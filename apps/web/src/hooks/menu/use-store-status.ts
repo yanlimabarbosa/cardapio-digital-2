@@ -1,0 +1,21 @@
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+import { apiFetch } from '@/lib/api';
+
+interface StoreStatus {
+  open: boolean;
+  reason?: string;
+  opensAt?: string;
+  closesAt?: string;
+  openDays?: number[];
+  bannerUrl?: string;
+}
+
+export function useStoreStatus() {
+  return useQuery<StoreStatus>({
+    queryKey: ['store-status'],
+    queryFn: () => apiFetch('/api/store/status'),
+    refetchInterval: 60000,
+  });
+}

@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  :root {
+    /* Bem Comer Self-Service — Butter & Cocoa palette */
+    --background: 44 83% 94%;          /* #FDF7E3 warm cream */
+    --foreground: 24 78% 10%;          /* #2A1508 near-black cocoa */
+    --card: 0 0% 100%;                 /* pure white — max contrast vs cream bg */
+    --card-foreground: 24 78% 10%;
+    --primary: 45 92% 53%;             /* #F5C518 butter yellow */
+    --primary-foreground: 24 78% 10%;
+    --secondary: 44 61% 77%;           /* #EAD8A0 warm cream */
+    --secondary-foreground: 24 71% 18%;
+    --muted: 45 67% 87%;               /* #F5EBC9 */
+    --muted-foreground: 38 37% 39%;    /* #8A6F40 mustard-brown */
+    --accent: 26 67% 25%;              /* #6B3E14 cocoa */
+    --accent-foreground: 47 74% 95%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 44 61% 77%;
+    --input: 44 61% 77%;
+    --ring: 45 92% 53%;
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scrollbar-gutter: stable;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Roboto', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Poppins', sans-serif;
+  }
+  .font-logo {
+    font-family: 'Fraunces', Georgia, serif;
+    font-optical-sizing: auto;
+  }
+  /* Autofill override so browser yellow doesn't clash */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    -webkit-box-shadow: 0 0 0 30px hsl(var(--card)) inset;
+    caret-color: hsl(var(--foreground));
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .text-shadow-warm {
+    text-shadow: 0 1px 0 rgba(42, 21, 8, 0.2), 0 2px 8px rgba(42, 21, 8, 0.15);
+  }
+  .bg-cocoa-noise {
+    background-color: #4A2810;
+    background-image:
+      radial-gradient(at 18% 12%, rgba(245, 197, 24, 0.08) 0px, transparent 55%),
+      radial-gradient(at 82% 88%, rgba(255, 217, 83, 0.05) 0px, transparent 50%),
+      linear-gradient(180deg, #5C3511 0%, #4A2810 58%, #3D1F0A 100%);
+  }
+  .bg-butter-noise {
+    background-color: #F5C518;
+    background-image:
+      radial-gradient(at 20% 20%, #FFE086 0px, transparent 50%),
+      radial-gradient(at 80% 70%, #E6B000 0px, transparent 55%);
+  }
+}
+
+@layer components {
+  /* Kept name for backwards compat — now grain over cocoa-tinted noise */
+  .tapioca-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+  .grain-butter {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n2)' opacity='0.07'/%3E%3C/svg%3E");
+  }
+  .btn-butter {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-butter-400 px-5 py-3 font-body font-semibold text-cocoa-800 shadow-butter transition-all;
+    background-image: linear-gradient(180deg, #FFD953 0%, #F5C518 52%, #E6B000 100%);
+  }
+  .btn-butter:hover {
+    @apply shadow-[0_8px_28px_-6px_rgba(245,197,24,0.7)];
+    transform: translateY(-1px);
+  }
+  .btn-butter:active {
+    transform: translateY(0);
+  }
+  .chip-butter {
+    @apply inline-flex items-center gap-1 rounded-full border border-butter-400/40 bg-butter-100 px-2.5 py-0.5 text-xs font-semibold text-cocoa-700;
+  }
+  /* Fancy divider with butter dot */
+  .rule-butter {
+    background-image: linear-gradient(to right, transparent, rgba(245, 197, 24, 0.5) 50%, transparent);
+    height: 1px;
+  }
+}

@@ -1,0 +1,40 @@
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+
+@Entity({ tableName: 'store_settings' })
+export class StoreSettings {
+  @PrimaryKey()
+  id: number = 1;
+
+  @Property()
+  openingTime!: string; // "09:00"
+
+  @Property()
+  closingTime!: string; // "23:00"
+
+  @Property({ type: 'jsonb' })
+  openDays!: number[]; // [1,2,3,4,5,6] = Mon-Sat (0=Sun)
+
+  @Property({ default: false })
+  forceClose?: boolean = false; // Manual override to close
+
+  @Property({ default: false })
+  forceOpen?: boolean = false; // Manual override to open
+
+  @Property({ columnType: 'decimal(5,2)', default: '0' })
+  pointsPerReal?: string = '0';
+
+  @Property({ length: 20, nullable: true })
+  receiptCnpj?: string;
+
+  @Property({ columnType: 'text', nullable: true })
+  receiptAddress?: string;
+
+  @Property({ length: 20, nullable: true })
+  receiptPhone?: string;
+
+  @Property({ columnType: 'text', nullable: true })
+  receiptFooter?: string;
+
+  @Property({ columnType: 'text', nullable: true })
+  bannerUrl?: string;
+}
