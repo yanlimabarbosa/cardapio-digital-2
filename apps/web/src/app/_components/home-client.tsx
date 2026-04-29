@@ -98,21 +98,23 @@ export function HomeClient() {
                           Meus Pedidos
                         </Link>
                         {customer.hasPassword ? (
-                          <button
-                            onClick={() => { setAccountMenuOpen(false); /* TODO: navigate to fidelidade */ }}
+                          <Link
+                            href="/fidelidade"
+                            onClick={() => setAccountMenuOpen(false)}
                             className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-terra-800 hover:bg-terra-50"
                           >
                             <Lock className="h-4 w-4" />
                             Programa de fidelidade
-                          </button>
+                          </Link>
                         ) : (
-                          <button
-                            onClick={() => { setAccountMenuOpen(false); setSetPasswordOpen(true); }}
+                          <Link
+                            href="/fidelidade"
+                            onClick={() => setAccountMenuOpen(false)}
                             className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-terra-800/50 hover:bg-terra-50"
                           >
                             <Lock className="h-4 w-4" />
                             Programa de fidelidade
-                          </button>
+                          </Link>
                         )}
                         <div className="my-1 border-t border-terra-100" />
                         <button

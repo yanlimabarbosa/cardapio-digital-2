@@ -52,7 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="flex min-h-dvh">
+    <div className="admin-shell flex min-h-dvh">
       <aside className="hidden w-64 flex-col border-r border-[#EAD8A0] bg-[#FBF6E9] md:flex sticky top-0 h-dvh">
         <SidebarContent navItems={NAV_ITEMS} pathname={pathname} user={user} onLogout={handleLogout} />
       </aside>

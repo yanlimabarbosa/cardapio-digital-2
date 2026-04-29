@@ -81,6 +81,8 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
   }
 
   function handleAdd() {
+    if (!product) return;
+
     if (isCompound) {
       const optionSels: CartOptionSelection[] = (product.optionGroups ?? [])
         .map((g) => ({
@@ -95,24 +97,24 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
 
       addItem(
         {
-          productId: product!.id,
-          productName: product!.name,
+          productId: product.id,
+          productName: product.name,
           unitPrice: displayPrice,
           extras: [],
           optionSelections: optionSels,
           isCompound: true,
-          imageUrl: product!.imageUrl,
+          imageUrl: product.imageUrl,
         },
         quantity,
       );
     } else {
       addItem(
         {
-          productId: product!.id,
-          productName: product!.name,
+          productId: product.id,
+          productName: product.name,
           unitPrice: displayPrice,
           extras: selectedExtras,
-          imageUrl: product!.imageUrl,
+          imageUrl: product.imageUrl,
         },
         quantity,
       );
