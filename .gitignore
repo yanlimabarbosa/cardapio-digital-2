@@ -10,5 +10,6 @@ coverage
 pgdata
 uploads
 .playwright-mcp
+SERVER-ENVS.local.md
 PLAN-*.md
 NEXT-STEPS.md

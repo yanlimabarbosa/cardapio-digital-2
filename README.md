@@ -219,7 +219,9 @@ cd ../web
 pnpm dev
 ```
 
-**Admin:** `admin@tapiocaria.com` / `admin123`
+**Admin Bem Comer:** `admin@bemcomer.com` / `BemComer@2026#Painel47`
+
+**Deploy safety:** Bem Comer shares the same server with Tapiocaria. Bem Comer operations must stay scoped to `/opt/bem-comer`, `bem-comer-*` containers, and database `cardapio_digital_2`. Verify both Bem Comer and Tapiocaria containers are still up after any server write.
 
 ---
 

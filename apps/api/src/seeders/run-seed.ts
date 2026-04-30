@@ -298,7 +298,7 @@ async function seed() {
 
   // Admin user
   await em.execute('DELETE FROM admin_users');
-  const passwordHash = await bcrypt.hash('admin123', 10);
+  const passwordHash = await bcrypt.hash('BemComer@2026#Painel47', 10);
   em.create(AdminUser, {
     email: 'admin@bemcomer.com',
     passwordHash,
@@ -310,7 +310,7 @@ async function seed() {
   const productCount = await em.count(Product);
 
   console.log(`Seed complete: ${categoryCount} categories, ${totalProducts} products`);
-  console.log('Admin user: admin@bemcomer.com / admin123');
+  console.log('Admin user: admin@bemcomer.com / BemComer@2026#Painel47');
 
   await orm.close();
 }
