@@ -2,12 +2,14 @@ export interface ProductExtra {
   id: string;
   name: string;
   price: number;
+  imageUrl?: string;
 }
 
 export interface OptionGroupOption {
   id: string;
   name: string;
   price: number;
+  imageUrl?: string;
 }
 
 export interface OptionGroup {

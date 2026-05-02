@@ -46,6 +46,10 @@ export function ProductsClient() {
     isEditingExtra,
     extraForm,
     setExtraForm,
+    extraImagePreview,
+    handleExtraImageSelect,
+    clearExtraImage,
+    extraUploading,
     openCreateExtra,
     openEditExtra,
     handleSaveExtra,
@@ -74,6 +78,10 @@ export function ProductsClient() {
     isEditingGroupOption,
     groupOptionForm,
     setGroupOptionForm,
+    groupOptionImagePreview,
+    handleGroupOptionImageSelect,
+    clearGroupOptionImage,
+    groupOptionUploading,
     openCreateGroupOption,
     openEditGroupOption,
     handleSaveGroupOption,
@@ -312,33 +320,45 @@ export function ProductsClient() {
                                             <p className="text-xs text-[#8A6F40]">Nenhuma opção</p>
                                           ) : (
                                             <div className="space-y-1.5">
-                                              {group.options.map((opt) => (
-                                                <div
-                                                  key={opt.id}
-                                                  className={cn(
-                                                    'flex items-center justify-between rounded-lg border border-[#EAD8A0] bg-[#FBF6E9] px-2.5 py-1.5 text-xs',
-                                                    !opt.isActive && 'opacity-50',
-                                                  )}
-                                                >
-                                                  <span className="text-[#2A1508]">
-                                                    {opt.name} — {opt.price > 0 ? formatCurrency(opt.price) : 'Incluso'}
-                                                  </span>
-                                                  <div className="flex gap-1">
-                                                    <button
-                                                      onClick={() => openEditGroupOption(opt)}
-                                                      className="rounded p-1 text-[#8A6F40] transition-colors hover:bg-[#FDF7E3]"
-                                                    >
-                                                      <Pencil className="h-2.5 w-2.5" />
-                                                    </button>
-                                                    <button
-                                                      onClick={() => deleteGroupOptionMutation.mutate(opt.id)}
-                                                      className="rounded p-1 text-[#8A6F40] transition-colors hover:bg-red-50 hover:text-red-600"
-                                                    >
-                                                      <Power className="h-2.5 w-2.5" />
-                                                    </button>
+                                              {group.options.map((opt) => {
+                                                const optImageSrc = getImageUrl(opt.imageUrl);
+                                                return (
+                                                  <div
+                                                    key={opt.id}
+                                                    className={cn(
+                                                      'flex items-center justify-between rounded-lg border border-[#EAD8A0] bg-[#FBF6E9] px-2.5 py-1.5 text-xs',
+                                                      !opt.isActive && 'opacity-50',
+                                                    )}
+                                                  >
+                                                    <div className="flex min-w-0 items-center gap-2">
+                                                      {optImageSrc && (
+                                                        <img
+                                                          src={optImageSrc}
+                                                          alt={opt.name}
+                                                          className="h-9 w-9 shrink-0 rounded-md border border-[#EAD8A0] object-cover"
+                                                        />
+                                                      )}
+                                                      <span className="truncate text-[#2A1508]">
+                                                        {opt.name} — {opt.price > 0 ? formatCurrency(opt.price) : 'Incluso'}
+                                                      </span>
+                                                    </div>
+                                                    <div className="flex shrink-0 gap-1">
+                                                      <button
+                                                        onClick={() => openEditGroupOption(opt)}
+                                                        className="rounded p-1 text-[#8A6F40] transition-colors hover:bg-[#FDF7E3]"
+                                                      >
+                                                        <Pencil className="h-2.5 w-2.5" />
+                                                      </button>
+                                                      <button
+                                                        onClick={() => deleteGroupOptionMutation.mutate(opt.id)}
+                                                        className="rounded p-1 text-[#8A6F40] transition-colors hover:bg-red-50 hover:text-red-600"
+                                                      >
+                                                        <Power className="h-2.5 w-2.5" />
+                                                      </button>
+                                                    </div>
                                                   </div>
-                                                </div>
-                                              ))}
+                                                );
+                                              })}
                                             </div>
                                           )}
                                         </div>
@@ -369,33 +389,45 @@ export function ProductsClient() {
                             <p className="text-sm text-[#8A6F40]">Sem adicionais</p>
                           ) : (
                             <div className="space-y-2">
-                              {product.extras.map((extra) => (
-                                <div
-                                  key={extra.id}
-                                  className={cn(
-                                    'flex items-center justify-between rounded-xl border border-[#EAD8A0] bg-[#FDF7E3] px-3 py-2 text-sm',
-                                    !extra.isActive && 'opacity-50',
-                                  )}
-                                >
-                                  <span className="text-[#2A1508]">
-                                    {extra.name} — {formatCurrency(extra.price)}
-                                  </span>
-                                  <div className="flex gap-1">
-                                    <button
-                                      onClick={() => openEditExtra(extra)}
-                                      className="rounded-md p-1.5 text-[#8A6F40] transition-colors hover:bg-[#FBF6E9]"
-                                    >
-                                      <Pencil className="h-3 w-3" />
-                                    </button>
-                                    <button
-                                      onClick={() => deleteExtraMutation.mutate(extra.id)}
-                                      className="rounded-md p-1.5 text-[#8A6F40] transition-colors hover:bg-red-50 hover:text-red-600"
-                                    >
-                                      <Power className="h-3 w-3" />
-                                    </button>
+                              {product.extras.map((extra) => {
+                                const extraImageSrc = getImageUrl(extra.imageUrl);
+                                return (
+                                  <div
+                                    key={extra.id}
+                                    className={cn(
+                                      'flex items-center justify-between rounded-xl border border-[#EAD8A0] bg-[#FDF7E3] px-3 py-2 text-sm',
+                                      !extra.isActive && 'opacity-50',
+                                    )}
+                                  >
+                                    <div className="flex min-w-0 items-center gap-2">
+                                      {extraImageSrc && (
+                                        <img
+                                          src={extraImageSrc}
+                                          alt={extra.name}
+                                          className="h-10 w-10 shrink-0 rounded-lg border border-[#EAD8A0] object-cover"
+                                        />
+                                      )}
+                                      <span className="truncate text-[#2A1508]">
+                                        {extra.name} — {formatCurrency(extra.price)}
+                                      </span>
+                                    </div>
+                                    <div className="flex shrink-0 gap-1">
+                                      <button
+                                        onClick={() => openEditExtra(extra)}
+                                        className="rounded-md p-1.5 text-[#8A6F40] transition-colors hover:bg-[#FBF6E9]"
+                                      >
+                                        <Pencil className="h-3 w-3" />
+                                      </button>
+                                      <button
+                                        onClick={() => deleteExtraMutation.mutate(extra.id)}
+                                        className="rounded-md p-1.5 text-[#8A6F40] transition-colors hover:bg-red-50 hover:text-red-600"
+                                      >
+                                        <Power className="h-3 w-3" />
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
                         </div>
@@ -430,8 +462,12 @@ export function ProductsClient() {
         isEditing={isEditingExtra}
         form={extraForm}
         setForm={setExtraForm}
+        imagePreview={extraImagePreview}
+        onImageSelect={handleExtraImageSelect}
+        onClearImage={clearExtraImage}
         onSave={handleSaveExtra}
         isPending={saveExtraMutation.isPending}
+        uploading={extraUploading}
       />
 
       <OptionGroupDialog
@@ -448,10 +484,15 @@ export function ProductsClient() {
         open={groupOptionDialogOpen}
         onOpenChange={setGroupOptionDialogOpen}
         isEditing={isEditingGroupOption}
+        label="Opção"
         form={groupOptionForm}
         setForm={setGroupOptionForm}
+        imagePreview={groupOptionImagePreview}
+        onImageSelect={handleGroupOptionImageSelect}
+        onClearImage={clearGroupOptionImage}
         onSave={handleSaveGroupOption}
         isPending={saveGroupOptionMutation.isPending}
+        uploading={groupOptionUploading}
       />
     </div>
   );

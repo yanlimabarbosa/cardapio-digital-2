@@ -10,6 +10,10 @@ export class UpdateExtraDto {
   price?: number;
 
   @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }

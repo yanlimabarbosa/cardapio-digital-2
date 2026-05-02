@@ -90,7 +90,7 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
           groupName: g.name,
           options: (groupSelections[g.id] ?? []).map((oid) => {
             const opt = g.options.find((o) => o.id === oid)!;
-            return { id: opt.id, name: opt.name, price: opt.price };
+            return { id: opt.id, name: opt.name, price: opt.price, imageUrl: opt.imageUrl };
           }),
         }))
         .filter((g) => g.options.length > 0);
@@ -172,6 +172,7 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
                 const isSelected = selected.includes(option.id);
                 const isDisabled = !isSelected && isMaxed;
                 const isLast = idx === group.options.length - 1;
+                const optionImageSrc = getImageUrl(option.imageUrl);
 
                 return (
                   <button
@@ -183,13 +184,22 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
                       isDisabled ? 'opacity-40' : 'hover:bg-terra-50/50 active:bg-terra-50'
                     } ${!isLast ? 'border-b border-terra-100' : ''}`}
                   >
-                    <div className="flex-1 pr-3">
-                      <span className="text-sm font-medium text-terra-800">{option.name}</span>
-                      {option.price > 0 ? (
-                        <p className="text-sm text-terra-500">+ {formatCurrency(option.price)}</p>
-                      ) : (
-                        <p className="text-xs text-green-600">Incluso</p>
+                    <div className="flex min-w-0 flex-1 items-center gap-3 pr-3">
+                      {optionImageSrc && (
+                        <img
+                          src={optionImageSrc}
+                          alt={option.name}
+                          className="h-14 w-14 shrink-0 rounded-lg border border-terra-100 object-cover"
+                        />
                       )}
+                      <div className="min-w-0">
+                        <span className="text-sm font-medium text-terra-800">{option.name}</span>
+                        {option.price > 0 ? (
+                          <p className="text-sm text-terra-500">+ {formatCurrency(option.price)}</p>
+                        ) : (
+                          <p className="text-xs text-green-600">Incluso</p>
+                        )}
+                      </div>
                     </div>
                     <div
                       className={`flex h-6 w-6 shrink-0 items-center justify-center transition-all ${
@@ -232,6 +242,7 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
         {product.extras.map((extra, idx) => {
           const isSelected = selectedExtras.some((e) => e.id === extra.id);
           const isLast = idx === product.extras.length - 1;
+          const extraImageSrc = getImageUrl(extra.imageUrl);
           return (
             <button
               key={extra.id}
@@ -242,9 +253,18 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
                 !isLast ? 'border-b border-terra-100' : ''
               }`}
             >
-              <div className="flex-1 pr-3">
-                <span className="text-sm font-medium text-terra-800">{extra.name}</span>
-                <p className="text-sm text-terra-500">+ {formatCurrency(extra.price)}</p>
+              <div className="flex min-w-0 flex-1 items-center gap-3 pr-3">
+                {extraImageSrc && (
+                  <img
+                    src={extraImageSrc}
+                    alt={extra.name}
+                    className="h-14 w-14 shrink-0 rounded-lg border border-terra-100 object-cover"
+                  />
+                )}
+                <div className="min-w-0">
+                  <span className="text-sm font-medium text-terra-800">{extra.name}</span>
+                  <p className="text-sm text-terra-500">+ {formatCurrency(extra.price)}</p>
+                </div>
               </div>
               <div
                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-all ${

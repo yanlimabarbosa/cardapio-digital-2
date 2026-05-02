@@ -98,6 +98,7 @@ export class AdminService {
           id: e.id,
           name: e.name,
           price: parseFloat(e.price),
+          imageUrl: e.imageUrl,
           sortOrder: e.sortOrder ?? 0,
           isActive: e.isActive,
         })),
@@ -116,6 +117,7 @@ export class AdminService {
               id: o.id,
               name: o.name,
               price: parseFloat(o.price),
+              imageUrl: o.imageUrl,
               sortOrder: o.sortOrder ?? 0,
               isActive: o.isActive ?? true,
             })),
@@ -258,6 +260,7 @@ export class AdminService {
       id: e.id,
       name: e.name,
       price: parseFloat(e.price),
+      imageUrl: e.imageUrl,
       isActive: e.isActive,
     }));
   }
@@ -270,6 +273,7 @@ export class AdminService {
       product,
       name: dto.name,
       price: dto.price.toFixed(2),
+      imageUrl: dto.imageUrl,
     });
     await this.em.flush();
     return extra;
@@ -281,6 +285,7 @@ export class AdminService {
 
     if (dto.name !== undefined) extra.name = dto.name;
     if (dto.price !== undefined) extra.price = dto.price.toFixed(2);
+    if (dto.imageUrl !== undefined) extra.imageUrl = dto.imageUrl;
     if (dto.isActive !== undefined) extra.isActive = dto.isActive;
 
     await this.em.flush();
@@ -315,6 +320,7 @@ export class AdminService {
             id: o.id,
             name: o.name,
             price: parseFloat(o.price),
+            imageUrl: o.imageUrl,
             sortOrder: o.sortOrder ?? 0,
             isActive: o.isActive ?? true,
           })),
@@ -390,10 +396,11 @@ export class AdminService {
       optionGroup: group,
       name: dto.name,
       price: dto.price.toFixed(2),
+      imageUrl: dto.imageUrl,
       sortOrder: count,
     });
     await this.em.flush();
-    return { id: option.id, name: option.name, price: parseFloat(option.price), sortOrder: option.sortOrder, isActive: option.isActive };
+    return { id: option.id, name: option.name, price: parseFloat(option.price), imageUrl: option.imageUrl, sortOrder: option.sortOrder, isActive: option.isActive };
   }
 
   async updateGroupOption(id: string, dto: UpdateExtraDto) {
@@ -402,6 +409,7 @@ export class AdminService {
 
     if (dto.name !== undefined) option.name = dto.name;
     if (dto.price !== undefined) option.price = dto.price.toFixed(2);
+    if (dto.imageUrl !== undefined) option.imageUrl = dto.imageUrl;
     if (dto.isActive !== undefined) option.isActive = dto.isActive;
 
     await this.em.flush();

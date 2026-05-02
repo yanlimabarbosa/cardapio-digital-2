@@ -38,6 +38,7 @@ export interface AdminExtra {
   id: string;
   name: string;
   price: number;
+  imageUrl?: string;
   sortOrder: number;
   isActive: boolean;
 }
@@ -46,6 +47,7 @@ export interface AdminOptionGroupOption {
   id: string;
   name: string;
   price: number;
+  imageUrl?: string;
   sortOrder: number;
   isActive: boolean;
 }

@@ -19,6 +19,9 @@ export class ProductExtra {
   @Property({ columnType: 'decimal(10,2)' })
   price!: string;
 
+  @Property({ nullable: true, columnType: 'varchar' })
+  imageUrl?: string;
+
   @Property({ default: 0 })
   sortOrder?: number = 0;
 

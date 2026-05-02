@@ -31,7 +31,7 @@ export class SectionsService {
           isActive: true,
           extras: sp.product.extras.getItems()
             .filter((e) => e.isActive)
-            .map((e) => ({ id: e.id, name: e.name, price: parseFloat(e.price) })),
+            .map((e) => ({ id: e.id, name: e.name, price: parseFloat(e.price), imageUrl: e.imageUrl })),
         })),
     }));
   }

@@ -69,6 +69,7 @@ export class ProductsService {
           id: e.id,
           name: e.name,
           price: parseFloat(e.price),
+          imageUrl: e.imageUrl,
         })),
       optionGroups: isCompound
         ? p.optionGroups
@@ -90,6 +91,7 @@ export class ProductsService {
                   id: o.id,
                   name: o.name,
                   price: parseFloat(o.price),
+                  imageUrl: o.imageUrl,
                 })),
             }))
         : undefined,

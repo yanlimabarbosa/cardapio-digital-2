@@ -1,4 +1,4 @@
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateExtraDto {
   @IsString()
@@ -6,4 +6,8 @@ export class CreateExtraDto {
 
   @IsNumber()
   price!: number;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

@@ -7,6 +7,7 @@ export interface CartExtra {
   id: string;
   name: string;
   price: number;
+  imageUrl?: string;
 }
 
 export interface CartOptionSelection {

@@ -9,7 +9,8 @@
     "start:prod": "node dist/main",
     "seed": "ts-node src/seeders/run-seed.ts",
     "seed:bemcomer": "ts-node src/seeders/run-seed-bem-comer.ts",
-    "seed:bemcomer:images": "ts-node src/seeders/seed-bem-comer-images.ts"
+    "seed:bemcomer:images": "ts-node src/seeders/seed-bem-comer-images.ts",
+    "seed:bemcomer:ingredient-images": "ts-node src/seeders/seed-bem-comer-ingredient-images.ts"
   },
   "dependencies": {
     "@cardapio/shared": "workspace:*",

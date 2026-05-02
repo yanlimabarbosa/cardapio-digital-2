@@ -47,12 +47,18 @@ export function useProductsPage() {
   const [uploading, setUploading] = useState(false);
 
   const [extraDialog, setExtraDialog] = useState<ExtraDialogState>({ mode: 'closed' });
-  const [extraForm, setExtraForm] = useState({ name: '', price: '' });
+  const [extraForm, setExtraForm] = useState({ name: '', price: '', imageUrl: '' });
+  const [extraImageFile, setExtraImageFile] = useState<File | null>(null);
+  const [extraImagePreview, setExtraImagePreview] = useState<string | null>(null);
+  const [extraUploading, setExtraUploading] = useState(false);
 
   const [optionGroupDialog, setOptionGroupDialog] = useState<OptionGroupDialogState>({ mode: 'closed' });
   const [optionGroupForm, setOptionGroupForm] = useState({ name: '', minSelections: '0', maxSelections: '1' });
   const [groupOptionDialog, setGroupOptionDialog] = useState<GroupOptionDialogState>({ mode: 'closed' });
-  const [groupOptionForm, setGroupOptionForm] = useState({ name: '', price: '' });
+  const [groupOptionForm, setGroupOptionForm] = useState({ name: '', price: '', imageUrl: '' });
+  const [groupOptionImageFile, setGroupOptionImageFile] = useState<File | null>(null);
+  const [groupOptionImagePreview, setGroupOptionImagePreview] = useState<string | null>(null);
+  const [groupOptionUploading, setGroupOptionUploading] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -224,19 +230,38 @@ export function useProductsPage() {
   }
 
   function openCreateGroupOption(groupId: string) {
-    setGroupOptionForm({ name: '', price: '' });
+    setGroupOptionForm({ name: '', price: '', imageUrl: '' });
+    setGroupOptionImageFile(null);
+    setGroupOptionImagePreview(null);
     setGroupOptionDialog({ mode: 'create', groupId });
   }
 
   function openEditGroupOption(option: AdminOptionGroupOption) {
-    setGroupOptionForm({ name: option.name, price: String(option.price) });
+    setGroupOptionForm({ name: option.name, price: String(option.price), imageUrl: option.imageUrl || '' });
+    setGroupOptionImageFile(null);
+    setGroupOptionImagePreview(option.imageUrl ? getImageUrl(option.imageUrl) : null);
     setGroupOptionDialog({ mode: 'edit', option });
   }
 
-  function handleSaveGroupOption() {
+  async function handleSaveGroupOption() {
+    let imageUrl = groupOptionForm.imageUrl;
+
+    if (groupOptionImageFile) {
+      setGroupOptionUploading(true);
+      try {
+        const result = await adminUpload(groupOptionImageFile, token);
+        imageUrl = result.url;
+      } catch {
+        setGroupOptionUploading(false);
+        return;
+      }
+      setGroupOptionUploading(false);
+    }
+
     saveGroupOptionMutation.mutate({
       name: groupOptionForm.name,
       price: parseFloat(groupOptionForm.price),
+      imageUrl,
     });
   }
 
@@ -295,19 +320,38 @@ export function useProductsPage() {
   }
 
   function openCreateExtra(productId: string) {
-    setExtraForm({ name: '', price: '' });
+    setExtraForm({ name: '', price: '', imageUrl: '' });
+    setExtraImageFile(null);
+    setExtraImagePreview(null);
     setExtraDialog({ mode: 'create', productId });
   }
 
   function openEditExtra(extra: AdminExtra) {
-    setExtraForm({ name: extra.name, price: String(extra.price) });
+    setExtraForm({ name: extra.name, price: String(extra.price), imageUrl: extra.imageUrl || '' });
+    setExtraImageFile(null);
+    setExtraImagePreview(extra.imageUrl ? getImageUrl(extra.imageUrl) : null);
     setExtraDialog({ mode: 'edit', extra });
   }
 
-  function handleSaveExtra() {
+  async function handleSaveExtra() {
+    let imageUrl = extraForm.imageUrl;
+
+    if (extraImageFile) {
+      setExtraUploading(true);
+      try {
+        const result = await adminUpload(extraImageFile, token);
+        imageUrl = result.url;
+      } catch {
+        setExtraUploading(false);
+        return;
+      }
+      setExtraUploading(false);
+    }
+
     saveExtraMutation.mutate({
       name: extraForm.name,
       price: parseFloat(extraForm.price),
+      imageUrl,
     });
   }
 
@@ -322,6 +366,32 @@ export function useProductsPage() {
     setImageFile(null);
     setImagePreview(null);
     setForm({ ...form, imageUrl: '' });
+  }
+
+  function handleExtraImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setExtraImageFile(file);
+    setExtraImagePreview(URL.createObjectURL(file));
+  }
+
+  function clearExtraImage() {
+    setExtraImageFile(null);
+    setExtraImagePreview(null);
+    setExtraForm({ ...extraForm, imageUrl: '' });
+  }
+
+  function handleGroupOptionImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setGroupOptionImageFile(file);
+    setGroupOptionImagePreview(URL.createObjectURL(file));
+  }
+
+  function clearGroupOptionImage() {
+    setGroupOptionImageFile(null);
+    setGroupOptionImagePreview(null);
+    setGroupOptionForm({ ...groupOptionForm, imageUrl: '' });
   }
 
   function toggleExpanded(productId: string) {
@@ -357,6 +427,10 @@ export function useProductsPage() {
     isEditingExtra,
     extraForm,
     setExtraForm,
+    extraImagePreview,
+    handleExtraImageSelect,
+    clearExtraImage,
+    extraUploading,
     openCreateExtra,
     openEditExtra,
     handleSaveExtra,
@@ -385,6 +459,10 @@ export function useProductsPage() {
     isEditingGroupOption: groupOptionDialog.mode === 'edit',
     groupOptionForm,
     setGroupOptionForm,
+    groupOptionImagePreview,
+    handleGroupOptionImageSelect,
+    clearGroupOptionImage,
+    groupOptionUploading,
     openCreateGroupOption,
     openEditGroupOption,
     handleSaveGroupOption,
