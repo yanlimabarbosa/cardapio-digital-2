@@ -14,8 +14,10 @@ This server now runs only Bem Comer (`cardapio-digital-2`). Tapiocaria is no lon
 - Nginx site: `/etc/nginx/sites-available/bem-comer`
 - Git remote: `git@github.com-cardapio-digital-2:yanlimabarbosa/cardapio-digital-2.git`
 - Deploy key: `/root/.ssh/cardapio_digital_2_deploy` (read-only GitHub deploy key)
-- Public app: `http://173.249.34.217`
-- Target domain: `cardapiobemcomer.com.br`
+- Public app: `https://cardapiobemcomer.com.br`
+- Raw IP fallback: `http://173.249.34.217`
+- Domain: `cardapiobemcomer.com.br`
+- TLS certificate: Let's Encrypt, installed with Certbot for `cardapiobemcomer.com.br` and `www.cardapiobemcomer.com.br`
 
 Do not store VPS passwords, database passwords, JWT secrets, or Mercado Pago tokens in tracked docs. Keep production secrets only in `/opt/bem-comer/.env` and local ignored notes.
 
@@ -129,10 +131,10 @@ Nginx is already configured for:
 - `www.cardapiobemcomer.com.br`
 - `173.249.34.217`
 
-DNS is managed in Hostinger. Point these records to the new VPS:
+DNS is managed in Hostinger. Current records should be:
 
 - `@` A record -> `173.249.34.217`
-- `www` A record -> `173.249.34.217` or CNAME to `@`
+- `www` CNAME -> `cardapiobemcomer.com.br` or A record -> `173.249.34.217`
 
 Check DNS:
 
@@ -141,14 +143,21 @@ dig +short cardapiobemcomer.com.br A
 dig +short www.cardapiobemcomer.com.br A
 ```
 
-Only run Certbot after both names resolve to `173.249.34.217`:
+HTTPS is already installed. Certbot renews it automatically. To inspect the certificate:
+
+```bash
+ssh cardapioweb
+certbot certificates
+```
+
+If the server is rebuilt or the cert is missing, run Certbot after both names resolve to `173.249.34.217`:
 
 ```bash
 ssh cardapioweb
 certbot --nginx \
   -d cardapiobemcomer.com.br \
   -d www.cardapiobemcomer.com.br \
-  --redirect
+  --non-interactive --agree-tos --register-unsafely-without-email --redirect
 ```
 
 ## Verification
@@ -162,6 +171,8 @@ curl -I http://127.0.0.1:3010
 curl -sS http://127.0.0.1:3011/api/menu | head -c 300
 curl -I http://173.249.34.217
 curl -sS http://173.249.34.217/api/menu | head -c 300
+curl -I https://cardapiobemcomer.com.br
+curl -sS https://cardapiobemcomer.com.br/api/menu | head -c 300
 
 docker compose -f docker-compose.prod.yml exec -T postgres psql \
   -U postgres -d cardapio_digital_2 \
