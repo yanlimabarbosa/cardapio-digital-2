@@ -4,8 +4,7 @@ import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { WS_EVENTS } from '@cardapio/shared';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+import { API_URL } from '@/lib/api-url';
 
 export function useOrderSocket(
   orderId: string | null,

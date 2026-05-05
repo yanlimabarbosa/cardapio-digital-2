@@ -6,9 +6,8 @@ import { io } from 'socket.io-client';
 import { WS_EVENTS } from '@cardapio/shared';
 import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
+import { API_URL } from '@/lib/api-url';
 import type { OrderSummary } from '@/types/admin';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
 export const KANBAN_COLUMNS = [
   { key: 'pending_payment', label: 'Aguardando', dot: 'bg-yellow-400', headerBg: 'bg-yellow-50 border-yellow-200' },

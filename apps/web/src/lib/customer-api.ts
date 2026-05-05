@@ -1,6 +1,5 @@
 import { useCustomerStore } from '@/stores/customer-store';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+import { API_URL } from './api-url';
 
 export function getCustomerHeaders(): Record<string, string> {
   const token = useCustomerStore.getState().token;

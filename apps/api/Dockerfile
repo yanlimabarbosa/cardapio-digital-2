@@ -32,6 +32,7 @@ COPY apps/api/package.json apps/api/
 COPY apps/api/src/seeders apps/api/src/seeders
 COPY apps/api/src/config apps/api/src/config
 COPY apps/api/src/entities apps/api/src/entities
+COPY apps/api/src/migrations apps/api/src/migrations
 COPY apps/api/tsconfig.json apps/api/
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 

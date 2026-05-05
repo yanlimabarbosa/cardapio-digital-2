@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+import { API_URL } from './api-url';
 
 export async function adminFetch<T>(
   path: string,
