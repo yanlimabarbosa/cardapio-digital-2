@@ -12,6 +12,8 @@ This server now runs only Bem Comer (`cardapio-digital-2`). Tapiocaria is no lon
 - Environment file: `/opt/bem-comer/.env`
 - Compose file: `/opt/bem-comer/docker-compose.prod.yml`
 - Nginx site: `/etc/nginx/sites-available/bem-comer`
+- Git remote: `git@github.com-cardapio-digital-2:yanlimabarbosa/cardapio-digital-2.git`
+- Deploy key: `/root/.ssh/cardapio_digital_2_deploy` (read-only GitHub deploy key)
 - Public app: `http://173.249.34.217`
 - Target domain: `cardapiobemcomer.com.br`
 
@@ -41,9 +43,31 @@ NEXT_PUBLIC_API_URL=same-origin
 
 That keeps browser requests on the same host, so the app works on the raw IP during setup and on the domain after DNS cutover.
 
-## Private Repo Deploy
+## Update Existing Deploy
 
-The VPS currently does not need GitHub credentials. If `git clone` fails because the repo is private, deploy the local committed tree over SSH:
+The server has a real Git clone in `/opt/bem-comer`. After committing and pushing locally, deploy with:
+
+```bash
+ssh cardapioweb
+cd /opt/bem-comer
+
+git pull --ff-only
+docker compose -f docker-compose.prod.yml build api web
+docker compose -f docker-compose.prod.yml run --rm api pnpm exec mikro-orm migration:up --config ./src/config/mikro-orm.config.ts
+docker compose -f docker-compose.prod.yml up -d api web
+```
+
+If the menu data needs to be reset from scratch, run only the Bem Comer seed:
+
+```bash
+docker compose -f docker-compose.prod.yml run --rm api pnpm seed:bemcomer
+```
+
+Do not run `pnpm seed`, which is the older generic seed.
+
+## Private Repo Bootstrap
+
+The VPS uses a read-only GitHub deploy key. If rebuilding the server from scratch, either add `/root/.ssh/cardapio_digital_2_deploy.pub` as a read-only deploy key in GitHub or deploy a temporary local committed tree over SSH:
 
 ```bash
 git archive --format=tar HEAD | ssh cardapioweb '
