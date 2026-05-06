@@ -6,10 +6,15 @@ dist
 .env
 .env.local
 coverage
+test-results
+playwright-report*
 .DS_Store
 pgdata
 uploads
 .playwright-mcp
+playwright-*.png
 SERVER-ENVS.local.md
+docs/pagbank-integration.local.md
+docs/pagbank-homologation-evidence.md
 PLAN-*.md
 NEXT-STEPS.md
