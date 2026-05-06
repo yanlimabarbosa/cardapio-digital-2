@@ -1954,7 +1954,8 @@
           "comment": null,
           "enumItems": [
             "pix",
-            "credit_card"
+            "credit_card",
+            "debit_card"
           ],
           "mappedType": "enum"
         },
@@ -2389,6 +2390,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "integer"
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": -1,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "string"
         }
       },
       "name": "product_extras",
