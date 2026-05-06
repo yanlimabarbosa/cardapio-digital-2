@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1900" viewBox="0 0 1700 1900" role="img" aria-labelledby="title desc">
+  <title id="title">Bem Comer payment flows</title>
+  <desc id="desc">Visual flow diagrams for Pix, credit card, and debit card with 3DS payment processing.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5b3415"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f7a4d"/>
+    </marker>
+    <style>
+      .bg { fill: #fff8e6; }
+      .title { font: 700 42px Arial, sans-serif; fill: #2b1608; }
+      .subtitle { font: 400 21px Arial, sans-serif; fill: #6b5034; }
+      .section-title { font: 700 30px Arial, sans-serif; fill: #2b1608; }
+      .section-note { font: 400 18px Arial, sans-serif; fill: #6b5034; }
+      .lane-label { font: 700 19px Arial, sans-serif; fill: #3a2413; }
+      .node-title { font: 700 18px Arial, sans-serif; fill: #241207; }
+      .node-text { font: 400 15px Arial, sans-serif; fill: #49311d; }
+      .small { font: 400 13px Arial, sans-serif; fill: #5c432f; }
+      .browser { fill: #f5dfb7; stroke: #ad8a5e; stroke-width: 2; rx: 14; }
+      .api { fill: #d8edff; stroke: #4986b6; stroke-width: 2; rx: 14; }
+      .db { fill: #e8f5dc; stroke: #65a34a; stroke-width: 2; rx: 14; }
+      .pagbank { fill: #e8e0ff; stroke: #8068bd; stroke-width: 2; rx: 14; }
+      .sdk { fill: #fff1c7; stroke: #c49a2b; stroke-width: 2; rx: 14; }
+      .safe { fill: #e0f7ea; stroke: #1f7a4d; stroke-width: 2; rx: 14; }
+      .warn { fill: #ffe1db; stroke: #cf553f; stroke-width: 2; rx: 14; }
+      .arrow { stroke: #5b3415; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .arrow-green { stroke: #1f7a4d; stroke-width: 3; fill: none; marker-end: url(#arrow-green); }
+      .boundary { fill: none; stroke: #1f7a4d; stroke-width: 3; stroke-dasharray: 10 8; rx: 20; }
+      .boundary-label { font: 700 18px Arial, sans-serif; fill: #1f7a4d; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1700" height="1900"/>
+  <text class="title" x="70" y="80">Bem Comer Payment Flows</text>
+  <text class="subtitle" x="70" y="118">Actual visual diagrams for Pix, credit card, and debit card with 3DS. The backend/database total is the trusted charge source.</text>
+
+  <rect class="boundary" x="565" y="155" width="630" height="1650"/>
+  <text class="boundary-label" x="590" y="183">Trusted backend boundary: API + Database calculate and charge the real total</text>
+
+  <!-- PIX -->
+  <text class="section-title" x="70" y="205">1. Pix</text>
+  <text class="section-note" x="70" y="235">Browser asks for a Pix QR Code. Backend loads the order and sends the DB total to PagBank.</text>
+
+  <text class="lane-label" x="105" y="285">Customer Browser</text>
+  <text class="lane-label" x="655" y="285">Bem Comer API</text>
+  <text class="lane-label" x="965" y="285">Database</text>
+  <text class="lane-label" x="1320" y="285">PagBank</text>
+
+  <rect class="browser" x="70" y="315" width="330" height="92"/>
+  <text class="node-title" x="94" y="345">Select Pix + confirm order</text>
+  <text class="node-text" x="94" y="373">Sends items/customer/paymentMethod</text>
+  <text class="small" x="94" y="394">No product prices are trusted here</text>
+
+  <rect class="api" x="610" y="315" width="260" height="92"/>
+  <text class="node-title" x="634" y="345">Create local order</text>
+  <text class="node-text" x="634" y="373">Validates customer/cart</text>
+  <text class="small" x="634" y="394">Returns orderId + total</text>
+
+  <rect class="db" x="930" y="315" width="250" height="92"/>
+  <text class="node-title" x="954" y="345">Calculate prices</text>
+  <text class="node-text" x="954" y="373">Products/options/coupon</text>
+  <text class="small" x="954" y="394">Stores order.totalAmount</text>
+
+  <rect class="browser" x="70" y="465" width="330" height="92"/>
+  <text class="node-title" x="94" y="495">Request Pix payment</text>
+  <text class="node-text" x="94" y="523">POST /api/payments/pix</text>
+  <text class="small" x="94" y="544">orderId, email, CPF</text>
+
+  <rect class="api" x="610" y="465" width="260" height="92"/>
+  <text class="node-title" x="634" y="495">Load order</text>
+  <text class="node-text" x="634" y="523">Uses DB order.totalAmount</text>
+  <text class="small" x="634" y="544">Not browser total</text>
+
+  <rect class="pagbank" x="1280" y="465" width="300" height="92"/>
+  <text class="node-title" x="1304" y="495">Create Pix QR Code</text>
+  <text class="node-text" x="1304" y="523">PagBank Orders API qr_codes</text>
+  <text class="small" x="1304" y="544">Returns copy/paste + QR image</text>
+
+  <rect class="browser" x="70" y="615" width="330" height="92"/>
+  <text class="node-title" x="94" y="645">Show QR Code</text>
+  <text class="node-text" x="94" y="673">Customer pays in bank app</text>
+  <text class="small" x="94" y="694">Webhook later marks order paid</text>
+
+  <path class="arrow" d="M 400 361 L 610 361"/>
+  <path class="arrow" d="M 870 361 L 930 361"/>
+  <path class="arrow" d="M 1055 407 L 1055 432 L 740 432 L 740 465"/>
+  <path class="arrow" d="M 400 511 L 610 511"/>
+  <path class="arrow" d="M 870 511 L 1280 511"/>
+  <path class="arrow" d="M 1280 550 L 400 650"/>
+
+  <!-- CREDIT -->
+  <text class="section-title" x="70" y="805">2. Credit Card</text>
+  <text class="section-note" x="70" y="835">Raw card data stays in the browser/PagBank SDK. Backend receives only encryptedCard and charges the DB total.</text>
+
+  <rect class="browser" x="70" y="875" width="330" height="92"/>
+  <text class="node-title" x="94" y="905">Create card order</text>
+  <text class="node-text" x="94" y="933">POST /api/orders</text>
+  <text class="small" x="94" y="954">paymentMethod=credit_card</text>
+
+  <rect class="api" x="610" y="875" width="260" height="92"/>
+  <text class="node-title" x="634" y="905">Create local order</text>
+  <text class="node-text" x="634" y="933">API returns server total</text>
+  <text class="small" x="634" y="954">UI displays this total</text>
+
+  <rect class="db" x="930" y="875" width="250" height="92"/>
+  <text class="node-title" x="954" y="905">Store order total</text>
+  <text class="node-text" x="954" y="933">Trusted amount source</text>
+  <text class="small" x="954" y="954">order.totalAmount</text>
+
+  <rect class="sdk" x="70" y="1025" width="330" height="92"/>
+  <text class="node-title" x="94" y="1055">PagBank SDK encryptCard</text>
+  <text class="node-text" x="94" y="1083">Card number/CVV in browser only</text>
+  <text class="small" x="94" y="1104">Returns encryptedCard</text>
+
+  <rect class="browser" x="70" y="1175" width="330" height="92"/>
+  <text class="node-title" x="94" y="1205">Submit credit payment</text>
+  <text class="node-text" x="94" y="1233">orderId + encryptedCard</text>
+  <text class="small" x="94" y="1254">email, CPF, installments</text>
+
+  <rect class="api" x="610" y="1175" width="260" height="92"/>
+  <text class="node-title" x="634" y="1205">Charge credit card</text>
+  <text class="node-text" x="634" y="1233">Loads order from DB</text>
+  <text class="small" x="634" y="1254">amount = order.totalAmount</text>
+
+  <rect class="pagbank" x="1280" y="1175" width="300" height="92"/>
+  <text class="node-title" x="1304" y="1205">PagBank card charge</text>
+  <text class="node-text" x="1304" y="1233">CREDIT_CARD + encrypted</text>
+  <text class="small" x="1304" y="1254">Returns PAID or DECLINED</text>
+
+  <rect class="safe" x="610" y="1325" width="260" height="92"/>
+  <text class="node-title" x="634" y="1355">Update order status</text>
+  <text class="node-text" x="634" y="1383">approved/rejected</text>
+  <text class="small" x="634" y="1404">Customer sees friendly UI</text>
+
+  <path class="arrow" d="M 400 921 L 610 921"/>
+  <path class="arrow" d="M 870 921 L 930 921"/>
+  <path class="arrow" d="M 235 967 L 235 1025"/>
+  <path class="arrow" d="M 235 1117 L 235 1175"/>
+  <path class="arrow" d="M 400 1221 L 610 1221"/>
+  <path class="arrow-green" d="M 870 1221 L 1280 1221"/>
+  <path class="arrow" d="M 1280 1260 L 870 1360"/>
+
+  <!-- DEBIT -->
+  <text class="section-title" x="70" y="1510">3. Debit Card + 3DS</text>
+  <text class="section-note" x="70" y="1540">3DS uses the server total for authentication. Backend still charges the DB total and never trusts browser totals.</text>
+
+  <rect class="browser" x="70" y="1580" width="330" height="92"/>
+  <text class="node-title" x="94" y="1610">Create debit order</text>
+  <text class="node-text" x="94" y="1638">POST /api/orders</text>
+  <text class="small" x="94" y="1659">paymentMethod=debit_card</text>
+
+  <rect class="api" x="610" y="1580" width="260" height="92"/>
+  <text class="node-title" x="634" y="1610">Create local order</text>
+  <text class="node-text" x="634" y="1638">API returns server total</text>
+  <text class="small" x="634" y="1659">Frontend uses it for 3DS</text>
+
+  <rect class="sdk" x="70" y="1730" width="330" height="92"/>
+  <text class="node-title" x="94" y="1760">3DS + encryptCard</text>
+  <text class="node-text" x="94" y="1788">authenticate3DS(amount=server total)</text>
+  <text class="small" x="94" y="1809">Returns authenticationId</text>
+
+  <rect class="api" x="610" y="1730" width="260" height="92"/>
+  <text class="node-title" x="634" y="1760">Charge debit card</text>
+  <text class="node-text" x="634" y="1788">orderId + encryptedCard + 3DS id</text>
+  <text class="small" x="634" y="1809">amount = DB order.totalAmount</text>
+
+  <rect class="pagbank" x="1280" y="1730" width="300" height="92"/>
+  <text class="node-title" x="1304" y="1760">PagBank debit charge</text>
+  <text class="node-text" x="1304" y="1788">DEBIT_CARD + THREEDS</text>
+  <text class="small" x="1304" y="1809">Returns PAID or DECLINED</text>
+
+  <rect class="warn" x="1280" y="1580" width="300" height="92"/>
+  <text class="node-title" x="1304" y="1610">If 3DS/card fails</text>
+  <text class="node-text" x="1304" y="1638">No raw PagBank errors in UI</text>
+  <text class="small" x="1304" y="1659">Shows friendly Portuguese message</text>
+
+  <path class="arrow" d="M 400 1626 L 610 1626"/>
+  <path class="arrow" d="M 740 1672 L 740 1700 L 235 1700 L 235 1730"/>
+  <path class="arrow" d="M 400 1776 L 610 1776"/>
+  <path class="arrow-green" d="M 870 1776 L 1280 1776"/>
+  <path class="arrow" d="M 400 1760 C 690 1540 1030 1535 1280 1615"/>
+
+  <text class="small" x="70" y="1865">Legend: tan = browser, blue = Bem Comer API, green = database/trusted, yellow = PagBank browser SDK, purple = PagBank API, red = handled failure.</text>
+</svg>
