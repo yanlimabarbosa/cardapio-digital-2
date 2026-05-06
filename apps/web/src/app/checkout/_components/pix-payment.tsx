@@ -127,6 +127,7 @@ export function PixPayment({ pixData, orderId }: PixPaymentProps) {
             </div>
             <button
               type="button"
+              aria-label={copied ? 'Código Pix copiado' : 'Copiar código Pix'}
               onClick={copyCode}
               className={`flex h-auto w-14 shrink-0 items-center justify-center rounded-xl border-2 font-semibold transition-all ${
                 copied

@@ -8,6 +8,8 @@ import { useCreateOrder } from '@/hooks/orders/use-create-order';
 import { usePixPayment } from '@/hooks/payments/use-pix-payment';
 import { useStoreStatus } from '@/hooks/menu/use-store-status';
 import { useRedeemableProducts } from '@/hooks/customer/use-redeemable-products';
+import { isValidCpf, isValidEmail, normalizeEmail } from '@/lib/utils';
+import { getPagBankPaymentErrorMessage } from '@/lib/payment-provider';
 import type { PaymentMethod, PixPaymentResponse, RedeemableProduct } from '@cardapio/shared';
 
 export function useCheckoutPage() {
@@ -19,13 +21,15 @@ export function useCheckoutPage() {
   const { data: storeStatus } = useStoreStatus();
   const { data: redeemableData } = useRedeemableProducts();
 
-  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit_card'>('pix');
+  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit_card' | 'debit_card'>('pix');
   const [redeemedItems, setRedeemedItems] = useState<string[]>([]);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [pixData, setPixData] = useState<PixPaymentResponse | null>(null);
   const [step, setStep] = useState<'select' | 'processing' | 'paying'>('select');
   const [error, setError] = useState<string | null>(null);
   const [savedTotal, setSavedTotal] = useState<number>(0);
+  const [payerEmail, setPayerEmail] = useState('');
+  const [payerCpf, setPayerCpf] = useState('');
 
   const effectiveFee = deliveryType === 'delivery' ? deliveryFee : 0;
   const effectiveDiscount = couponCode ? couponDiscount : 0;
@@ -42,14 +46,37 @@ export function useCheckoutPage() {
     }
   }, [items, orderId, router]);
 
+  function validatePayer() {
+    const normalizedEmail = normalizeEmail(payerEmail);
+
+    if (!normalizedEmail) {
+      setError('Informe seu e-mail para continuar.');
+      return false;
+    }
+    if (!isValidEmail(normalizedEmail)) {
+      setError('Informe um e-mail válido para continuar.');
+      return false;
+    }
+    if (!isValidCpf(payerCpf)) {
+      setError('Informe um CPF válido para continuar.');
+      return false;
+    }
+    return true;
+  }
+
   async function handlePay() {
     setError(null);
+    if (!validatePayer()) return;
     setStep('processing');
 
     try {
+      const normalizedEmail = normalizeEmail(payerEmail);
+      const cpfDigits = payerCpf.replace(/\D/g, '');
+
       const order = await createOrder.mutateAsync({
         customerName: effectiveName,
         customerPhone: effectivePhone,
+        customerEmail: normalizedEmail,
         paymentMethod: paymentMethod as PaymentMethod,
         deliveryType,
         deliveryAddress: deliveryType === 'delivery' ? {
@@ -89,10 +116,14 @@ export function useCheckoutPage() {
       }
 
       setOrderId(order.id);
-      setSavedTotal(Math.max(0, getTotalAmount(items) + effectiveFee - effectiveDiscount));
+      setSavedTotal(Number(order.totalAmount));
 
       if (paymentMethod === 'pix') {
-        const pix = await pixPayment.mutateAsync(order.id);
+        const pix = await pixPayment.mutateAsync({
+          orderId: order.id,
+          payerEmail: normalizedEmail,
+          payerTaxId: cpfDigits,
+        });
         setPixData(pix);
         setStep('paying');
         clearCart();
@@ -100,7 +131,7 @@ export function useCheckoutPage() {
         setStep('paying');
       }
     } catch (err: any) {
-      setError(err.message || 'Erro ao criar pedido');
+      setError(getCheckoutErrorMessage(err.message, 'Erro ao criar pedido'));
       setStep('select');
     }
   }
@@ -108,13 +139,21 @@ export function useCheckoutPage() {
   async function handleSwitchToPix() {
     if (!orderId) return;
     setError(null);
+    if (!validatePayer()) return;
     try {
-      const pix = await pixPayment.mutateAsync(orderId);
+      const normalizedEmail = normalizeEmail(payerEmail);
+      const cpfDigits = payerCpf.replace(/\D/g, '');
+
+      const pix = await pixPayment.mutateAsync({
+        orderId,
+        payerEmail: normalizedEmail,
+        payerTaxId: cpfDigits,
+      });
       setPixData(pix);
       setPaymentMethod('pix');
       clearCart();
     } catch (err: any) {
-      setError(err.message || 'Erro ao gerar Pix');
+      setError(getCheckoutErrorMessage(err.message, 'Erro ao gerar Pix'));
     }
   }
 
@@ -146,8 +185,14 @@ export function useCheckoutPage() {
     totalAmount,
     deliveryFee: effectiveFee,
     deliveryType,
+    deliveryAddress,
+    customerPhoneForPayment: effectivePhone,
     couponCode,
     couponDiscount: effectiveDiscount,
+    payerEmail,
+    setPayerEmail,
+    payerCpf,
+    setPayerCpf,
     handlePay,
     handleSwitchToPix,
     handleCardSuccess,
@@ -160,4 +205,23 @@ export function useCheckoutPage() {
     toggleRedeemItem,
     loyaltyBalance,
   };
+}
+
+function getCheckoutErrorMessage(message: string | undefined, fallback: string) {
+  const normalized = message?.trim();
+  if (!normalized) return fallback;
+
+  const lower = normalized.toLowerCase();
+  const looksLikeGatewayError =
+    lower.includes('pagbank') ||
+    lower.includes('pagseguro') ||
+    lower.includes('access_denied') ||
+    lower.includes('whitelist') ||
+    lower.includes('40002') ||
+    lower.includes('charges[') ||
+    lower.includes('qr_codes') ||
+    lower.includes('payment_method') ||
+    lower.includes('transienttoken');
+
+  return looksLikeGatewayError ? getPagBankPaymentErrorMessage(normalized) : normalized;
 }
