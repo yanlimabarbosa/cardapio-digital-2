@@ -1,9 +1,11 @@
 export interface CreatePixPaymentDto {
   orderId: string;
+  payerEmail: string;
+  payerTaxId: string;
 }
 
 export interface PixPaymentResponse {
-  paymentId: number;
+  paymentId: number | string;
   qrCode: string;
   qrCodeBase64: string;
   ticketUrl?: string;
@@ -12,8 +14,7 @@ export interface PixPaymentResponse {
 
 export interface CreateCardPaymentDto {
   orderId: string;
-  token: string;
-  paymentMethodId: string;
+  encryptedCard: string;
   installments: number;
   payerEmail: string;
   identificationType: string;
@@ -23,8 +24,24 @@ export interface CreateCardPaymentDto {
 export interface CardPaymentResponse {
   status: string;
   statusDetail: string;
-  paymentId: number;
+  paymentId: number | string;
 }
+
+export interface PagBank3dsSessionResponse {
+  session: string;
+  expiresAt: number;
+}
+
+export interface CreateDebitCardPaymentDto {
+  orderId: string;
+  encryptedCard: string;
+  authenticationId: string;
+  payerEmail: string;
+  identificationType: string;
+  identificationNumber: string;
+}
+
+export type DebitCardPaymentResponse = CardPaymentResponse;
 
 export interface PaymentStatusResponse {
   orderId: string;
