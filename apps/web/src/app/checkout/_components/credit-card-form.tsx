@@ -4,22 +4,19 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useCardPayment } from '@/hooks/payments/use-card-payment';
-import { maskCpf, isValidCpf, formatCurrency } from '@/lib/utils';
+import { maskCpf, isValidCpf, formatCurrency, isValidEmail, normalizeEmail } from '@/lib/utils';
+import { getCardEncryptionErrorMessage, getPagBankPaymentErrorMessage } from '@/lib/payment-provider';
 import { Loader2, CreditCard, Lock, ChevronDown, AlertCircle } from 'lucide-react';
-
-declare global {
-  interface Window {
-    MercadoPago: any;
-  }
-}
 
 interface CreditCardFormProps {
   orderId: string;
   totalAmount: number;
   onSuccess?: () => void;
+  initialEmail?: string;
+  initialCpf?: string;
 }
 
-export function CreditCardForm({ orderId, totalAmount, onSuccess }: CreditCardFormProps) {
+export function CreditCardForm({ orderId, totalAmount, onSuccess, initialEmail = '', initialCpf = '' }: CreditCardFormProps) {
   const router = useRouter();
   const cardPayment = useCardPayment();
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +26,8 @@ export function CreditCardForm({ orderId, totalAmount, onSuccess }: CreditCardFo
   const [expirationYear, setExpirationYear] = useState('');
   const [securityCode, setSecurityCode] = useState('');
   const [cardholderName, setCardholderName] = useState('');
-  const [cpf, setCpf] = useState('');
-  const [email, setEmail] = useState('');
+  const [cpf, setCpf] = useState(initialCpf);
+  const [email, setEmail] = useState(initialEmail);
   const [installments, setInstallments] = useState(1);
 
   function formatCardNumber(value: string) {
@@ -43,44 +40,53 @@ export function CreditCardForm({ orderId, totalAmount, onSuccess }: CreditCardFo
     setError(null);
 
     try {
+      const normalizedEmail = normalizeEmail(email);
+
+      if (!isValidEmail(normalizedEmail)) {
+        setError('Informe um e-mail válido.');
+        return;
+      }
+
       if (!isValidCpf(cpf)) {
         setError('CPF inválido.');
         return;
       }
 
-      if (!window.MercadoPago) {
-        setError('SDK do Mercado Pago não carregou. Recarregue a página.');
+      const cpfDigits = cpf.replace(/\D/g, '');
+      const cardNumberDigits = cardNumber.replace(/\s/g, '');
+
+      if (!window.PagSeguro) {
+        setError('SDK do PagBank não carregou. Recarregue a página.');
         return;
       }
 
-      const mp = new window.MercadoPago(
-        process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
-        { locale: 'pt-BR' },
-      );
+      const publicKey = process.env.NEXT_PUBLIC_PAGBANK_PUBLIC_KEY;
+      if (!publicKey) {
+        setError('Chave pública do PagBank não configurada.');
+        return;
+      }
 
-      const tokenResult = await mp.createCardToken({
-        cardNumber: cardNumber.replace(/\s/g, ''),
-        cardExpirationMonth: expirationMonth,
-        cardExpirationYear: expirationYear,
+      const encrypted = window.PagSeguro.encryptCard({
+        publicKey,
+        holder: cardholderName,
+        number: cardNumberDigits,
+        expMonth: expirationMonth.padStart(2, '0'),
+        expYear: expirationYear,
         securityCode,
-        cardholderName,
-        identificationType: 'CPF',
-        identificationNumber: cpf.replace(/\D/g, ''),
       });
 
-      if (tokenResult.error) {
-        setError('Erro ao processar o cartão. Verifique os dados.');
+      if (encrypted.hasErrors || !encrypted.encryptedCard) {
+        setError(getCardEncryptionErrorMessage(encrypted.errors));
         return;
       }
 
       const result = await cardPayment.mutateAsync({
         orderId,
-        token: tokenResult.id,
-        paymentMethodId: tokenResult.first_six_digits ? getPaymentMethodId(tokenResult.first_six_digits) : 'visa',
+        encryptedCard: encrypted.encryptedCard,
         installments,
-        payerEmail: email,
+        payerEmail: normalizedEmail,
         identificationType: 'CPF',
-        identificationNumber: cpf.replace(/\D/g, ''),
+        identificationNumber: cpfDigits,
       });
 
       if (result.status === 'approved') {
@@ -93,7 +99,7 @@ export function CreditCardForm({ orderId, totalAmount, onSuccess }: CreditCardFo
         else router.push(`/order/${orderId}`);
       }
     } catch (err: any) {
-      setError(err.message || 'Erro ao processar pagamento');
+      setError(getPagBankPaymentErrorMessage(err.message));
     }
   }
 
@@ -271,6 +277,8 @@ export function CreditCardForm({ orderId, totalAmount, onSuccess }: CreditCardFo
 
       {error && (
         <motion.div
+          role="alert"
+          aria-live="polite"
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-start gap-3 rounded-xl bg-red-50 border border-red-200 px-4 py-3"
@@ -315,26 +323,11 @@ export function CreditCardForm({ orderId, totalAmount, onSuccess }: CreditCardFo
   );
 }
 
-function getPaymentMethodId(bin: string): string {
-  if (bin.startsWith('4')) return 'visa';
-  if (bin.startsWith('51') || bin.startsWith('52') || bin.startsWith('53') || bin.startsWith('54') || bin.startsWith('55')) return 'master';
-  if (bin.startsWith('2221') || bin.startsWith('23') || bin.startsWith('24') || bin.startsWith('25') || bin.startsWith('26') || bin.startsWith('27')) return 'master';
-  if (bin.startsWith('34') || bin.startsWith('37')) return 'amex';
-  if (bin.startsWith('636368') || bin.startsWith('438935') || bin.startsWith('504175') || bin.startsWith('451416')) return 'elo';
-  if (bin.startsWith('606282') || bin.startsWith('3841')) return 'hipercard';
-  return 'visa';
-}
-
 function getErrorMessage(statusDetail: string): string {
   const messages: Record<string, string> = {
-    cc_rejected_insufficient_amount: 'Saldo insuficiente.',
-    cc_rejected_bad_filled_card_number: 'Número do cartão incorreto.',
-    cc_rejected_bad_filled_date: 'Data de validade incorreta.',
-    cc_rejected_bad_filled_security_code: 'CVV incorreto.',
-    cc_rejected_bad_filled_other: 'Dados do cartão incorretos.',
-    cc_rejected_call_for_authorize: 'Entre em contato com a operadora do cartão.',
-    cc_rejected_card_disabled: 'Cartão desabilitado. Entre em contato com a operadora.',
-    cc_rejected_max_attempts: 'Número máximo de tentativas excedido.',
+    DECLINED: 'Pagamento recusado. Tente outro cartão.',
+    CANCELED: 'Pagamento cancelado. Tente novamente.',
+    CANCELLED: 'Pagamento cancelado. Tente novamente.',
   };
   return messages[statusDetail] || 'Pagamento recusado. Tente outro cartão.';
 }
