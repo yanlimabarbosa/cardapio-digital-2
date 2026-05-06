@@ -19,7 +19,7 @@ This server now runs only Bem Comer (`cardapio-digital-2`). Tapiocaria is no lon
 - Domain: `cardapiobemcomer.com.br`
 - TLS certificate: Let's Encrypt, installed with Certbot for `cardapiobemcomer.com.br` and `www.cardapiobemcomer.com.br`
 
-Do not store VPS passwords, database passwords, JWT secrets, or Mercado Pago tokens in tracked docs. Keep production secrets only in `/opt/bem-comer/.env` and local ignored notes.
+Do not store VPS passwords, database passwords, JWT secrets, or payment gateway tokens in tracked docs. Keep production secrets only in `/opt/bem-comer/.env` and local ignored notes.
 
 ## Services
 
@@ -95,6 +95,60 @@ docker compose -f docker-compose.prod.yml up -d api web
 ```
 
 Use only the Bem Comer seed. Do not run `pnpm seed`, which is the older generic seed.
+
+## Payments
+
+PagBank is the only payment gateway in the current payment flow.
+
+Current integration state:
+
+- Mercado Pago runtime support has been removed from the payment flow.
+- `mercadopago` has been removed from the API dependencies.
+- Pix uses the PagBank Orders API with `qr_codes`.
+- Credit card uses the PagBank transparent checkout SDK in the browser and sends only `encryptedCard` to the API.
+- Debit card uses the PagBank transparent checkout SDK with 3DS authentication. The browser creates the 3DS auth result, then the API sends `DEBIT_CARD`, `card.encrypted`, and `authentication_method.type = THREEDS` to PagBank.
+- The checkout always collects payer e-mail and CPF, which PagBank requires for Pix/card payments.
+- Payment notifications are handled at `/api/webhooks/pagbank`.
+- PagBank order and charge webhooks are mapped back to local orders by `reference_id`.
+
+Sandbox is passing for Pix, credit card, denied credit card, and debit card with 3DS through `pnpm test:e2e`.
+
+Real PagBank sandbox webhook delivery is not tested from localhost because PagBank needs a public URL. Use either the deployed sandbox configuration or a public tunnel, following `docs/pagbank-real-sandbox-webhook.md`.
+
+Production is still blocked by PagBank account authorization:
+
+```text
+ACCESS_DENIED - whitelist access required. Contact PagSeguro
+```
+
+PagBank must approve/whitelist the production account before production charges can be created through the Orders API.
+
+If the PagBank panel has a webhook/notification URL field, use:
+
+```text
+https://cardapiobemcomer.com.br/api/webhooks/pagbank
+```
+
+For production, configure:
+
+```env
+PAGBANK_ENV=production
+PAGBANK_ACCESS_TOKEN=...
+PAGBANK_WEBHOOK_TOKEN=...
+NEXT_PUBLIC_PAGBANK_ENV=production
+NEXT_PUBLIC_PAGBANK_PUBLIC_KEY=...
+```
+
+Changing the PagBank environment or public key requires rebuilding `api` and `web` because the frontend SDK environment and public key are compiled into the Next.js build.
+
+After changing payment env vars:
+
+```bash
+ssh cardapioweb
+cd /opt/bem-comer
+docker compose -f docker-compose.prod.yml build api web
+docker compose -f docker-compose.prod.yml up -d api web
+```
 
 ## Ingredient Images
 
