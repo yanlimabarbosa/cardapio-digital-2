@@ -20,7 +20,8 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 const PAYMENT_LABELS: Record<string, string> = {
   pix: 'Pix',
-  credit_card: 'Cartão',
+  credit_card: 'Crédito',
+  debit_card: 'Débito',
 };
 
 function formatDate(iso: string) {

@@ -78,7 +78,7 @@ export function OrderCardContent({
           </span>
         )}
         <span className="rounded-full bg-[#FDF7E3] border border-[#EAD8A0] px-2 py-0.5 text-[10px] font-semibold text-[#8A6F40]">
-          {order.paymentMethod === 'pix' ? 'Pix' : 'Cartão'}
+          {order.paymentMethod === 'pix' ? 'Pix' : order.paymentMethod === 'debit_card' ? 'Débito' : 'Crédito'}
         </span>
       </div>
 

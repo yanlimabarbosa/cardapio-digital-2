@@ -61,6 +61,7 @@ const STATUS_LABELS: Record<string, string> = {
 const PAYMENT_LABELS: Record<string, string> = {
   pix: 'PIX',
   credit_card: 'Cartao de Credito',
+  debit_card: 'Cartao de Debito',
 };
 
 function formatCurrencyReceipt(value: number): string {
