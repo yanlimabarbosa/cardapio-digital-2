@@ -11,6 +11,14 @@ What is still not proven locally:
 - PagBank itself sending the webhook to our endpoint.
 - The exact real headers/body sent by the sandbox account currently used by the restaurant.
 
+Current public test setup as of 2026-05-06:
+- The deployed VPS is intentionally using PagBank sandbox credentials.
+- `API_PUBLIC_URL=https://cardapiobemcomer.com.br`.
+- `PAGBANK_ENV=sandbox`.
+- `NEXT_PUBLIC_PAGBANK_ENV=sandbox`.
+- Sandbox `PAGBANK_ACCESS_TOKEN`, `PAGBANK_WEBHOOK_TOKEN`, and `NEXT_PUBLIC_PAGBANK_PUBLIC_KEY` are configured on the VPS.
+- Public checkout payments are not real sales while this setup is active.
+
 Official references:
 - Webhooks for Orders API: https://developer.pagbank.com.br/reference/webhooks
 - Pix QR Code Orders API: https://developer.pagbank.com.br/reference/criar-pedido-pedido-com-qr-code
@@ -37,6 +45,8 @@ With localhost, the app omits `notification_urls`, so no real PagBank webhook ca
 ## Option A: Test On The Deployed Server In Sandbox
 
 Use this when we can temporarily run the public site against PagBank sandbox.
+
+This is the current active approach on the VPS. Keep the public URL as the production domain, but keep the PagBank environment and keys in sandbox:
 
 Server env:
 
@@ -73,6 +83,56 @@ Expected result:
 ```
 
 - The customer page redirects to `/order/:id` and shows `Pago`.
+
+After the real sandbox webhook test:
+- Export or copy sanitized backend evidence.
+- Save the order id, PagBank `ORDE_...` id, webhook timestamp, and status transition.
+- Do not leave the public site in sandbox when the restaurant wants to accept real sales.
+
+## Switching From Sandbox-On-Production To Production
+
+Use this checklist when the restaurant is ready for real payments and PagBank has approved/whitelisted the production account.
+
+Server file:
+
+```text
+/opt/bem-comer/.env
+```
+
+Replace sandbox values with production values:
+
+```env
+PAGBANK_ENV=production
+PAGBANK_ACCESS_TOKEN=<production token>
+PAGBANK_WEBHOOK_TOKEN=<production webhook token>
+API_PUBLIC_URL=https://cardapiobemcomer.com.br
+NEXT_PUBLIC_PAGBANK_ENV=production
+NEXT_PUBLIC_PAGBANK_PUBLIC_KEY=<production public key>
+```
+
+Then rebuild and restart:
+
+```bash
+ssh cardapioweb
+cd /opt/bem-comer
+docker compose -f docker-compose.prod.yml build api web
+docker compose -f docker-compose.prod.yml up -d api web
+```
+
+Verification:
+
+```bash
+docker compose -f docker-compose.prod.yml exec -T api sh -lc 'printenv PAGBANK_ENV'
+curl -sS https://cardapiobemcomer.com.br/api/store/status
+```
+
+Expected:
+
+```text
+PAGBANK_ENV=production
+```
+
+Only run real payment tests after confirming that PagBank production no longer returns `ACCESS_DENIED - whitelist access required`.
 
 ## Option B: Test Locally With A Public Tunnel
 

@@ -113,6 +113,21 @@ Current integration state:
 
 Sandbox is passing for Pix, credit card, denied credit card, and debit card with 3DS through `pnpm test:e2e`.
 
+Temporary payment environment as of 2026-05-06:
+
+- The public VPS is intentionally configured to use PagBank sandbox for homologation/testing.
+- `API_PUBLIC_URL` remains `https://cardapiobemcomer.com.br`, so PagBank sandbox can call the public webhook URL.
+- `PAGBANK_ENV=sandbox`
+- `NEXT_PUBLIC_PAGBANK_ENV=sandbox`
+- `PAGBANK_ACCESS_TOKEN`, `PAGBANK_WEBHOOK_TOKEN`, and `NEXT_PUBLIC_PAGBANK_PUBLIC_KEY` are copied from the local sandbox `.env`.
+- Old Mercado Pago env vars were removed from local and VPS `.env` files:
+  - `MP_ACCESS_TOKEN`
+  - `MP_PUBLIC_KEY`
+  - `MP_WEBHOOK_SECRET`
+  - `NEXT_PUBLIC_MP_PUBLIC_KEY`
+
+This means public checkout payments are sandbox/test payments until the production cutover below is completed.
+
 Real PagBank sandbox webhook delivery is not tested from localhost because PagBank needs a public URL. Use either the deployed sandbox configuration or a public tunnel, following `docs/pagbank-real-sandbox-webhook.md`.
 
 Production is still blocked by PagBank account authorization:
@@ -138,6 +153,18 @@ PAGBANK_WEBHOOK_TOKEN=...
 NEXT_PUBLIC_PAGBANK_ENV=production
 NEXT_PUBLIC_PAGBANK_PUBLIC_KEY=...
 ```
+
+Production cutover checklist:
+
+1. Replace the sandbox values in `/opt/bem-comer/.env` with production PagBank credentials.
+2. Keep `API_PUBLIC_URL=https://cardapiobemcomer.com.br`.
+3. Set `PAGBANK_ENV=production`.
+4. Set `NEXT_PUBLIC_PAGBANK_ENV=production`.
+5. Set the production `PAGBANK_ACCESS_TOKEN`.
+6. Set the production `PAGBANK_WEBHOOK_TOKEN`.
+7. Set the production `NEXT_PUBLIC_PAGBANK_PUBLIC_KEY`.
+8. Rebuild and restart `api` and `web`.
+9. Run a low-value Pix/card production validation only after PagBank approves/whitelists the account.
 
 Changing the PagBank environment or public key requires rebuilding `api` and `web` because the frontend SDK environment and public key are compiled into the Next.js build.
 
