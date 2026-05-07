@@ -8,6 +8,8 @@ import { Product } from '../entities/product.entity';
 import { OptionGroup } from '../entities/option-group.entity';
 import { ProductExtra } from '../entities/product-extra.entity';
 import { AdminUser } from '../entities/admin-user.entity';
+import { StoreSettings } from '../entities/store-settings.entity';
+import type { WeeklySchedule } from '@cardapio/shared';
 
 interface GroupSpec {
   name: string;
@@ -24,6 +26,36 @@ interface ProductSpec {
   sortOrder: number;
   groups: GroupSpec[];
 }
+
+const LUNCH_EVERY_DAY: WeeklySchedule = {
+  0: [{ start: '11:00', end: '15:00' }],
+  1: [{ start: '11:00', end: '15:00' }],
+  2: [{ start: '11:00', end: '15:00' }],
+  3: [{ start: '11:00', end: '15:00' }],
+  4: [{ start: '11:00', end: '15:00' }],
+  5: [{ start: '11:00', end: '15:00' }],
+  6: [{ start: '11:00', end: '15:00' }],
+};
+
+const DINNER_MON_SAT: WeeklySchedule = {
+  0: [],
+  1: [{ start: '18:00', end: '21:00' }],
+  2: [{ start: '18:00', end: '21:00' }],
+  3: [{ start: '18:00', end: '21:00' }],
+  4: [{ start: '18:00', end: '21:00' }],
+  5: [{ start: '18:00', end: '21:00' }],
+  6: [{ start: '18:00', end: '21:00' }],
+};
+
+const STORE_WEEKLY_SCHEDULE: WeeklySchedule = {
+  0: [{ start: '11:00', end: '21:00' }],
+  1: [{ start: '11:00', end: '21:00' }],
+  2: [{ start: '11:00', end: '21:00' }],
+  3: [{ start: '11:00', end: '21:00' }],
+  4: [{ start: '11:00', end: '21:00' }],
+  5: [{ start: '11:00', end: '21:00' }],
+  6: [{ start: '11:00', end: '21:00' }],
+};
 
 const ARROZ = ['Arroz branco', 'Arroz refogado'];
 const FEIJAO = ['Feijão preto', 'Feijão carioca', 'Feijão Macassar na farofa'];
@@ -240,9 +272,9 @@ async function seed() {
   await em.execute('DELETE FROM categories');
 
   // Categories
-  const categorySpecs = [
-    { name: 'Almoço', description: 'Cardápio do almoço — terça a domingo, 11h às 15h', sortOrder: 1 },
-    { name: 'Jantar', description: 'Cardápio do jantar — terça a sábado, 17h às 21h', sortOrder: 2 },
+  const categorySpecs: Array<{ name: string; description: string; sortOrder: number; availabilitySchedule?: WeeklySchedule }> = [
+    { name: 'Almoço', description: 'Cardápio do almoço — todos os dias, 11h às 15h', sortOrder: 1, availabilitySchedule: LUNCH_EVERY_DAY },
+    { name: 'Jantar', description: 'Cardápio do jantar — segunda a sábado, 18h às 21h', sortOrder: 2, availabilitySchedule: DINNER_MON_SAT },
     { name: 'Sopas', description: 'Sopas do dia', sortOrder: 3 },
     { name: 'Porções', description: 'Para acompanhar', sortOrder: 4 },
     { name: 'Bebidas', description: 'Refrigerantes e águas', sortOrder: 5 },
@@ -319,6 +351,24 @@ async function seed() {
   }
 
   await em.flush();
+
+  let settings = await em.findOne(StoreSettings, { id: 1 });
+  if (!settings) {
+    settings = em.create(StoreSettings, {
+      id: 1,
+      openingTime: '11:00',
+      closingTime: '21:00',
+      openDays: [0, 1, 2, 3, 4, 5, 6],
+      forceClose: false,
+      forceOpen: false,
+      weeklySchedule: STORE_WEEKLY_SCHEDULE,
+    });
+  } else {
+    settings.openingTime = '11:00';
+    settings.closingTime = '21:00';
+    settings.openDays = [0, 1, 2, 3, 4, 5, 6];
+    settings.weeklySchedule = STORE_WEEKLY_SCHEDULE;
+  }
 
   // Admin user
   await em.execute('DELETE FROM admin_users');

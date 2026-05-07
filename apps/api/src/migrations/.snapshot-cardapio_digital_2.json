@@ -287,6 +287,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "availability_schedule": {
+          "name": "availability_schedule",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
         }
       },
       "name": "categories",
@@ -2219,6 +2235,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "integer"
+        },
+        "scheduled_for": {
+          "name": "scheduled_for",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
         }
       },
       "name": "orders",
@@ -3014,6 +3046,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "availability_schedule": {
+          "name": "availability_schedule",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
         }
       },
       "name": "sections",
@@ -3228,6 +3276,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "text"
+        },
+        "weekly_schedule": {
+          "name": "weekly_schedule",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
         }
       },
       "name": "store_settings",
