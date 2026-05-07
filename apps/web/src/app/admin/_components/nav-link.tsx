@@ -27,8 +27,8 @@ export function NavLink({ item, pathname, onClick }: NavLinkProps) {
         className={cn(
           'flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors',
           isActive
-            ? 'border-r-2 border-[#6B3E14] bg-[#6B3E14]/10 text-[#6B3E14]'
-            : 'text-[#8A6F40] hover:bg-[#FDF7E3] hover:text-[#5C2F10]',
+            ? 'border-r-2 border-[#A0603A] bg-[#A0603A]/10 text-[#A0603A]'
+            : 'text-[#8B7355] hover:bg-[#FAF6F1] hover:text-[#8b4c2a]',
         )}
       >
         <item.icon className="h-4 w-4" />
