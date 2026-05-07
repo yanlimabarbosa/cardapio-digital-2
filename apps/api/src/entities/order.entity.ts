@@ -74,6 +74,9 @@ export class Order {
   @Property({ nullable: true, columnType: 'text' })
   notes?: string;
 
+  @Property({ nullable: true })
+  scheduledFor?: Date;
+
   @OneToMany(() => OrderItem, (item) => item.order, { eager: true })
   items = new Collection<OrderItem>(this);
 

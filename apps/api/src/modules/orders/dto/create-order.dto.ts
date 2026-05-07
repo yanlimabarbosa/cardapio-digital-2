@@ -94,6 +94,10 @@ export class CreateOrderDto {
   @IsString()
   couponCode?: string;
 
+  @IsOptional()
+  @IsString()
+  scheduledFor?: string | null;
+
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

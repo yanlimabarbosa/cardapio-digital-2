@@ -255,6 +255,7 @@ export class CustomersService {
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,
       deliveryType: order.deliveryType || 'pickup',
+      scheduledFor: order.scheduledFor?.toISOString() ?? null,
       items: order.items.getItems().map((item) => ({
         id: item.id,
         productName: item.productName,
