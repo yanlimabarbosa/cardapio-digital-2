@@ -1,6 +1,6 @@
 # Cardápio Digital 2 — Bem Comer
 
-Sistema completo de cardápio digital com pedidos online, pagamento integrado via Mercado Pago, painel administrativo com analytics e painel da cozinha em tempo real.
+Sistema completo de cardápio digital com pedidos online, agendamento, pagamento integrado via PagBank, painel administrativo com analytics e painel da cozinha em tempo real.
 
 Este repositório/deploy atual é somente do cardápio Bem Comer (`cardapio-digital-2`). A antiga Tapiocaria Tambaú não roda mais neste servidor.
 
@@ -15,9 +15,10 @@ Este repositório/deploy atual é somente do cardápio Bem Comer (`cardapio-digi
 - Fotos dos produtos em alta qualidade
 - Descrições e preços em BRL
 - Navegação por abas de categorias com scroll suave
-- Produtos esgotados aparecem com selo "Esgotado" (imagem em preto e branco, botão desabilitado)
+- Produtos indisponíveis por estoque ou horário continuam visíveis, mas ficam desabilitados com mensagem de próximo horário
 - Layout mobile-first, responsivo para celular e desktop
-- Indicador de status da loja (aberta/fechada) com horário de funcionamento expandível
+- Indicador de status da loja (aberta/fechada) com agenda semanal
+- Cliente pode escolher um horário futuro de retirada/entrega quando o cardápio permite agendamento
 
 **Carrinho de Compras**
 - Adicionar produtos com quantidade personalizável
@@ -35,14 +36,15 @@ Este repositório/deploy atual é somente do cardápio Bem Comer (`cardapio-digi
 - Campo de número e complemento manuais
 - Validação: só permite prosseguir quando endereço está completo (se entrega)
 
-**Pagamento Integrado (Mercado Pago)**
+**Pagamento Integrado (PagBank)**
 - Checkout Transparente — cliente não sai da aplicação
 - **Pix**: QR Code gerado em tempo real + código copia-e-cola com countdown de expiração
-- **Cartão de Crédito**: formulário com tokenização via MercadoPago.js (dados do cartão nunca passam pelo servidor)
+- **Cartão de Crédito**: formulário com criptografia via SDK PagBank (dados do cartão nunca passam pelo servidor)
+- **Cartão de Débito**: fluxo com criptografia PagBank + autenticação 3DS
 - Parcelamento em até 6x
 - Detecção de pagamento em tempo real via WebSocket + polling como fallback
 - Redirecionamento automático para página de tracking após aprovação
-- Integração com sandbox do Mercado Pago para testes
+- Integração com sandbox PagBank para homologação e testes
 
 **Acompanhamento do Pedido**
 - Número do pedido sequencial diário (#1, #2, #3...)
@@ -60,6 +62,7 @@ Este repositório/deploy atual é somente do cardápio Bem Comer (`cardapio-digi
 - Acesso protegido por login (mesmo admin)
 - Kanban com 3 colunas: **Pagos** → **Preparando** → **Prontos**
 - Cards mostram: número do pedido, nome do cliente, tempo desde criação, itens com extras, total
+- Cards mostram o horário agendado quando o pedido é para retirada/entrega futura
 - Badge de **"Entrega"** (azul) com endereço ou **"Retirada"** (verde)
 - Botões para mover pedido entre colunas (Preparar → Pronto → Enviar → Entregue)
 - Pedido entregue desaparece do painel
@@ -87,14 +90,15 @@ Este repositório/deploy atual é somente do cardápio Bem Comer (`cardapio-digi
 **Controle da Loja**
 - Indicador de status real (aberta/fechada com motivo)
 - Modo de operação em 3 estados: **Automático** (segue horário) | **Forçar Aberta** (override) | **Forçar Fechada** (override)
-- Configurar horário de abertura e fechamento
-- Selecionar dias da semana (Dom-Sáb) com toggles visuais
-- Quando fechado: banner vermelho no cardápio, pedidos bloqueados automaticamente
+- Configurar agenda semanal com múltiplos intervalos por dia
+- `Forçar Fechada` bloqueia todos os pedidos; `Forçar Aberta` abre a loja, mas preserva horários de categorias e seções
+- Quando fechado: banner no cardápio, pedidos bloqueados automaticamente no backend
 
 **Gerenciamento de Categorias**
 - Listar todas as categorias com contagem de produtos e indicador ativa/inativa
 - Drag-and-drop para reordenar categorias (dnd-kit) — ordem reflete no cardápio do cliente
 - Criar/editar categoria (nome, descrição, ordem)
+- Configurar disponibilidade da categoria por agenda semanal
 - Toggle ativar/desativar categoria (botão Power)
 - Botão para reordenar produtos dentro de cada categoria via dialog com drag-and-drop
 - Restrições de drag: vertical axis + parent element para evitar overflow
@@ -105,7 +109,7 @@ Este repositório/deploy atual é somente do cardápio Bem Comer (`cardapio-digi
 - Criar/editar produto (nome, descrição, preço, categoria, imagem)
 - Upload de imagem com drag-drop ou click (JPG, PNG, WebP, até 5MB)
 - Preview da imagem antes de salvar
-- Toggle ativar/desativar produto (marca como "Esgotado" no cardápio)
+- Toggle ativar/desativar produto (marca como indisponível no cardápio)
 - Gerenciamento de adicionais (extras) por produto: criar, editar, desativar
 - Ordenação customizável (`sortOrder`) que afeta o cardápio do cliente
 
@@ -114,6 +118,7 @@ Este repositório/deploy atual é somente do cardápio Bem Comer (`cardapio-digi
 - Drag-and-drop de cards entre colunas para mudar status (validação de transições)
 - Visual feedback: borda verde para drop válido, vermelha para inválido
 - Cada card mostra: número, cliente, tempo, tipo entrega/retirada, método de pagamento, itens expandíveis
+- Cards e histórico mostram horário agendado quando existir
 - Botão "Marcar Entregue" nos cards "Em Rota" e "Pronto" (retirada)
 - Botão cancelar (X) em qualquer card ativo
 - Seção "Finalizados" colapsável com pedidos entregues e cancelados
@@ -126,9 +131,10 @@ Este repositório/deploy atual é somente do cardápio Bem Comer (`cardapio-digi
 
 ## Segurança
 
-- **Dados do cartão nunca tocam o servidor** — tokenização feita pelo MercadoPago.js no navegador do cliente
+- **Dados do cartão nunca tocam o servidor** — criptografia feita pelo SDK PagBank no navegador do cliente
 - **Total sempre recalculado no backend** — preços do banco de dados, nunca confia no frontend
-- **Webhook com validação de assinatura HMAC** — rejeita webhooks falsos com 403
+- **Webhook PagBank validado por token de autenticidade** — rejeita webhooks falsos com 403
+- **Disponibilidade validada no backend** — loja, categorias e seções são verificadas no horário escolhido
 - **Webhook responde 200 imediatamente** — processamento assíncrono via fila (BullMQ)
 - **Processamento idempotente** — mesmo webhook recebido múltiplas vezes não duplica processamento
 - **Snapshot de preços nos pedidos** — nome e preço do produto salvos no momento da compra
@@ -167,7 +173,7 @@ O sistema utiliza Socket.io com namespace `/kitchen` para comunicação em tempo
 | Backend | NestJS, TypeScript, MikroORM |
 | Banco de Dados | PostgreSQL 17 |
 | Filas | BullMQ + Redis 7 |
-| Pagamento | Mercado Pago SDK (Checkout Transparente) |
+| Pagamento | PagBank SDK (Checkout Transparente + 3DS) |
 | Real-time | WebSocket (Socket.io) |
 | Autenticação | JWT + Passport |
 | Upload | Multer (armazenamento local) |
@@ -213,10 +219,10 @@ cd apps/api
 npx mikro-orm migration:up
 npx ts-node src/seeders/run-seed-bem-comer.ts
 
-# 5. Iniciar API (porta 3333)
-pnpm dev
+# 5. Iniciar API (porta 3334 neste workspace)
+API_PORT=3334 pnpm dev
 
-# 6. Iniciar Frontend (porta 3847)
+# 6. Iniciar Frontend (porta 3848)
 cd ../web
 pnpm dev
 ```

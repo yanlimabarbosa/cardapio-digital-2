@@ -96,6 +96,23 @@ docker compose -f docker-compose.prod.yml up -d api web
 
 Use only the Bem Comer seed. Do not run `pnpm seed`, which is the older generic seed.
 
+## Current Availability Rules
+
+The production seed/migration keeps store opening hours separate from menu availability:
+
+- Store: open every day from `11:00` to `21:00`
+- Lunch menu/category: every day from `11:00` to `15:00`
+- Dinner menu/category: Monday to Saturday from `18:00` to `21:00`
+- Products do not have their own schedules. Availability comes from store, category, and section rules.
+- `forceClose` blocks everything. `forceOpen` opens the store but still preserves category and section schedules.
+
+After deploying schedule changes, confirm the rules from the API:
+
+```bash
+curl -sS 'https://cardapiobemcomer.com.br/api/store/status' | head -c 500
+curl -sS 'https://cardapiobemcomer.com.br/api/menu' | head -c 500
+```
+
 ## Payments
 
 PagBank is the only payment gateway in the current payment flow.
