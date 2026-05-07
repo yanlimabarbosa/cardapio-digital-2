@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { CategoryList } from './category-list';
 import { CartFloatingBar } from './cart-floating-bar';
@@ -11,11 +11,20 @@ import { useCustomerStore } from '@/stores/customer-store';
 import { getImageUrl } from '@/lib/admin-api';
 import { AuthDialog } from '@/components/auth/auth-dialog';
 import { SetPasswordDialog } from '@/components/auth/set-password-dialog';
+import { formatScheduleDayRanges } from '@cardapio/shared';
 
 const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 export function HomeClient() {
-  const { categories, isLoading, error, storeStatus, hoursOpen, toggleHours, sections } = useHomePage();
+  const {
+    categories,
+    isLoading,
+    error,
+    storeStatus,
+    hoursOpen,
+    toggleHours,
+    sections,
+  } = useHomePage();
   const [authOpen, setAuthOpen] = useState(false);
   const [setPasswordOpen, setSetPasswordOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -159,11 +168,10 @@ export function HomeClient() {
                       {DAY_NAMES.map((day, i) => {
                         const today = new Date().getDay();
                         const isToday = i === today;
-                        const isDayOpen = storeStatus.openDays?.includes(i) ?? true;
                         return (
                           <div key={i} className={`flex justify-between py-1.5 ${i < 6 ? 'border-b border-white/5' : ''} ${isToday ? 'font-bold text-butter-200' : ''}`}>
                             <span>{day}</span>
-                            <span>{isDayOpen ? `${storeStatus.opensAt} às ${storeStatus.closesAt}` : 'Fechado'}</span>
+                            <span>{formatScheduleDayRanges(storeStatus.weeklySchedule, i as 0 | 1 | 2 | 3 | 4 | 5 | 6)}</span>
                           </div>
                         );
                       })}
@@ -217,7 +225,7 @@ export function HomeClient() {
         )}
       </div>
 
-      {storeStatus?.open !== false && <CartFloatingBar />}
+      <CartFloatingBar />
 
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
       <SetPasswordDialog open={setPasswordOpen} onOpenChange={setSetPasswordOpen} />

@@ -6,8 +6,8 @@ import { useStoreStatus } from '@/hooks/menu/use-store-status';
 import { useSections } from '@/hooks/menu/use-sections';
 
 export function useHomePage() {
-  const { data: categories, isLoading, error } = useMenu();
   const { data: storeStatus } = useStoreStatus();
+  const { data: categories, isLoading, error } = useMenu();
   const { data: sections } = useSections();
   const [hoursOpen, setHoursOpen] = useState(false);
 
