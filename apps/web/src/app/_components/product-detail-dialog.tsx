@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Product, OptionGroup } from '@cardapio/shared';
+import { formatScheduledFor, type Product, type OptionGroup } from '@cardapio/shared';
 import { Modal } from '@/components/ui/modal';
 import { formatCurrency } from '@/lib/utils';
 import { getImageUrl } from '@/lib/admin-api';
@@ -22,6 +22,7 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
   const [groupSelections, setGroupSelections] = useState<Record<string, string[]>>({});
   const [imageOpen, setImageOpen] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
+  const scheduledFor = useCartStore((s) => s.scheduledFor);
 
   const close = useCallback(() => {
     setQuantity(1);
@@ -50,6 +51,8 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
 
   const itemTotal = (displayPrice + optionsTotal) * quantity;
   const hasOptions = isCompound || product.extras.length > 0;
+  const scheduledForLabel = formatScheduledFor(scheduledFor);
+  const canAdd = storeOpen || !!scheduledFor;
 
   // Validation: all required groups must be satisfied
   const allRequiredSatisfied = isCompound
@@ -286,7 +289,7 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
 
   const bottomBar = (
     <div className="shrink-0 border-t border-[#E8DDD0] bg-white px-5 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-      {storeOpen ? (
+      {canAdd ? (
         <div className="flex items-center gap-3">
           <div className="flex items-center rounded-lg border border-[#E8DDD0]">
             <button type="button" data-testid="qty-decrease" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="flex h-10 w-10 items-center justify-center text-[#4A2810] transition-colors active:bg-[#FAF6F1]">
@@ -367,6 +370,11 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
           {optionsContent}
           <div className="h-4" />
         </div>
+        {scheduledForLabel && (
+          <div className="border-t border-[#E8DDD0] bg-[#FAF6F1] px-5 py-2 text-sm font-semibold text-[#4A2810]">
+            Agendado para {scheduledForLabel}
+          </div>
+        )}
         {bottomBar}
       </div>
 
@@ -406,6 +414,11 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
               {optionsContent}
               <div className="h-4" />
             </div>
+            {scheduledForLabel && (
+              <div className="border-t border-[#E8DDD0] bg-[#FAF6F1] px-5 py-2 text-sm font-semibold text-[#4A2810]">
+                Agendado para {scheduledForLabel}
+              </div>
+            )}
             {bottomBar}
           </div>
         </div>
@@ -437,7 +450,7 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
                 )}
               </div>
             </div>
-            {storeOpen ? (
+            {canAdd ? (
               <div className="mt-6 flex items-center gap-3">
                 <div className="flex items-center rounded-lg border border-[#E8DDD0]">
                   <button type="button" data-testid="qty-decrease" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="flex h-10 w-10 items-center justify-center text-[#4A2810] transition-colors active:bg-[#FAF6F1]">

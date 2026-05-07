@@ -90,7 +90,9 @@ export function useCartPage() {
   const effectiveDiscount = couponCode ? couponDiscount : 0;
   const totalAmount = Math.max(0, subtotal + effectiveFee - effectiveDiscount);
   const needsAddress = deliveryType === 'delivery';
-  const scheduleOptions = buildScheduleOptions(storeStatus?.weeklySchedule, new Date(), { intervalMinutes: 60, maxDays: 7, limit: 80 });
+  const scheduleOptions = getNextSessionOptions(
+    buildScheduleOptions(storeStatus?.weeklySchedule, new Date(), { intervalMinutes: 60, maxDays: 7, limit: 80 }),
+  );
   const scheduledForLabel = formatScheduledFor(scheduledFor);
   const canOrderNow = storeStatus?.open !== false;
 
@@ -409,4 +411,25 @@ export function useCartPage() {
     setScheduledFor,
     canOrderNow,
   };
+}
+
+function getNextSessionOptions<T extends { value: string }>(options: T[]): T[] {
+  const first = options[0];
+  if (!first) return [];
+  const firstDay = getRecifeDateKey(first.value);
+  return options.filter((option) => getRecifeDateKey(option.value) === firstDay);
+}
+
+function getRecifeDateKey(value: string): string {
+  const values: Record<string, string> = {};
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Recife',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  for (const part of formatter.formatToParts(new Date(value))) {
+    if (part.type !== 'literal') values[part.type] = part.value;
+  }
+  return `${values.year}-${values.month}-${values.day}`;
 }

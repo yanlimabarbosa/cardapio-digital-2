@@ -21,6 +21,9 @@ export function HomeClient() {
     isLoading,
     error,
     storeStatus,
+    scheduledFor,
+    scheduledForLabel,
+    clearScheduledFor,
     hoursOpen,
     toggleHours,
     sections,
@@ -206,6 +209,22 @@ export function HomeClient() {
         </div>
       )}
 
+      {scheduledFor && scheduledForLabel && (
+        <div className="bg-cream-100 px-4 py-3 text-center text-cocoa-800">
+          <div className="container flex flex-wrap items-center justify-center gap-2">
+            <Clock className="h-4 w-4" />
+            <span className="font-semibold">Pedido agendado para {scheduledForLabel}</span>
+            <button
+              type="button"
+              onClick={clearScheduledFor}
+              className="rounded-full border border-cocoa-700/20 px-3 py-1 text-xs font-bold text-cocoa-700 transition-colors hover:bg-white"
+            >
+              Pedir agora
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="container px-4 py-4">
         {isLoading && (
           <div className="flex items-center justify-center py-20">
@@ -221,7 +240,7 @@ export function HomeClient() {
         )}
 
         {categories && categories.length > 0 && (
-          <CategoryList categories={categories} sections={sections} storeOpen={storeStatus?.open !== false} />
+          <CategoryList categories={categories} sections={sections} storeOpen={storeStatus?.open !== false || !!scheduledFor} />
         )}
       </div>
 

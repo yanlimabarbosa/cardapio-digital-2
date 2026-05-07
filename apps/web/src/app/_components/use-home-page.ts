@@ -4,11 +4,15 @@ import { useState } from 'react';
 import { useMenu } from '@/hooks/menu/use-menu';
 import { useStoreStatus } from '@/hooks/menu/use-store-status';
 import { useSections } from '@/hooks/menu/use-sections';
+import { useCartStore } from '@/stores/cart-store';
+import { formatScheduledFor } from '@cardapio/shared';
 
 export function useHomePage() {
+  const scheduledFor = useCartStore((s) => s.scheduledFor);
+  const setScheduledFor = useCartStore((s) => s.setScheduledFor);
   const { data: storeStatus } = useStoreStatus();
-  const { data: categories, isLoading, error } = useMenu();
-  const { data: sections } = useSections();
+  const { data: categories, isLoading, error } = useMenu(scheduledFor);
+  const { data: sections } = useSections(scheduledFor);
   const [hoursOpen, setHoursOpen] = useState(false);
 
   const toggleHours = () => setHoursOpen(!hoursOpen);
@@ -18,6 +22,9 @@ export function useHomePage() {
     isLoading,
     error,
     storeStatus,
+    scheduledFor,
+    scheduledForLabel: formatScheduledFor(scheduledFor),
+    clearScheduledFor: () => setScheduledFor(null),
     hoursOpen,
     toggleHours,
     sections,

@@ -9,6 +9,7 @@ import { ProductDetailDialog } from './product-detail-dialog';
 import { formatCurrency } from '@/lib/utils';
 import { getImageUrl } from '@/lib/admin-api';
 import { cn } from '@/lib/utils';
+import { useCartStore } from '@/stores/cart-store';
 
 interface CategoryListProps {
   categories: Category[];
@@ -21,6 +22,7 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
   const [, startTransition] = useTransition();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const setScheduledFor = useCartStore((s) => s.setScheduledFor);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const navRef = useRef<HTMLDivElement>(null);
   const isScrollingTo = useRef(false);
@@ -72,7 +74,11 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
   }, []);
 
   function handleSelectProduct(product: Product) {
-    if (!product.isActive || product.isAvailable === false) return;
+    if (!product.isActive) return;
+    if (product.isAvailable === false) {
+      if (!product.nextAvailableAt) return;
+      setScheduledFor(product.nextAvailableAt);
+    }
     setSelectedProduct(product);
     setDialogOpen(true);
   }
@@ -95,15 +101,23 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
             {section.products.map((product) => {
               const imgSrc = getImageUrl(product.imageUrl);
               const unavailable = !product.isActive || product.isAvailable === false || section.isAvailable === false;
+              const nextAvailableAt = product.nextAvailableAt ?? section.nextAvailableAt;
+              const availabilityMessage = product.availabilityMessage ?? section.availabilityMessage;
+              const canPreorder = product.isActive && unavailable && !!nextAvailableAt;
+              const actionableProduct = canPreorder
+                ? { ...product, nextAvailableAt, availabilityMessage }
+                : product;
               return (
                 <button
                   key={product.id}
                   type="button"
-                  onClick={() => !unavailable && handleSelectProduct(product)}
-                  disabled={unavailable}
+                  onClick={() => (!unavailable || canPreorder) && handleSelectProduct(actionableProduct)}
+                  disabled={unavailable && !canPreorder}
                   className={`group w-[10rem] shrink-0 overflow-hidden rounded-xl border border-terra-200/60 bg-white shadow-sm transition-all sm:w-[11.5rem] ${
                     unavailable
-                      ? 'cursor-not-allowed opacity-55'
+                      ? canPreorder
+                        ? 'cursor-pointer opacity-75 hover:border-terra-300 hover:shadow-md active:scale-[0.98]'
+                        : 'cursor-not-allowed opacity-55'
                       : 'hover:border-terra-300 hover:shadow-md active:scale-[0.98]'
                   }`}
                 >
@@ -134,7 +148,7 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
                     </p>
                     {unavailable && (
                       <p className="mt-1 line-clamp-2 text-[0.65rem] font-semibold text-terra-500">
-                        {product.availabilityMessage ?? section.availabilityMessage ?? 'Indisponível'}
+                        {availabilityMessage ?? 'Indisponível'}
                       </p>
                     )}
                   </div>

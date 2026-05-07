@@ -13,16 +13,20 @@ interface ProductCardProps {
 export const ProductCard = memo(function ProductCard({ product, onSelect }: ProductCardProps) {
   const imgSrc = getImageUrl(product.imageUrl);
   const unavailable = !product.isActive || product.isAvailable === false;
+  const canPreorder = product.isActive && product.isAvailable === false && !!product.nextAvailableAt;
   const unavailableLabel = !product.isActive ? 'Esgotado' : product.availabilityMessage ?? 'Indisponível';
+  const disabled = unavailable && !canPreorder;
 
   return (
     <button
       type="button"
-      onClick={() => !unavailable && onSelect(product)}
-      disabled={unavailable}
+      onClick={() => !disabled && onSelect(product)}
+      disabled={disabled}
       className={`group flex w-full items-stretch gap-3 rounded-xl border bg-card p-3 text-left shadow-[0_1px_2px_rgba(61,43,31,0.04),0_4px_12px_-6px_rgba(61,43,31,0.1)] transition-all ${
         unavailable
-          ? 'cursor-not-allowed border-cocoa-700/10 opacity-50'
+          ? canPreorder
+            ? 'cursor-pointer border-cocoa-700/10 opacity-75 hover:-translate-y-0.5 hover:border-butter-400/80 hover:shadow-card-warm active:scale-[0.99]'
+            : 'cursor-not-allowed border-cocoa-700/10 opacity-50'
           : 'cursor-pointer border-cocoa-700/12 hover:-translate-y-0.5 hover:border-butter-400/80 hover:shadow-card-warm active:scale-[0.99]'
       }`}
     >
@@ -86,7 +90,7 @@ export const ProductCard = memo(function ProductCard({ product, onSelect }: Prod
         {unavailable && (
           <div className="absolute inset-0 flex items-center justify-center bg-terra-900/50 backdrop-blur-[1px]">
             <span className="rounded-full bg-terra-900/80 px-2.5 py-1 text-[0.65rem] font-bold text-white">
-              {!product.isActive ? 'Esgotado' : 'Indisponível'}
+              {canPreorder ? 'Agendar' : !product.isActive ? 'Esgotado' : 'Indisponível'}
             </span>
           </div>
         )}
