@@ -3,6 +3,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { StoreSettings } from '../../entities';
 import {
   getCombinedScheduleAvailability,
+  getRangesForDay,
+  getZonedParts,
   legacyToWeeklySchedule,
   normalizeWeeklySchedule,
   formatScheduleDayRanges,
@@ -86,9 +88,12 @@ export class StoreService {
   }> {
     const settings = await this.getSettings();
     const weeklySchedule = this.getEffectiveSchedule(settings);
+    const dayRanges = getRangesForDay(weeklySchedule, getZonedParts(at).weekday);
+    const opensAt = dayRanges[0]?.start ?? settings.openingTime;
+    const closesAt = dayRanges[dayRanges.length - 1]?.end ?? settings.closingTime;
     const base = {
-      opensAt: settings.openingTime,
-      closesAt: settings.closingTime,
+      opensAt,
+      closesAt,
       openDays: settings.openDays,
       weeklySchedule,
       bannerUrl: settings.bannerUrl,
