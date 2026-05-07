@@ -72,7 +72,7 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
   }, []);
 
   function handleSelectProduct(product: Product) {
-    if (!product.isActive) return;
+    if (!product.isActive || product.isAvailable === false) return;
     setSelectedProduct(product);
     setDialogOpen(true);
   }
@@ -84,24 +84,35 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
           <div className="mb-3 flex items-center gap-2">
             {section.emoji && <span className="text-base">{section.emoji}</span>}
             <h2 className="font-display text-lg font-semibold text-cocoa-700">{section.label}</h2>
+            {section.isAvailable === false && section.availabilityMessage && (
+              <span className="rounded-full bg-terra-100 px-2 py-0.5 text-[0.68rem] font-semibold text-terra-600">
+                {section.availabilityMessage}
+              </span>
+            )}
             <span className="h-px flex-1 bg-gradient-to-r from-butter-400/40 via-butter-400/10 to-transparent" />
           </div>
           <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
             {section.products.map((product) => {
               const imgSrc = getImageUrl(product.imageUrl);
+              const unavailable = !product.isActive || product.isAvailable === false || section.isAvailable === false;
               return (
                 <button
                   key={product.id}
                   type="button"
-                  onClick={() => handleSelectProduct(product)}
-                  className="group w-[10rem] shrink-0 overflow-hidden rounded-xl border border-terra-200/60 bg-white shadow-sm transition-all hover:border-terra-300 hover:shadow-md active:scale-[0.98] sm:w-[11.5rem]"
+                  onClick={() => !unavailable && handleSelectProduct(product)}
+                  disabled={unavailable}
+                  className={`group w-[10rem] shrink-0 overflow-hidden rounded-xl border border-terra-200/60 bg-white shadow-sm transition-all sm:w-[11.5rem] ${
+                    unavailable
+                      ? 'cursor-not-allowed opacity-55'
+                      : 'hover:border-terra-300 hover:shadow-md active:scale-[0.98]'
+                  }`}
                 >
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-terra-100">
                     {imgSrc ? (
                       <img
                         src={imgSrc}
                         alt={product.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${unavailable ? 'grayscale' : ''}`}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-terra-50 to-terra-100">
@@ -121,6 +132,11 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
                     <p className="mt-1.5 font-display text-[0.85rem] font-semibold text-terra-600">
                       {formatCurrency(product.price)}
                     </p>
+                    {unavailable && (
+                      <p className="mt-1 line-clamp-2 text-[0.65rem] font-semibold text-terra-500">
+                        {product.availabilityMessage ?? section.availabilityMessage ?? 'Indisponível'}
+                      </p>
+                    )}
                   </div>
                 </button>
               );
@@ -140,16 +156,16 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
               className={cn(
                 'group relative shrink-0 rounded-full px-3.5 py-1.5 text-xs transition-all duration-200 will-change-transform sm:px-4 sm:py-2 sm:text-sm',
                 activeCategory === cat.id
-                  ? 'text-butter-300 font-bold shadow-[inset_0_1px_0_rgba(255,217,83,0.18),inset_0_-1px_0_rgba(20,10,3,0.4)]'
+                  ? 'text-butter-300 font-bold shadow-[inset_0_1px_0_rgba(233,176,127,0.18),inset_0_-1px_0_rgba(61,43,31,0.4)]'
                   : 'border border-cocoa-700/12 bg-cream-100/70 font-semibold text-cocoa-700 hover:border-cocoa-700/25 hover:bg-butter-100/60',
               )}
               style={
                 activeCategory === cat.id
-                  ? { backgroundImage: 'linear-gradient(180deg, #6B3E14 0%, #4A2810 60%, #3D1F0A 100%)' }
+                  ? { backgroundImage: 'linear-gradient(180deg, #A0603A 0%, #8b4c2a 60%, #723f28 100%)' }
                   : undefined
               }
             >
-              <span className="relative" style={activeCategory === cat.id ? { textShadow: '0 1px 0 rgba(20,10,3,0.35)' } : undefined}>
+              <span className="relative" style={activeCategory === cat.id ? { textShadow: '0 1px 0 rgba(61,43,31,0.35)' } : undefined}>
                 {cat.name}
               </span>
             </button>
@@ -171,6 +187,9 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
                 <h2 className="font-display text-[1.4rem] font-bold leading-tight text-cocoa-800 tracking-tight">{cat.name}</h2>
                 {cat.description && (
                   <p className="mt-1 text-[0.8rem] font-medium text-cocoa-500/75">{cat.description}</p>
+                )}
+                {cat.isAvailable === false && cat.availabilityMessage && (
+                  <p className="mt-1 text-[0.78rem] font-semibold text-terra-600">{cat.availabilityMessage}</p>
                 )}
               </div>
             </div>

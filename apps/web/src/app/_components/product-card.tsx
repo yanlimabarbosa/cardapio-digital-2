@@ -12,14 +12,15 @@ interface ProductCardProps {
 
 export const ProductCard = memo(function ProductCard({ product, onSelect }: ProductCardProps) {
   const imgSrc = getImageUrl(product.imageUrl);
-  const unavailable = !product.isActive;
+  const unavailable = !product.isActive || product.isAvailable === false;
+  const unavailableLabel = !product.isActive ? 'Esgotado' : product.availabilityMessage ?? 'Indisponível';
 
   return (
     <button
       type="button"
       onClick={() => !unavailable && onSelect(product)}
       disabled={unavailable}
-      className={`group flex w-full items-stretch gap-3 rounded-xl border bg-card p-3 text-left shadow-[0_1px_2px_rgba(74,40,16,0.04),0_4px_12px_-6px_rgba(74,40,16,0.1)] transition-all ${
+      className={`group flex w-full items-stretch gap-3 rounded-xl border bg-card p-3 text-left shadow-[0_1px_2px_rgba(61,43,31,0.04),0_4px_12px_-6px_rgba(61,43,31,0.1)] transition-all ${
         unavailable
           ? 'cursor-not-allowed border-cocoa-700/10 opacity-50'
           : 'cursor-pointer border-cocoa-700/12 hover:-translate-y-0.5 hover:border-butter-400/80 hover:shadow-card-warm active:scale-[0.99]'
@@ -58,6 +59,11 @@ export const ProductCard = memo(function ProductCard({ product, onSelect }: Prod
             </span>
           )}
         </div>
+        {unavailable && (
+          <p className="mt-1 text-[0.72rem] font-semibold leading-tight text-terra-600">
+            {unavailableLabel}
+          </p>
+        )}
       </div>
 
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-terra-100 sm:h-[6.5rem] sm:w-[6.5rem]">
@@ -80,7 +86,7 @@ export const ProductCard = memo(function ProductCard({ product, onSelect }: Prod
         {unavailable && (
           <div className="absolute inset-0 flex items-center justify-center bg-terra-900/50 backdrop-blur-[1px]">
             <span className="rounded-full bg-terra-900/80 px-2.5 py-1 text-[0.65rem] font-bold text-white">
-              Esgotado
+              {!product.isActive ? 'Esgotado' : 'Indisponível'}
             </span>
           </div>
         )}
