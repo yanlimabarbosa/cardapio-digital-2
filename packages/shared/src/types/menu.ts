@@ -1,3 +1,5 @@
+import type { WeeklySchedule } from './schedule';
+
 export interface ProductExtra {
   id: string;
   name: string;
@@ -32,6 +34,9 @@ export interface Product {
   isCompound: boolean;
   extras: ProductExtra[];
   optionGroups?: OptionGroup[];
+  isAvailable?: boolean;
+  availabilityMessage?: string;
+  nextAvailableAt?: string;
   // Promotional fields
   isPromotional: boolean;
   promotionalPrice: number | null;
@@ -44,6 +49,10 @@ export interface Category {
   name: string;
   description?: string;
   imageUrl?: string;
+  availabilitySchedule?: WeeklySchedule | null;
+  isAvailable?: boolean;
+  availabilityMessage?: string;
+  nextAvailableAt?: string;
   products: Product[];
 }
 

@@ -59,6 +59,7 @@ export interface CreateOrderDto {
   deliveryAreaId?: string;
   notes?: string;
   couponCode?: string;
+  scheduledFor?: string | null;
   items: CreateOrderItemDto[];
   redeemedItems?: Array<{ productId: string }>;
 }
@@ -87,6 +88,7 @@ export interface OrderResponse {
   deliveryType: 'pickup' | 'delivery';
   deliveryAddress?: DeliveryAddress;
   notes?: string;
+  scheduledFor?: string | null;
   items: OrderItemResponse[];
   createdAt: string;
   updatedAt: string;
