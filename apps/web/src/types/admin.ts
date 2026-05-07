@@ -1,3 +1,5 @@
+import type { WeeklySchedule } from '@cardapio/shared';
+
 export interface Dashboard {
   todayOrdersCount: number;
   todayPaidCount: number;
@@ -14,6 +16,7 @@ export interface StoreSettingsData {
   openingTime: string;
   closingTime: string;
   openDays: number[];
+  weeklySchedule?: WeeklySchedule | null;
   forceClose: boolean;
   forceOpen: boolean;
   pointsPerReal: number;
@@ -31,6 +34,7 @@ export interface AdminCategory {
   imageUrl?: string;
   sortOrder: number;
   isActive: boolean;
+  availabilitySchedule?: WeeklySchedule | null;
   productCount: number;
 }
 
@@ -102,6 +106,7 @@ export interface OrderSummary {
   paymentMethod: string;
   paymentStatus?: string;
   deliveryType?: string;
+  scheduledFor?: string | null;
   itemCount: number;
   items: OrderItem[];
   createdAt: string;

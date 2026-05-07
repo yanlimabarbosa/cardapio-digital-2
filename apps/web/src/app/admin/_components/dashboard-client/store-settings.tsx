@@ -8,8 +8,8 @@ import { ImagePlus, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
 import type { StoreSettingsData } from '@/types/admin';
-
-const DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+import { WeeklyScheduleEditor } from '@/components/admin/weekly-schedule-editor';
+import { legacyToWeeklySchedule } from '@cardapio/shared';
 
 type StoreMode = 'schedule' | 'force_open' | 'force_close';
 
@@ -19,7 +19,6 @@ interface StoreSettingsProps {
   storeMode: StoreMode;
   onSetMode: (mode: StoreMode) => void;
   onUpdateSettings: (data: Partial<StoreSettingsData>) => void;
-  onToggleDay: (day: number) => void;
 }
 
 export function StoreSettings({
@@ -28,7 +27,6 @@ export function StoreSettings({
   storeMode,
   onSetMode,
   onUpdateSettings,
-  onToggleDay,
 }: StoreSettingsProps) {
   const token = useAuthStore((s) => s.token);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -50,9 +48,9 @@ export function StoreSettings({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, type: 'spring', damping: 24, stiffness: 300 }}
-      className="rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] p-6 shadow-[0_0_8px_rgba(60,40,20,0.12)]"
+      className="rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] p-6 shadow-[0_0_8px_rgba(61,43,31,0.12)]"
     >
-      <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">
+      <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
         Controle da Loja
       </h2>
 
@@ -77,17 +75,17 @@ export function StoreSettings({
       )}
 
       <div className="mb-5">
-        <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#8A6F40]">
+        <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#8B7355]">
           Modo
         </label>
-        <div className="inline-flex rounded-xl border border-[#EAD8A0] p-1">
+        <div className="inline-flex rounded-xl border border-[#E8DDD0] p-1">
           <button
             onClick={() => onSetMode('schedule')}
             className={cn(
               'rounded-lg px-4 py-2 text-sm font-bold transition-colors',
               storeMode === 'schedule'
-                ? 'bg-[#6B3E14] text-white'
-                : 'text-[#8A6F40] hover:bg-[#FDF7E3]',
+                ? 'bg-[#A0603A] text-white'
+                : 'text-[#8B7355] hover:bg-[#FAF6F1]',
             )}
           >
             Automático
@@ -98,7 +96,7 @@ export function StoreSettings({
               'rounded-lg px-4 py-2 text-sm font-bold transition-colors',
               storeMode === 'force_open'
                 ? 'bg-emerald-500 text-white'
-                : 'text-[#8A6F40] hover:bg-[#FDF7E3]',
+                : 'text-[#8B7355] hover:bg-[#FAF6F1]',
             )}
           >
             Forçar Aberta
@@ -109,7 +107,7 @@ export function StoreSettings({
               'rounded-lg px-4 py-2 text-sm font-bold transition-colors',
               storeMode === 'force_close'
                 ? 'bg-red-500 text-white'
-                : 'text-[#8A6F40] hover:bg-[#FDF7E3]',
+                : 'text-[#8B7355] hover:bg-[#FAF6F1]',
             )}
           >
             Forçar Fechada
@@ -117,36 +115,16 @@ export function StoreSettings({
         </div>
       </div>
 
-      <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#8A6F40]">
-        Horário de Funcionamento
+      <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#8B7355]">
+        Agenda semanal
       </label>
-      <div className="flex flex-wrap gap-4">
-        <div>
-          <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8A6F40]">
-            Abre às
-          </label>
-          <Input
-            type="time"
-            value={storeSettings.openingTime}
-            onChange={(e) => onUpdateSettings({ openingTime: e.target.value })}
-            className="h-11 w-32 rounded-xl border-[#EAD8A0] bg-[#FBF6E9]"
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8A6F40]">
-            Fecha às
-          </label>
-          <Input
-            type="time"
-            value={storeSettings.closingTime}
-            onChange={(e) => onUpdateSettings({ closingTime: e.target.value })}
-            className="h-11 w-32 rounded-xl border-[#EAD8A0] bg-[#FBF6E9]"
-          />
-        </div>
-      </div>
+      <WeeklyScheduleEditor
+        value={storeSettings.weeklySchedule ?? legacyToWeeklySchedule(storeSettings.openDays, storeSettings.openingTime, storeSettings.closingTime)}
+        onChange={(weeklySchedule) => onUpdateSettings({ weeklySchedule })}
+      />
 
       <div className="mt-5">
-        <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-[#8A6F40]">
+        <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-[#8B7355]">
           Pontos por R$1 gasto
         </label>
         <Input
@@ -155,46 +133,24 @@ export function StoreSettings({
           min="0"
           value={storeSettings.pointsPerReal ?? 0}
           onChange={(e) => onUpdateSettings({ pointsPerReal: parseFloat(e.target.value) || 0 })}
-          className="h-11 w-32 rounded-xl border-[#EAD8A0] bg-[#FBF6E9]"
+          className="h-11 w-32 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
         />
-        <p className="mt-1 text-[10px] text-[#8A6F40]">
+        <p className="mt-1 text-[10px] text-[#8B7355]">
           Ex: 1.00 = 1 ponto a cada R$1 gasto. 0 = desativado.
         </p>
       </div>
 
-      <div className="mt-5">
-        <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#8A6F40]">
-          Dias abertos
-        </label>
-        <div className="flex gap-2">
-          {DAY_LABELS.map((label, i) => (
-            <button
-              key={i}
-              className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold transition-colors',
-                storeSettings.openDays.includes(i)
-                  ? 'bg-[#6B3E14] text-white'
-                  : 'border-2 border-[#EAD8A0] text-[#8A6F40] hover:border-[#6B3E14]/30',
-              )}
-              onClick={() => onToggleDay(i)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Banner */}
-      <div className="mt-8 border-t border-[#EAD8A0] pt-6">
-        <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">
+      <div className="mt-8 border-t border-[#E8DDD0] pt-6">
+        <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
           Aparência
         </h3>
         <div>
-          <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8A6F40]">
+          <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
             Banner do Cardápio
           </label>
           {storeSettings.bannerUrl ? (
-            <div className="relative w-full overflow-hidden rounded-xl border border-[#EAD8A0]">
+            <div className="relative w-full overflow-hidden rounded-xl border border-[#E8DDD0]">
               <img
                 src={storeSettings.bannerUrl}
                 alt="Banner"
@@ -210,7 +166,7 @@ export function StoreSettings({
           ) : (
             <button
               onClick={() => bannerInputRef.current?.click()}
-              className="flex h-24 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#EAD8A0] text-sm text-[#8A6F40] transition-colors hover:border-[#6B3E14]/40 hover:text-[#6B3E14]"
+              className="flex h-24 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E8DDD0] text-sm text-[#8B7355] transition-colors hover:border-[#A0603A]/40 hover:text-[#A0603A]"
             >
               <ImagePlus className="h-5 w-5" />
               Enviar banner
@@ -223,18 +179,18 @@ export function StoreSettings({
             className="hidden"
             onChange={handleBannerUpload}
           />
-          <p className="mt-1 text-[10px] text-[#8A6F40]">Aparece abaixo do cabeçalho no cardápio. Recomendado: 1200×400px.</p>
+          <p className="mt-1 text-[10px] text-[#8B7355]">Aparece abaixo do cabeçalho no cardápio. Recomendado: 1200×400px.</p>
         </div>
       </div>
 
       {/* Receipt settings */}
-      <div className="mt-8 border-t border-[#EAD8A0] pt-6">
-        <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">
+      <div className="mt-8 border-t border-[#E8DDD0] pt-6">
+        <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
           Dados do Comprovante
         </h3>
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8A6F40]">
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
               CNPJ
             </label>
             <Input
@@ -242,11 +198,11 @@ export function StoreSettings({
               placeholder="XX.XXX.XXX/XXXX-XX"
               value={storeSettings.receiptCnpj ?? ''}
               onChange={(e) => onUpdateSettings({ receiptCnpj: e.target.value })}
-              className="h-11 w-64 rounded-xl border-[#EAD8A0] bg-[#FBF6E9]"
+              className="h-11 w-64 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8A6F40]">
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
               Endereco
             </label>
             <textarea
@@ -254,11 +210,11 @@ export function StoreSettings({
               value={storeSettings.receiptAddress ?? ''}
               onChange={(e) => onUpdateSettings({ receiptAddress: e.target.value })}
               rows={2}
-              className="w-full rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] px-3 py-2 text-sm text-[#2A1508] outline-none placeholder:text-[#B89D5F] focus:border-[#D4B878] focus:ring-2 focus:ring-[#EAD8A0]/50"
+              className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8A6F40]">
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
               Telefone
             </label>
             <Input
@@ -266,11 +222,11 @@ export function StoreSettings({
               placeholder="(XX) XXXXX-XXXX"
               value={storeSettings.receiptPhone ?? ''}
               onChange={(e) => onUpdateSettings({ receiptPhone: e.target.value })}
-              className="h-11 w-52 rounded-xl border-[#EAD8A0] bg-[#FBF6E9]"
+              className="h-11 w-52 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8A6F40]">
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
               Mensagem de rodape
             </label>
             <textarea
@@ -278,7 +234,7 @@ export function StoreSettings({
               value={storeSettings.receiptFooter ?? ''}
               onChange={(e) => onUpdateSettings({ receiptFooter: e.target.value })}
               rows={2}
-              className="w-full rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] px-3 py-2 text-sm text-[#2A1508] outline-none placeholder:text-[#B89D5F] focus:border-[#D4B878] focus:ring-2 focus:ring-[#EAD8A0]/50"
+              className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
             />
           </div>
         </div>
