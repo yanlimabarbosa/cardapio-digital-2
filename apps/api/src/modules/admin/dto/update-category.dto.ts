@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsNumber, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsObject } from 'class-validator';
+import type { WeeklySchedule } from '@cardapio/shared';
 
 export class UpdateCategoryDto {
   @IsOptional()
@@ -20,4 +21,8 @@ export class UpdateCategoryDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsObject()
+  availabilitySchedule?: WeeklySchedule | null;
 }

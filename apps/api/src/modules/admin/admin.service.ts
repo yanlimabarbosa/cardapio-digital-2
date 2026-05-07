@@ -9,6 +9,7 @@ import { CreateExtraDto } from './dto/create-extra.dto';
 import { UpdateExtraDto } from './dto/update-extra.dto';
 import { CreateOptionGroupDto } from './dto/create-option-group.dto';
 import { UpdateOptionGroupDto } from './dto/update-option-group.dto';
+import { normalizeWeeklySchedule } from '@cardapio/shared';
 
 @Injectable()
 export class AdminService {
@@ -29,6 +30,7 @@ export class AdminService {
       imageUrl: c.imageUrl,
       sortOrder: c.sortOrder,
       isActive: c.isActive,
+      availabilitySchedule: c.availabilitySchedule ?? null,
       productCount: c.products.length,
       createdAt: c.createdAt,
     }));
@@ -40,6 +42,7 @@ export class AdminService {
       description: dto.description,
       imageUrl: dto.imageUrl,
       sortOrder: dto.sortOrder ?? 0,
+      availabilitySchedule: normalizeWeeklySchedule(dto.availabilitySchedule) ?? null,
     });
     await this.em.flush();
     return category;
@@ -53,6 +56,7 @@ export class AdminService {
     if (dto.imageUrl !== undefined) category.imageUrl = dto.imageUrl;
     if (dto.sortOrder !== undefined) category.sortOrder = dto.sortOrder;
     if (dto.isActive !== undefined) category.isActive = dto.isActive;
+    if (dto.availabilitySchedule !== undefined) category.availabilitySchedule = normalizeWeeklySchedule(dto.availabilitySchedule) ?? null;
     await this.em.flush();
     return category;
   }
@@ -489,6 +493,7 @@ export class AdminService {
         paymentStatus: o.paymentStatus,
         deliveryType: o.deliveryType || 'pickup',
         deliveryAddress: o.deliveryAddress,
+        scheduledFor: o.scheduledFor?.toISOString() ?? null,
         itemCount: o.items.length,
         items: o.items.getItems().map((item) => ({
           id: item.id,
@@ -532,6 +537,7 @@ export class AdminService {
       paymentMethod: o.paymentMethod,
       paymentStatus: o.paymentStatus,
       deliveryType: o.deliveryType || 'pickup',
+      scheduledFor: o.scheduledFor?.toISOString() ?? null,
       itemCount: o.items.length,
       items: o.items.getItems().map((item) => ({
         id: item.id,

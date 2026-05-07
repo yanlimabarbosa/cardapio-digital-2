@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsObject } from 'class-validator';
+import type { WeeklySchedule } from '@cardapio/shared';
 
 export class CreateCategoryDto {
   @IsString()
@@ -15,4 +16,8 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsNumber()
   sortOrder?: number;
+
+  @IsOptional()
+  @IsObject()
+  availabilitySchedule?: WeeklySchedule | null;
 }
