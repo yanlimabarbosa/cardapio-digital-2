@@ -43,7 +43,7 @@ const cardVariants = {
 };
 
 export function DashboardClient() {
-  const { data, stats, storeSettings, storeStatus, storeMode, setStoreModeMutation, updateSettingsMutation, toggleDay } = useDashboardPage();
+  const { data, stats, storeSettings, storeStatus, storeMode, setStoreModeMutation, updateSettingsMutation } = useDashboardPage();
 
   const statusPieData = STATUS_CHART_DATA
     .map((s) => ({ ...s, value: data?.ordersByStatus?.[s.key] ?? 0 }))
@@ -66,7 +66,7 @@ export function DashboardClient() {
 
   return (
     <div className="space-y-5">
-      <h1 className="font-display text-2xl font-semibold text-[#2A1508]">Dashboard</h1>
+      <h1 className="font-display text-2xl font-semibold text-[#3D2B1F]">Dashboard</h1>
 
       <motion.div
         variants={containerVariants}
@@ -78,17 +78,17 @@ export function DashboardClient() {
           <motion.div
             key={stat.title}
             variants={cardVariants}
-            className="rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] p-4 shadow-[0_0_8px_rgba(60,40,20,0.12)]"
+            className="rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] p-4 shadow-[0_0_8px_rgba(61,43,31,0.12)]"
           >
             <div className="flex items-center justify-between pb-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#8A6F40]">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
                 {stat.title}
               </span>
               <div className={cn('flex h-8 w-8 items-center justify-center rounded-full', stat.bgColor)}>
                 <stat.icon className={cn('h-3.5 w-3.5', stat.color)} />
               </div>
             </div>
-            <div className="font-display text-2xl font-semibold text-[#2A1508]">{stat.value}</div>
+            <div className="font-display text-2xl font-semibold text-[#3D2B1F]">{stat.value}</div>
           </motion.div>
         ))}
       </motion.div>
@@ -100,19 +100,19 @@ export function DashboardClient() {
               <AreaChart data={weeklyData}>
                 <defs>
                   <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6B3E14" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#6B3E14" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#A0603A" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#A0603A" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EAD8A0" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E8DDD0" vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fontSize: 11, fill: '#8A6F40', fontWeight: 600 }}
+                  tick={{ fontSize: 11, fill: '#8B7355', fontWeight: 600 }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: '#8A6F40' }}
+                  tick={{ fontSize: 11, fill: '#8B7355' }}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={(v) => `R$${v}`}
@@ -124,11 +124,11 @@ export function DashboardClient() {
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#6B3E14"
+                  stroke="#A0603A"
                   strokeWidth={2.5}
                   fill="url(#revenueGrad)"
-                  dot={{ r: 4, fill: '#6B3E14', strokeWidth: 2, stroke: '#FBF6E9' }}
-                  activeDot={{ r: 6, fill: '#6B3E14', stroke: '#FBF6E9', strokeWidth: 2 }}
+                  dot={{ r: 4, fill: '#A0603A', strokeWidth: 2, stroke: '#FFFCF8' }}
+                  activeDot={{ r: 6, fill: '#A0603A', stroke: '#FFFCF8', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -138,7 +138,7 @@ export function DashboardClient() {
         <SectionCard title="Pedidos por Status" delay={0.15}>
           {statusPieData.length === 0 ? (
             <div className="flex h-[220px] items-center justify-center">
-              <p className="text-sm text-[#B89D5F]">Sem dados</p>
+              <p className="text-sm text-[#C4B5A0]">Sem dados</p>
             </div>
           ) : (
             <div className="flex h-[220px] items-center justify-center">
@@ -164,9 +164,9 @@ export function DashboardClient() {
                         if (!active || !payload?.length) return null;
                         const d = payload[0].payload;
                         return (
-                          <div className="rounded-lg border border-[#EAD8A0] bg-[#FBF6E9] px-3 py-2 shadow-lg">
-                            <p className="text-xs font-semibold text-[#8A6F40]">{d.label}</p>
-                            <p className="text-sm font-semibold text-[#2A1508]">{d.value} pedidos</p>
+                          <div className="rounded-lg border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 shadow-lg">
+                            <p className="text-xs font-semibold text-[#8B7355]">{d.label}</p>
+                            <p className="text-sm font-semibold text-[#3D2B1F]">{d.value} pedidos</p>
                           </div>
                         );
                       }}
@@ -175,10 +175,10 @@ export function DashboardClient() {
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="font-display text-xl font-semibold text-[#2A1508]">
+                    <div className="font-display text-xl font-semibold text-[#3D2B1F]">
                       {data?.todayOrdersCount ?? 0}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#8A6F40]">total</div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#8B7355]">total</div>
                   </div>
                 </div>
               </div>
@@ -186,8 +186,8 @@ export function DashboardClient() {
                 {statusPieData.map((s) => (
                   <div key={s.key} className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                    <span className="text-xs text-[#8A6F40]">{s.label}</span>
-                    <span className="text-xs font-semibold text-[#2A1508]">{s.value}</span>
+                    <span className="text-xs text-[#8B7355]">{s.label}</span>
+                    <span className="text-xs font-semibold text-[#3D2B1F]">{s.value}</span>
                   </div>
                 ))}
               </div>
@@ -201,20 +201,20 @@ export function DashboardClient() {
           <div className="h-[200px]">
             {hourlyData.length === 0 ? (
               <div className="flex h-full items-center justify-center">
-                <p className="text-sm text-[#B89D5F]">Sem dados</p>
+                <p className="text-sm text-[#C4B5A0]">Sem dados</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={hourlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#EAD8A0" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E8DDD0" vertical={false} />
                   <XAxis
                     dataKey="label"
-                    tick={{ fontSize: 10, fill: '#8A6F40', fontWeight: 600 }}
+                    tick={{ fontSize: 10, fill: '#8B7355', fontWeight: 600 }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fontSize: 10, fill: '#8A6F40' }}
+                    tick={{ fontSize: 10, fill: '#8B7355' }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(v) => `R$${v}`}
@@ -227,7 +227,7 @@ export function DashboardClient() {
                     {hourlyData.map((entry, i) => (
                       <Cell
                         key={i}
-                        fill={entry.revenue > 0 ? '#6B3E14' : '#EAD8A0'}
+                        fill={entry.revenue > 0 ? '#A0603A' : '#E8DDD0'}
                         fillOpacity={entry.revenue > 0 ? 0.85 : 0.4}
                       />
                     ))}
@@ -242,7 +242,7 @@ export function DashboardClient() {
           <div className="h-[200px]">
             {!data?.topProducts?.length ? (
               <div className="flex h-full items-center justify-center">
-                <p className="text-sm text-[#B89D5F]">Sem dados</p>
+                <p className="text-sm text-[#C4B5A0]">Sem dados</p>
               </div>
             ) : (
               <div className="space-y-2.5 overflow-y-auto pr-1" style={{ maxHeight: 200 }}>
@@ -252,26 +252,26 @@ export function DashboardClient() {
                   return (
                     <div key={product.name} className="group">
                       <div className="mb-1 flex items-center justify-between">
-                        <span className="truncate text-xs font-semibold text-[#2A1508]">
+                        <span className="truncate text-xs font-semibold text-[#3D2B1F]">
                           {i + 1}. {product.name}
                         </span>
                         <div className="ml-2 flex shrink-0 items-center gap-2">
-                          <span className="text-[10px] font-bold text-[#8A6F40]">
+                          <span className="text-[10px] font-bold text-[#8B7355]">
                             {product.qty}x
                           </span>
-                          <span className="text-[10px] font-semibold text-[#6B3E14]">
+                          <span className="text-[10px] font-semibold text-[#A0603A]">
                             {formatCurrency(product.revenue)}
                           </span>
                         </div>
                       </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#EAD8A0]/60">
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#E8DDD0]/60">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
                           transition={{ delay: 0.3 + i * 0.05, duration: 0.5, ease: 'easeOut' }}
                           className="h-full rounded-full"
                           style={{
-                            background: `linear-gradient(90deg, #6B3E14, #A77A1E)`,
+                            background: `linear-gradient(90deg, #A0603A, #A0603A)`,
                           }}
                         />
                       </div>
@@ -291,7 +291,6 @@ export function DashboardClient() {
           storeMode={storeMode}
           onSetMode={(mode) => setStoreModeMutation.mutate(mode)}
           onUpdateSettings={(data) => updateSettingsMutation.mutate(data)}
-          onToggleDay={toggleDay}
         />
       )}
     </div>
