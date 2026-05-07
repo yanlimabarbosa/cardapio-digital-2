@@ -6,6 +6,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
 import type { AdminCategory, AdminProduct } from '@/types/admin';
+import type { WeeklySchedule } from '@cardapio/shared';
 
 type DialogState =
   | { mode: 'closed' }
@@ -18,7 +19,12 @@ export function useCategoriesPage() {
   const token = useAuthStore((s) => s.token);
   const queryClient = useQueryClient();
   const [dialog, setDialog] = useState<DialogState>({ mode: 'closed' });
-  const [form, setForm] = useState({ name: '', description: '', sortOrder: 0 });
+  const [form, setForm] = useState<{ name: string; description: string; sortOrder: number; availabilitySchedule: WeeklySchedule | null }>({
+    name: '',
+    description: '',
+    sortOrder: 0,
+    availabilitySchedule: null,
+  });
   const [reorderDialog, setReorderDialog] = useState<ReorderDialogState>(null);
 
   const { data: categories, isLoading } = useQuery<AdminCategory[]>({
@@ -46,6 +52,7 @@ export function useCategoriesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
       setDialog({ mode: 'closed' });
     },
   });
@@ -55,6 +62,7 @@ export function useCategoriesPage() {
       adminFetch(`/api/admin/categories/${id}`, token, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
     },
   });
 
@@ -66,6 +74,7 @@ export function useCategoriesPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
     },
   });
 
@@ -77,6 +86,7 @@ export function useCategoriesPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
     },
   });
 
@@ -116,12 +126,12 @@ export function useCategoriesPage() {
     : [];
 
   function openCreate() {
-    setForm({ name: '', description: '', sortOrder: 0 });
+    setForm({ name: '', description: '', sortOrder: 0, availabilitySchedule: null });
     setDialog({ mode: 'create' });
   }
 
   function openEdit(cat: AdminCategory) {
-    setForm({ name: cat.name, description: cat.description || '', sortOrder: cat.sortOrder });
+    setForm({ name: cat.name, description: cat.description || '', sortOrder: cat.sortOrder, availabilitySchedule: cat.availabilitySchedule ?? null });
     setDialog({ mode: 'edit', category: cat });
   }
 
@@ -134,6 +144,7 @@ export function useCategoriesPage() {
       name: form.name,
       description: form.description || undefined,
       sortOrder: form.sortOrder,
+      availabilitySchedule: form.availabilitySchedule,
     });
   }
 

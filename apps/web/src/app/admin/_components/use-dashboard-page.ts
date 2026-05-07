@@ -39,6 +39,8 @@ export function useDashboardPage() {
     queryClient.invalidateQueries({ queryKey: ['admin-store-settings'] });
     queryClient.invalidateQueries({ queryKey: ['store-status'] });
     queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+    queryClient.invalidateQueries({ queryKey: ['menu'] });
+    queryClient.invalidateQueries({ queryKey: ['sections'] });
   };
 
   const setStoreModeMutation = useMutation({
@@ -81,8 +83,8 @@ export function useDashboardPage() {
       title: 'Pedidos Hoje',
       value: data?.todayOrdersCount ?? 0,
       icon: ShoppingCart,
-      bgColor: 'bg-[#6B3E14]/10',
-      color: 'text-[#6B3E14]',
+      bgColor: 'bg-[#A0603A]/10',
+      color: 'text-[#A0603A]',
     },
     {
       title: 'Receita Hoje',
