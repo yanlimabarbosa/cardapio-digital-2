@@ -52,7 +52,7 @@ export function LoyaltyClient() {
 
       <div className="container space-y-5 px-4 py-5">
         {!customer.token ? (
-          <section className="rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] p-6 text-center">
+          <section className="rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-6 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-terra-100">
               <User className="h-6 w-6 text-terra-600" />
             </div>
@@ -67,7 +67,7 @@ export function LoyaltyClient() {
             </button>
           </section>
         ) : !customer.hasPassword ? (
-          <section className="rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] p-6 text-center">
+          <section className="rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-6 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-terra-100">
               <Lock className="h-6 w-6 text-terra-600" />
             </div>
@@ -83,7 +83,7 @@ export function LoyaltyClient() {
           </section>
         ) : (
           <>
-            <section className="overflow-hidden rounded-xl border border-[#EAD8A0] bg-[#FBF6E9]">
+            <section className="overflow-hidden rounded-xl border border-[#E8DDD0] bg-[#FFFCF8]">
               <div className="bg-cocoa-noise p-5 text-cream-50">
                 <div className="flex items-center justify-between gap-4">
                   <div>
@@ -98,7 +98,7 @@ export function LoyaltyClient() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 divide-x divide-[#EAD8A0]">
+              <div className="grid grid-cols-2 divide-x divide-[#E8DDD0]">
                 <div className="p-4">
                   <p className="text-xs text-terra-800/50">Produtos disponíveis</p>
                   <p className="mt-1 font-display text-xl font-semibold text-terra-900">{products.length}</p>
@@ -128,7 +128,7 @@ export function LoyaltyClient() {
                       {products.map((product) => {
                         const imgSrc = getImageUrl(product.imageUrl);
                         return (
-                          <div key={product.id} className={`flex gap-3 rounded-xl border bg-white p-3 ${product.canRedeem ? 'border-[#EAD8A0]' : 'border-terra-200 opacity-60'}`}>
+                          <div key={product.id} className={`flex gap-3 rounded-xl border bg-white p-3 ${product.canRedeem ? 'border-[#E8DDD0]' : 'border-terra-200 opacity-60'}`}>
                             {imgSrc ? (
                               <img src={imgSrc} alt={product.name} className="h-16 w-16 shrink-0 rounded-lg object-cover" />
                             ) : (
@@ -161,12 +161,12 @@ export function LoyaltyClient() {
                   {transactions.length === 0 ? (
                     <EmptyState icon={History} title="Nenhuma movimentação ainda" />
                   ) : (
-                    <div className="overflow-hidden rounded-xl border border-[#EAD8A0] bg-white">
+                    <div className="overflow-hidden rounded-xl border border-[#E8DDD0] bg-white">
                       {transactions.map((tx) => {
                         const meta = TYPE_META[tx.type];
                         const Icon = meta.icon;
                         return (
-                          <div key={tx.id} className="flex items-center gap-3 border-b border-[#EAD8A0] p-4 last:border-b-0">
+                          <div key={tx.id} className="flex items-center gap-3 border-b border-[#E8DDD0] p-4 last:border-b-0">
                             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${meta.className}`}>
                               <Icon className="h-4 w-4" />
                             </div>
@@ -199,7 +199,7 @@ export function LoyaltyClient() {
 
 function EmptyState({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
   return (
-    <div className="rounded-xl border border-[#EAD8A0] bg-white p-6 text-center">
+    <div className="rounded-xl border border-[#E8DDD0] bg-white p-6 text-center">
       <Icon className="mx-auto h-8 w-8 text-terra-300" />
       <p className="mt-2 text-sm font-medium text-terra-800/60">{title}</p>
     </div>
