@@ -82,7 +82,7 @@ export function PixPayment({ pixData, orderId }: PixPaymentProps) {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', damping: 20 }}
-        className="rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] p-6"
+        className="rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] p-6"
       >
         <div className="flex flex-col items-center">
           <div className="relative">
@@ -98,13 +98,13 @@ export function PixPayment({ pixData, orderId }: PixPaymentProps) {
                 className="h-52 w-52 rounded-lg"
               />
             ) : (
-              <div className="flex h-52 w-52 items-center justify-center rounded-lg bg-[#FDF7E3]">
-                <QrCode className="h-20 w-20 text-[#EAD8A0]" />
+              <div className="flex h-52 w-52 items-center justify-center rounded-lg bg-[#FAF6F1]">
+                <QrCode className="h-20 w-20 text-[#E8DDD0]" />
               </div>
             )}
           </div>
 
-          <div className="mt-6 flex items-center gap-2 text-sm text-[#8A6F40]">
+          <div className="mt-6 flex items-center gap-2 text-sm text-[#8B7355]">
             <Smartphone className="h-4 w-4" />
             <span>Escaneie com o app do seu banco</span>
           </div>
@@ -116,14 +116,14 @@ export function PixPayment({ pixData, orderId }: PixPaymentProps) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08, type: 'spring', damping: 20 }}
-          className="rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] p-5"
+          className="rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] p-5"
         >
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
             Ou copie o código Pix
           </p>
           <div className="flex gap-2">
-            <div className="min-w-0 flex-1 rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] px-4 py-3">
-              <p className="truncate text-xs font-medium text-[#2A1508]">{pixData.qrCode}</p>
+            <div className="min-w-0 flex-1 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-4 py-3">
+              <p className="truncate text-xs font-medium text-[#3D2B1F]">{pixData.qrCode}</p>
             </div>
             <button
               type="button"
@@ -162,10 +162,10 @@ export function PixPayment({ pixData, orderId }: PixPaymentProps) {
               <Timer className="h-5 w-5 text-red-500" />
             </div>
             <p className="text-sm font-semibold text-red-600">Código Pix expirado</p>
-            <p className="text-xs text-[#8A6F40]">Volte e gere um novo código</p>
+            <p className="text-xs text-[#8B7355]">Volte e gere um novo código</p>
           </>
         ) : (
-          <div className="w-full rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] px-5 py-5">
+          <div className="w-full rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] px-5 py-5">
             <div className="flex flex-col items-center gap-3">
               <div className="relative">
                 <div className="absolute inset-0 animate-ping rounded-full bg-terra-600/20" />
@@ -173,14 +173,14 @@ export function PixPayment({ pixData, orderId }: PixPaymentProps) {
                   <Loader2 className="h-5 w-5 animate-spin text-terra-600" />
                 </div>
               </div>
-              <p className="text-sm font-semibold text-[#2A1508]">Aguardando pagamento...</p>
-              <p className={`flex items-center gap-1.5 text-sm font-bold tabular-nums ${isUrgent ? 'text-red-500' : 'text-[#8A6F40]'}`}>
+              <p className="text-sm font-semibold text-[#3D2B1F]">Aguardando pagamento...</p>
+              <p className={`flex items-center gap-1.5 text-sm font-bold tabular-nums ${isUrgent ? 'text-red-500' : 'text-[#8B7355]'}`}>
                 <Timer className="h-3.5 w-3.5" />
                 Expira em {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
               </p>
-              <div className="flex items-center gap-3 text-[11px] font-normal text-[#9A8654]">
+              <div className="flex items-center gap-3 text-[11px] font-normal text-[#8B7355]">
                 <span className="flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Pagamento seguro</span>
-                <span className="h-1 w-1 rounded-full bg-[#EAD8A0]" />
+                <span className="h-1 w-1 rounded-full bg-[#E8DDD0]" />
                 <span>Confirmação automática</span>
               </div>
             </div>

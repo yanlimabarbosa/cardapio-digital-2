@@ -1,7 +1,7 @@
 export default function CheckoutLoading() {
   return (
-    <main className="min-h-dvh bg-terra-50 pb-32">
-      <header className="bg-terra-600 px-4 py-4">
+    <main className="order-flow-brown min-h-dvh bg-terra-50 pb-32">
+      <header className="bg-cocoa-noise px-4 py-4">
         <div className="container flex items-center gap-4">
           <div className="h-10 w-10 animate-pulse rounded bg-terra-500" />
           <div className="h-6 w-28 animate-pulse rounded bg-terra-500" />
