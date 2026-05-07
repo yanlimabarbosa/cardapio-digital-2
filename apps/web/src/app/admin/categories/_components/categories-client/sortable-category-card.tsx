@@ -40,9 +40,9 @@ export function SortableCategoryCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] shadow-[0_0_8px_rgba(60,40,20,0.12)] overflow-hidden',
+        'rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] shadow-[0_0_8px_rgba(61,43,31,0.12)] overflow-hidden',
         'flex transition-shadow',
-        isDragging && 'shadow-xl opacity-95 ring-2 ring-[#6B3E14]/30',
+        isDragging && 'shadow-xl opacity-95 ring-2 ring-[#A0603A]/30',
       )}
     >
       {/* Active indicator bar */}
@@ -54,16 +54,16 @@ export function SortableCategoryCard({
       <div className="flex flex-1 items-center justify-between p-4">
         <div className="flex items-center gap-3">
           <button
-            className="cursor-grab touch-none rounded p-1 text-[#B89D5F] transition-colors hover:text-[#8A6F40] active:cursor-grabbing"
+            className="cursor-grab touch-none rounded p-1 text-[#C4B5A0] transition-colors hover:text-[#8B7355] active:cursor-grabbing"
             {...attributes}
             {...listeners}
           >
             <GripVertical className="h-4 w-4" />
           </button>
           <div>
-            <h3 className="font-semibold text-[#2A1508]">{cat.name}</h3>
+            <h3 className="font-semibold text-[#3D2B1F]">{cat.name}</h3>
             <div className="mt-1 flex items-center gap-2">
-              <span className="rounded-full bg-[#FDF7E3] px-2.5 py-0.5 text-xs font-semibold text-[#8A6F40]">
+              <span className="rounded-full bg-[#FAF6F1] px-2.5 py-0.5 text-xs font-semibold text-[#8B7355]">
                 {cat.productCount} produtos
               </span>
               {!cat.isActive && (
@@ -78,13 +78,13 @@ export function SortableCategoryCard({
           <button
             onClick={onReorderProducts}
             title="Reordenar produtos"
-            className="rounded-lg border border-[#EAD8A0] p-2 text-[#8A6F40] transition-colors hover:bg-[#FDF7E3] hover:text-[#6B3E14]"
+            className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
           >
             <ArrowUpDown className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={onEdit}
-            className="rounded-lg border border-[#EAD8A0] p-2 text-[#8A6F40] transition-colors hover:bg-[#FDF7E3] hover:text-[#6B3E14]"
+            className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
@@ -94,7 +94,7 @@ export function SortableCategoryCard({
             className={cn(
               'rounded-lg border p-2 transition-colors',
               cat.isActive
-                ? 'border-[#EAD8A0] text-[#8A6F40] hover:bg-red-50 hover:text-red-600'
+                ? 'border-[#E8DDD0] text-[#8B7355] hover:bg-red-50 hover:text-red-600'
                 : 'border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100',
             )}
           >

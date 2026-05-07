@@ -82,15 +82,15 @@ export function ProductReorderDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent open={open} className="border-[#EAD8A0] bg-[#FBF6E9]">
-        <DialogHeader className="border-b border-[#EAD8A0] pb-4 px-6 pt-6">
-          <DialogTitle className="font-display text-lg font-semibold text-[#2A1508]">
+      <DialogContent open={open} className="border-[#E8DDD0] bg-[#FFFCF8]">
+        <DialogHeader className="border-b border-[#E8DDD0] pb-4 px-6 pt-6">
+          <DialogTitle className="font-display text-lg font-semibold text-[#3D2B1F]">
             Ordenar Produtos — {categoryName}
           </DialogTitle>
         </DialogHeader>
         <div className="px-6 py-4 overflow-y-auto overflow-x-hidden max-h-[60vh]">
           {products.length === 0 ? (
-            <p className="text-center text-sm text-[#8A6F40] py-8">Nenhum produto nesta categoria.</p>
+            <p className="text-center text-sm text-[#8B7355] py-8">Nenhum produto nesta categoria.</p>
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis, restrictToParentElement]}>
               <SortableContext items={products.map((p) => p.id)} strategy={verticalListSortingStrategy}>
@@ -103,17 +103,17 @@ export function ProductReorderDialog({
             </DndContext>
           )}
         </div>
-        <DialogFooter className="border-t border-[#EAD8A0] px-6 py-4">
+        <DialogFooter className="border-t border-[#E8DDD0] px-6 py-4">
           <button
             onClick={onClose}
-            className="rounded-xl border border-[#EAD8A0] px-4 py-2.5 text-sm font-semibold text-[#8A6F40] transition-colors hover:bg-[#FDF7E3]"
+            className="rounded-xl border border-[#E8DDD0] px-4 py-2.5 text-sm font-semibold text-[#8B7355] transition-colors hover:bg-[#FAF6F1]"
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={isPending || products.length === 0}
-            className="rounded-xl bg-[#6B3E14] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#5C2F10] disabled:opacity-60"
+            className="rounded-xl bg-[#A0603A] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#8b4c2a] disabled:opacity-60"
           >
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salvar Ordem'}
           </button>
