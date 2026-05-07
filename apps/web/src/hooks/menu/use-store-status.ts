@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
+import type { WeeklySchedule } from '@cardapio/shared';
 
 interface StoreStatus {
   open: boolean;
@@ -9,6 +10,9 @@ interface StoreStatus {
   opensAt?: string;
   closesAt?: string;
   openDays?: number[];
+  weeklySchedule?: WeeklySchedule;
+  nextOpenAt?: string;
+  nextOpenLabel?: string;
   bannerUrl?: string;
 }
 
