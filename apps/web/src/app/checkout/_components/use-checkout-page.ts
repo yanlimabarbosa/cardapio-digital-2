@@ -10,11 +10,11 @@ import { useStoreStatus } from '@/hooks/menu/use-store-status';
 import { useRedeemableProducts } from '@/hooks/customer/use-redeemable-products';
 import { isValidCpf, isValidEmail, normalizeEmail } from '@/lib/utils';
 import { getPagBankPaymentErrorMessage } from '@/lib/payment-provider';
-import type { PaymentMethod, PixPaymentResponse, RedeemableProduct } from '@cardapio/shared';
+import { formatScheduledFor, type PaymentMethod, type PixPaymentResponse } from '@cardapio/shared';
 
 export function useCheckoutPage() {
   const router = useRouter();
-  const { items, customerName, customerPhone, notes, deliveryType, deliveryAddress, deliveryAreaId, deliveryFee, couponCode, couponDiscount, clearCart } = useCartStore();
+  const { items, customerName, customerPhone, notes, deliveryType, deliveryAddress, deliveryAreaId, deliveryFee, couponCode, couponDiscount, scheduledFor, clearCart } = useCartStore();
   const customerStore = useCustomerStore();
   const createOrder = useCreateOrder();
   const pixPayment = usePixPayment();
@@ -91,6 +91,7 @@ export function useCheckoutPage() {
         deliveryAreaId: deliveryType === 'delivery' ? deliveryAreaId ?? undefined : undefined,
         notes: notes || undefined,
         couponCode: couponCode || undefined,
+        scheduledFor: scheduledFor || undefined,
         items: items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -186,6 +187,8 @@ export function useCheckoutPage() {
     deliveryFee: effectiveFee,
     deliveryType,
     deliveryAddress,
+    scheduledFor,
+    scheduledForLabel: formatScheduledFor(scheduledFor),
     customerPhoneForPayment: effectivePhone,
     couponCode,
     couponDiscount: effectiveDiscount,
@@ -198,7 +201,7 @@ export function useCheckoutPage() {
     handleCardSuccess,
     createOrderPending: createOrder.isPending,
     pixPaymentPending: pixPayment.isPending,
-    storeClosed: storeStatus?.open === false,
+    storeClosed: !scheduledFor && storeStatus?.open === false,
     // Loyalty
     redeemableProducts,
     redeemedItems,

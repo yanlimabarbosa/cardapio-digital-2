@@ -26,6 +26,7 @@ export function CheckoutClient() {
     deliveryFee,
     deliveryType,
     deliveryAddress,
+    scheduledForLabel,
     customerPhoneForPayment,
     couponCode,
     couponDiscount,
@@ -45,11 +46,11 @@ export function CheckoutClient() {
     loyaltyBalance,
   } = useCheckoutPage();
   const payerInputClass =
-    'h-12 w-full rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] px-4 text-sm font-medium text-[#2A1508] placeholder-[#B89D5F] outline-none transition-all focus:border-[#6B3E14] focus:ring-2 focus:ring-[#6B3E14]/20';
+    'h-12 w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-4 text-sm font-medium text-[#3D2B1F] placeholder-[#C4B5A0] outline-none transition-all focus:border-[#4A2810] focus:ring-2 focus:ring-[#4A2810]/20';
 
   if (step === 'processing') {
     return (
-      <main className="flex min-h-dvh flex-col items-center justify-center bg-terra-50 px-4">
+      <main className="order-flow-brown flex min-h-dvh flex-col items-center justify-center bg-terra-50 px-4">
         <motion.div
           className="text-center"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -68,8 +69,8 @@ export function CheckoutClient() {
 
   if (step === 'paying' && pixData && orderId) {
     return (
-      <main className="min-h-dvh bg-terra-50">
-        <header className="relative overflow-hidden bg-terra-600 px-4 py-4 text-white">
+      <main className="order-flow-brown min-h-dvh bg-terra-50">
+        <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
           <div className="absolute inset-0 tapioca-grain opacity-40" />
           <div className="container relative flex items-center gap-3">
             <Link href="/"><img src="/logo.png" alt="Bem Comer Self-Service" className="h-10 w-10 rounded-full object-cover" /></Link>
@@ -90,8 +91,8 @@ export function CheckoutClient() {
     const isDebit = paymentMethod === 'debit_card';
 
     return (
-      <main className="min-h-dvh bg-terra-50">
-        <header className="relative overflow-hidden bg-terra-600 px-4 py-4 text-white">
+      <main className="order-flow-brown min-h-dvh bg-terra-50">
+        <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
           <div className="absolute inset-0 tapioca-grain opacity-40" />
           <div className="container relative flex items-center gap-3">
             <Link href="/"><img src="/logo.png" alt="Bem Comer Self-Service" className="h-10 w-10 rounded-full object-cover" /></Link>
@@ -122,7 +123,7 @@ export function CheckoutClient() {
               initialCpf={payerCpf}
             />
           )}
-          <div className="mt-6 space-y-3 rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] p-4">
+          <div className="mt-6 space-y-3 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4">
             <p className="text-center text-sm text-terra-500">Problemas com o cartão?</p>
             <button
               type="button"
@@ -146,12 +147,12 @@ export function CheckoutClient() {
   }
 
   return (
-    <main className="min-h-dvh bg-terra-50 pb-36">
-      <header className="relative overflow-hidden bg-terra-600 px-4 py-4 text-white">
+    <main className="order-flow-brown min-h-dvh bg-terra-50 pb-36">
+      <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
         <div className="absolute inset-0 tapioca-grain opacity-40" />
         <div className="container relative flex items-center gap-3">
           <Link href="/cart">
-            <button className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-terra-500">
+            <button className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10">
               <ArrowLeft className="h-5 w-5" />
             </button>
           </Link>
@@ -164,9 +165,15 @@ export function CheckoutClient() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] p-4"
+          className="rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4"
         >
           <h2 className="mb-3 text-sm font-semibold text-terra-700">Resumo do pedido</h2>
+          {scheduledForLabel && (
+            <div className="mb-3 flex items-center gap-2 rounded-lg bg-butter-100 px-3 py-2 text-sm font-semibold text-cocoa-800">
+              <Clock className="h-4 w-4" />
+              Agendado para {scheduledForLabel}
+            </div>
+          )}
           <div className="space-y-2.5">
             {items.map((item) => {
               let optPrice = 0;
@@ -239,7 +246,7 @@ export function CheckoutClient() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.04 }}
-            className="rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] p-4"
+            className="rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4"
           >
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-terra-700">Resgatar com pontos</h2>
@@ -261,8 +268,8 @@ export function CheckoutClient() {
                       isSelected
                         ? 'border-terra-600 bg-terra-50'
                         : product.canRedeem
-                          ? 'border-[#EAD8A0] hover:border-terra-300'
-                          : 'border-[#EAD8A0] opacity-50 cursor-not-allowed'
+                          ? 'border-[#E8DDD0] hover:border-terra-300'
+                          : 'border-[#E8DDD0] opacity-50 cursor-not-allowed'
                     }`}
                   >
                     {product.imageUrl ? (
@@ -345,12 +352,12 @@ export function CheckoutClient() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.055 }}
-          className="rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] p-4"
+          className="rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4"
         >
           <h2 className="mb-3 text-sm font-semibold text-terra-700">Dados do pagador</h2>
           <div className="space-y-3">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">
                 E-mail
               </label>
               <input
@@ -363,7 +370,7 @@ export function CheckoutClient() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">
                 CPF
               </label>
               <input
@@ -380,7 +387,7 @@ export function CheckoutClient() {
           </div>
         </motion.div>
 
-        <div className="rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] px-4 py-6">
+        <div className="rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-4 py-6">
           <AnimatePresence mode="wait">
             {paymentMethod === 'pix' ? (
               <motion.div
@@ -398,8 +405,8 @@ export function CheckoutClient() {
                   </div>
                 </div>
                 <div>
-                  <p className="font-display text-lg font-semibold text-[#2A1508]">Pagamento instantâneo</p>
-                  <p className="mx-auto mt-1 max-w-[240px] text-xs font-normal text-[#9A8654]">
+                  <p className="font-display text-lg font-semibold text-[#3D2B1F]">Pagamento instantâneo</p>
+                  <p className="mx-auto mt-1 max-w-[240px] text-xs font-normal text-[#8B7355]">
                     Escaneie o QR Code e seu pedido será confirmado na hora
                   </p>
                 </div>
@@ -424,8 +431,8 @@ export function CheckoutClient() {
                   </div>
                 </div>
                 <div>
-                  <p className="font-display text-lg font-semibold text-[#2A1508]">Cartão de crédito</p>
-                  <p className="mx-auto mt-1 max-w-[240px] text-xs font-normal text-[#9A8654]">
+                  <p className="font-display text-lg font-semibold text-[#3D2B1F]">Cartão de crédito</p>
+                  <p className="mx-auto mt-1 max-w-[240px] text-xs font-normal text-[#8B7355]">
                     Parcele em até 6x sem juros no cartão
                   </p>
                 </div>
@@ -449,8 +456,8 @@ export function CheckoutClient() {
                   </div>
                 </div>
                 <div>
-                  <p className="font-display text-lg font-semibold text-[#2A1508]">Cartão de débito</p>
-                  <p className="mx-auto mt-1 max-w-[240px] text-xs font-normal text-[#9A8654]">
+                  <p className="font-display text-lg font-semibold text-[#3D2B1F]">Cartão de débito</p>
+                  <p className="mx-auto mt-1 max-w-[240px] text-xs font-normal text-[#8B7355]">
                     Autenticação 3DS com validação do banco emissor
                   </p>
                 </div>
