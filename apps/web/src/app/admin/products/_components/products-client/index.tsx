@@ -93,12 +93,12 @@ export function ProductsClient() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-[#2A1508]">Produtos</h1>
+        <h1 className="font-display text-2xl font-semibold text-[#3D2B1F]">Produtos</h1>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           onClick={openCreate}
-          className="flex items-center gap-2 rounded-xl bg-[#6B3E14] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#5C2F10]"
+          className="flex items-center gap-2 rounded-xl bg-[#A0603A] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#8b4c2a]"
         >
           <Plus className="h-4 w-4" />
           Novo Produto
@@ -107,12 +107,12 @@ export function ProductsClient() {
 
       <div className="mb-4 space-y-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8A6F40]" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8B7355]" />
           <Input
             placeholder="Buscar produto..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-11 rounded-xl border-[#EAD8A0] bg-[#FBF6E9] pl-10"
+            className="h-11 rounded-xl border-[#E8DDD0] bg-[#FFFCF8] pl-10"
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -121,8 +121,8 @@ export function ProductsClient() {
             className={cn(
               'rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors',
               !categoryFilter
-                ? 'bg-[#6B3E14] text-white'
-                : 'bg-[#FBF6E9] text-[#8A6F40] border border-[#EAD8A0] hover:bg-[#FDF7E3]',
+                ? 'bg-[#A0603A] text-white'
+                : 'bg-[#FFFCF8] text-[#8B7355] border border-[#E8DDD0] hover:bg-[#FAF6F1]',
             )}
           >
             Todos
@@ -134,8 +134,8 @@ export function ProductsClient() {
               className={cn(
                 'rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors',
                 categoryFilter === cat.id
-                  ? 'bg-[#6B3E14] text-white'
-                  : 'bg-[#FBF6E9] text-[#8A6F40] border border-[#EAD8A0] hover:bg-[#FDF7E3]',
+                  ? 'bg-[#A0603A] text-white'
+                  : 'bg-[#FFFCF8] text-[#8B7355] border border-[#E8DDD0] hover:bg-[#FAF6F1]',
               )}
             >
               {cat.name}
@@ -146,7 +146,7 @@ export function ProductsClient() {
 
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-[#6B3E14]" />
+          <Loader2 className="h-6 w-6 animate-spin text-[#A0603A]" />
         </div>
       ) : (
         <motion.div
@@ -160,7 +160,7 @@ export function ProductsClient() {
               key={product.id}
               variants={itemVariants}
               className={cn(
-                'overflow-hidden rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] shadow-[0_0_8px_rgba(60,40,20,0.12)]',
+                'overflow-hidden rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] shadow-[0_0_8px_rgba(61,43,31,0.12)]',
                 'flex',
               )}
             >
@@ -176,17 +176,17 @@ export function ProductsClient() {
                       <img
                         src={getImageUrl(product.imageUrl) || ''}
                         alt={product.name}
-                        className="h-14 w-14 shrink-0 rounded-xl border border-[#EAD8A0] object-cover"
+                        className="h-14 w-14 shrink-0 rounded-xl border border-[#E8DDD0] object-cover"
                       />
                     ) : (
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-dashed border-[#EAD8A0] bg-[#FDF7E3]">
-                        <ImagePlus className="h-5 w-5 text-[#EAD8A0]" />
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-dashed border-[#E8DDD0] bg-[#FAF6F1]">
+                        <ImagePlus className="h-5 w-5 text-[#E8DDD0]" />
                       </div>
                     )}
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-[#2A1508] truncate">{product.name}</h3>
-                        <span className="shrink-0 rounded-full bg-[#FDF7E3] px-2 py-0.5 text-xs font-semibold text-[#8A6F40]">
+                        <h3 className="font-semibold text-[#3D2B1F] truncate">{product.name}</h3>
+                        <span className="shrink-0 rounded-full bg-[#FAF6F1] px-2 py-0.5 text-xs font-semibold text-[#8B7355]">
                           {product.categoryName}
                         </span>
                         {product.isCompound && (
@@ -200,7 +200,7 @@ export function ProductsClient() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-[#8A6F40]">
+                      <p className="text-sm text-[#8B7355]">
                         {formatCurrency(product.price)} · {product.isCompound ? `${product.optionGroups.length} grupos` : `${product.extras.length} extras`}
                       </p>
                     </div>
@@ -208,7 +208,7 @@ export function ProductsClient() {
                   <div className="flex shrink-0 gap-2 ml-2">
                     <button
                       onClick={() => toggleExpanded(product.id)}
-                      className="rounded-lg border border-[#EAD8A0] p-2 text-[#8A6F40] transition-all hover:bg-[#FDF7E3]"
+                      className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-all hover:bg-[#FAF6F1]"
                     >
                       <motion.div
                         animate={{ rotate: expandedProduct === product.id ? 180 : 0 }}
@@ -219,16 +219,16 @@ export function ProductsClient() {
                     </button>
                     <button
                       onClick={() => openEdit(product)}
-                      className="rounded-lg border border-[#EAD8A0] p-2 text-[#8A6F40] transition-colors hover:bg-[#FDF7E3] hover:text-[#6B3E14]"
+                      className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => toggleMutation.mutate(product.id)}
                       className={cn(
-                        'rounded-lg border border-[#EAD8A0] p-2 transition-colors',
+                        'rounded-lg border border-[#E8DDD0] p-2 transition-colors',
                         product.isActive
-                          ? 'text-[#8A6F40] hover:bg-red-50 hover:text-red-600'
+                          ? 'text-[#8B7355] hover:bg-red-50 hover:text-red-600'
                           : 'text-emerald-500 hover:bg-emerald-50',
                       )}
                     >
@@ -248,49 +248,49 @@ export function ProductsClient() {
                     >
                       {product.isCompound ? (
                         /* ─── Option Groups (compound product) ─── */
-                        <div className="mt-4 border-t border-[#EAD8A0] pt-4">
+                        <div className="mt-4 border-t border-[#E8DDD0] pt-4">
                           <div className="mb-3 flex items-center justify-between">
-                            <span className="text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">
+                            <span className="text-xs font-bold uppercase tracking-widest text-[#8B7355]">
                               Grupos de Opções
                             </span>
                             <button
                               onClick={() => openCreateOptionGroup(product.id)}
-                              className="flex items-center gap-1 rounded-lg border border-[#EAD8A0] px-3 py-1.5 text-xs font-semibold text-[#8A6F40] transition-colors hover:bg-[#FDF7E3]"
+                              className="flex items-center gap-1 rounded-lg border border-[#E8DDD0] px-3 py-1.5 text-xs font-semibold text-[#8B7355] transition-colors hover:bg-[#FAF6F1]"
                             >
                               <Plus className="h-3 w-3" />
                               Grupo
                             </button>
                           </div>
                           {product.optionGroups.length === 0 ? (
-                            <p className="text-sm text-[#8A6F40]">Nenhum grupo de opções criado</p>
+                            <p className="text-sm text-[#8B7355]">Nenhum grupo de opções criado</p>
                           ) : (
                             <div className="space-y-2">
                               {product.optionGroups.map((group) => (
-                                <div key={group.id} className={cn('rounded-xl border border-[#EAD8A0] bg-[#FDF7E3] overflow-hidden', !group.isActive && 'opacity-50')}>
+                                <div key={group.id} className={cn('rounded-xl border border-[#E8DDD0] bg-[#FAF6F1] overflow-hidden', !group.isActive && 'opacity-50')}>
                                   <div className="flex items-center justify-between px-3 py-2.5">
                                     <button
                                       onClick={() => toggleExpandedGroup(group.id)}
                                       className="flex flex-1 items-center gap-2 text-left"
                                     >
                                       <motion.div animate={{ rotate: expandedGroup === group.id ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                                        <ChevronDown className="h-3.5 w-3.5 text-[#8A6F40]" />
+                                        <ChevronDown className="h-3.5 w-3.5 text-[#8B7355]" />
                                       </motion.div>
-                                      <span className="text-sm font-semibold text-[#2A1508]">{group.name}</span>
-                                      <span className="rounded-full bg-[#FBF6E9] px-2 py-0.5 text-[10px] font-bold text-[#8A6F40]">
+                                      <span className="text-sm font-semibold text-[#3D2B1F]">{group.name}</span>
+                                      <span className="rounded-full bg-[#FFFCF8] px-2 py-0.5 text-[10px] font-bold text-[#8B7355]">
                                         {group.minSelections >= 1 ? 'Obrigatório' : 'Opcional'} · {group.maxSelections === 1 ? 'Única' : `Até ${group.maxSelections}`}
                                       </span>
-                                      <span className="text-xs text-[#8A6F40]">{group.options.length} opções</span>
+                                      <span className="text-xs text-[#8B7355]">{group.options.length} opções</span>
                                     </button>
                                     <div className="flex gap-1">
                                       <button
                                         onClick={() => openEditOptionGroup(group)}
-                                        className="rounded-md p-1.5 text-[#8A6F40] transition-colors hover:bg-[#FBF6E9]"
+                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-[#FFFCF8]"
                                       >
                                         <Pencil className="h-3 w-3" />
                                       </button>
                                       <button
                                         onClick={() => deleteOptionGroupMutation.mutate(group.id)}
-                                        className="rounded-md p-1.5 text-[#8A6F40] transition-colors hover:bg-red-50 hover:text-red-600"
+                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                       >
                                         <Power className="h-3 w-3" />
                                       </button>
@@ -305,19 +305,19 @@ export function ProductsClient() {
                                         transition={{ duration: 0.15 }}
                                         className="overflow-hidden"
                                       >
-                                        <div className="border-t border-[#EAD8A0] px-3 pb-3 pt-2">
+                                        <div className="border-t border-[#E8DDD0] px-3 pb-3 pt-2">
                                           <div className="mb-2 flex items-center justify-between">
-                                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#7A4F1C]">Opções</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">Opções</span>
                                             <button
                                               onClick={() => openCreateGroupOption(group.id)}
-                                              className="flex items-center gap-1 rounded-md border border-[#EAD8A0] px-2 py-1 text-[10px] font-semibold text-[#8A6F40] transition-colors hover:bg-[#FBF6E9]"
+                                              className="flex items-center gap-1 rounded-md border border-[#E8DDD0] px-2 py-1 text-[10px] font-semibold text-[#8B7355] transition-colors hover:bg-[#FFFCF8]"
                                             >
                                               <Plus className="h-2.5 w-2.5" />
                                               Opção
                                             </button>
                                           </div>
                                           {group.options.length === 0 ? (
-                                            <p className="text-xs text-[#8A6F40]">Nenhuma opção</p>
+                                            <p className="text-xs text-[#8B7355]">Nenhuma opção</p>
                                           ) : (
                                             <div className="space-y-1.5">
                                               {group.options.map((opt) => {
@@ -326,7 +326,7 @@ export function ProductsClient() {
                                                   <div
                                                     key={opt.id}
                                                     className={cn(
-                                                      'flex items-center justify-between rounded-lg border border-[#EAD8A0] bg-[#FBF6E9] px-2.5 py-1.5 text-xs',
+                                                      'flex items-center justify-between rounded-lg border border-[#E8DDD0] bg-[#FFFCF8] px-2.5 py-1.5 text-xs',
                                                       !opt.isActive && 'opacity-50',
                                                     )}
                                                   >
@@ -335,23 +335,23 @@ export function ProductsClient() {
                                                         <img
                                                           src={optImageSrc}
                                                           alt={opt.name}
-                                                          className="h-9 w-9 shrink-0 rounded-md border border-[#EAD8A0] object-cover"
+                                                          className="h-9 w-9 shrink-0 rounded-md border border-[#E8DDD0] object-cover"
                                                         />
                                                       )}
-                                                      <span className="truncate text-[#2A1508]">
+                                                      <span className="truncate text-[#3D2B1F]">
                                                         {opt.name} — {opt.price > 0 ? formatCurrency(opt.price) : 'Incluso'}
                                                       </span>
                                                     </div>
                                                     <div className="flex shrink-0 gap-1">
                                                       <button
                                                         onClick={() => openEditGroupOption(opt)}
-                                                        className="rounded p-1 text-[#8A6F40] transition-colors hover:bg-[#FDF7E3]"
+                                                        className="rounded p-1 text-[#8B7355] transition-colors hover:bg-[#FAF6F1]"
                                                       >
                                                         <Pencil className="h-2.5 w-2.5" />
                                                       </button>
                                                       <button
                                                         onClick={() => deleteGroupOptionMutation.mutate(opt.id)}
-                                                        className="rounded p-1 text-[#8A6F40] transition-colors hover:bg-red-50 hover:text-red-600"
+                                                        className="rounded p-1 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                                       >
                                                         <Power className="h-2.5 w-2.5" />
                                                       </button>
@@ -372,21 +372,21 @@ export function ProductsClient() {
                         </div>
                       ) : (
                         /* ─── Flat Extras (non-compound) ─── */
-                        <div className="mt-4 border-t border-[#EAD8A0] pt-4">
+                        <div className="mt-4 border-t border-[#E8DDD0] pt-4">
                           <div className="mb-3 flex items-center justify-between">
-                            <span className="text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">
+                            <span className="text-xs font-bold uppercase tracking-widest text-[#8B7355]">
                               Adicionais
                             </span>
                             <button
                               onClick={() => openCreateExtra(product.id)}
-                              className="flex items-center gap-1 rounded-lg border border-[#EAD8A0] px-3 py-1.5 text-xs font-semibold text-[#8A6F40] transition-colors hover:bg-[#FDF7E3]"
+                              className="flex items-center gap-1 rounded-lg border border-[#E8DDD0] px-3 py-1.5 text-xs font-semibold text-[#8B7355] transition-colors hover:bg-[#FAF6F1]"
                             >
                               <Plus className="h-3 w-3" />
                               Adicional
                             </button>
                           </div>
                           {product.extras.length === 0 ? (
-                            <p className="text-sm text-[#8A6F40]">Sem adicionais</p>
+                            <p className="text-sm text-[#8B7355]">Sem adicionais</p>
                           ) : (
                             <div className="space-y-2">
                               {product.extras.map((extra) => {
@@ -395,7 +395,7 @@ export function ProductsClient() {
                                   <div
                                     key={extra.id}
                                     className={cn(
-                                      'flex items-center justify-between rounded-xl border border-[#EAD8A0] bg-[#FDF7E3] px-3 py-2 text-sm',
+                                      'flex items-center justify-between rounded-xl border border-[#E8DDD0] bg-[#FAF6F1] px-3 py-2 text-sm',
                                       !extra.isActive && 'opacity-50',
                                     )}
                                   >
@@ -404,23 +404,23 @@ export function ProductsClient() {
                                         <img
                                           src={extraImageSrc}
                                           alt={extra.name}
-                                          className="h-10 w-10 shrink-0 rounded-lg border border-[#EAD8A0] object-cover"
+                                          className="h-10 w-10 shrink-0 rounded-lg border border-[#E8DDD0] object-cover"
                                         />
                                       )}
-                                      <span className="truncate text-[#2A1508]">
+                                      <span className="truncate text-[#3D2B1F]">
                                         {extra.name} — {formatCurrency(extra.price)}
                                       </span>
                                     </div>
                                     <div className="flex shrink-0 gap-1">
                                       <button
                                         onClick={() => openEditExtra(extra)}
-                                        className="rounded-md p-1.5 text-[#8A6F40] transition-colors hover:bg-[#FBF6E9]"
+                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-[#FFFCF8]"
                                       >
                                         <Pencil className="h-3 w-3" />
                                       </button>
                                       <button
                                         onClick={() => deleteExtraMutation.mutate(extra.id)}
-                                        className="rounded-md p-1.5 text-[#8A6F40] transition-colors hover:bg-red-50 hover:text-red-600"
+                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                       >
                                         <Power className="h-3 w-3" />
                                       </button>

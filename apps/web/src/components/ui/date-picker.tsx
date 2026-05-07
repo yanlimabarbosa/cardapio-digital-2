@@ -94,8 +94,8 @@ export function DatePicker({ value, onChange, placeholder = 'Selecionar data', c
         <button
           type="button"
           className={cn(
-            'flex h-10 w-full items-center justify-between rounded-lg border border-[#EAD8A0] bg-white px-3 text-sm outline-none transition-colors focus:border-[#D4B878] focus:ring-2 focus:ring-[#EAD8A0]/50',
-            !value && 'text-[#8A6F40]/50',
+            'flex h-10 w-full items-center justify-between rounded-lg border border-[#E8DDD0] bg-white px-3 text-sm outline-none transition-colors focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50',
+            !value && 'text-[#8B7355]/50',
             className,
           )}
         >
@@ -106,17 +106,17 @@ export function DatePicker({ value, onChange, placeholder = 'Selecionar data', c
                 onClick={clear}
                 className="rounded p-0.5 hover:bg-terra-100"
               >
-                <X className="h-3 w-3 text-[#8A6F40]" />
+                <X className="h-3 w-3 text-[#8B7355]" />
               </span>
             )}
-            <Calendar className="h-4 w-4 text-[#8A6F40]" />
+            <Calendar className="h-4 w-4 text-[#8B7355]" />
           </div>
         </button>
       </Popover.Trigger>
 
       <Popover.Portal>
         <Popover.Content
-          className="z-[100] w-[280px] rounded-xl border border-[#EAD8A0] bg-white p-3 shadow-xl animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2"
+          className="z-[100] w-[280px] rounded-xl border border-[#E8DDD0] bg-white p-3 shadow-xl animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2"
           sideOffset={4}
           align="start"
         >
@@ -125,17 +125,17 @@ export function DatePicker({ value, onChange, placeholder = 'Selecionar data', c
             <button
               type="button"
               onClick={prevMonth}
-              className="rounded-lg p-1.5 text-[#8A6F40] transition-colors hover:bg-terra-100"
+              className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-terra-100"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-sm font-semibold text-[#2A1508]">
+            <span className="text-sm font-semibold text-[#3D2B1F]">
               {MONTH_NAMES[viewMonth]} {viewYear}
             </span>
             <button
               type="button"
               onClick={nextMonth}
-              className="rounded-lg p-1.5 text-[#8A6F40] transition-colors hover:bg-terra-100"
+              className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-terra-100"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -144,7 +144,7 @@ export function DatePicker({ value, onChange, placeholder = 'Selecionar data', c
           {/* Day headers */}
           <div className="mb-1 grid grid-cols-7 gap-0">
             {DAY_HEADERS.map((d, i) => (
-              <div key={i} className="flex h-8 items-center justify-center text-[10px] font-bold uppercase text-[#8A6F40]/60">
+              <div key={i} className="flex h-8 items-center justify-center text-[10px] font-bold uppercase text-[#8B7355]/60">
                 {d}
               </div>
             ))}
@@ -164,7 +164,7 @@ export function DatePicker({ value, onChange, placeholder = 'Selecionar data', c
                         ? 'bg-terra-600 font-bold text-white'
                         : isToday(day)
                           ? 'bg-terra-100 font-semibold text-terra-700'
-                          : 'text-[#2A1508] hover:bg-terra-50',
+                          : 'text-[#3D2B1F] hover:bg-terra-50',
                     )}
                   >
                     {day}
@@ -177,11 +177,11 @@ export function DatePicker({ value, onChange, placeholder = 'Selecionar data', c
           </div>
 
           {/* Footer */}
-          <div className="mt-2 flex justify-between border-t border-[#EAD8A0] pt-2">
+          <div className="mt-2 flex justify-between border-t border-[#E8DDD0] pt-2">
             <button
               type="button"
               onClick={() => { onChange(''); setOpen(false); }}
-              className="text-xs font-medium text-[#8A6F40] hover:text-terra-600"
+              className="text-xs font-medium text-[#8B7355] hover:text-terra-600"
             >
               Limpar
             </button>

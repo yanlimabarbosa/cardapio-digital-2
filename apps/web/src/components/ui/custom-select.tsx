@@ -28,19 +28,19 @@ export function CustomSelect({ value, onChange, options, placeholder = 'Selecion
         <button
           type="button"
           className={cn(
-            'flex h-10 w-full items-center justify-between rounded-lg border border-[#EAD8A0] bg-white px-3 text-sm outline-none transition-colors focus:border-[#D4B878] focus:ring-2 focus:ring-[#EAD8A0]/50',
-            !selected && 'text-[#8A6F40]/50',
+            'flex h-10 w-full items-center justify-between rounded-lg border border-[#E8DDD0] bg-white px-3 text-sm outline-none transition-colors focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50',
+            !selected && 'text-[#8B7355]/50',
             className,
           )}
         >
-          <span className={selected ? 'text-[#2A1508]' : ''}>{selected?.label || placeholder}</span>
-          <ChevronDown className={cn('h-4 w-4 text-[#8A6F40] transition-transform', open && 'rotate-180')} />
+          <span className={selected ? 'text-[#3D2B1F]' : ''}>{selected?.label || placeholder}</span>
+          <ChevronDown className={cn('h-4 w-4 text-[#8B7355] transition-transform', open && 'rotate-180')} />
         </button>
       </Popover.Trigger>
 
       <Popover.Portal>
         <Popover.Content
-          className="z-[100] max-h-[240px] min-w-[var(--radix-popover-trigger-width)] overflow-y-auto rounded-xl border border-[#EAD8A0] bg-white py-1 shadow-xl animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2"
+          className="z-[100] max-h-[240px] min-w-[var(--radix-popover-trigger-width)] overflow-y-auto rounded-xl border border-[#E8DDD0] bg-white py-1 shadow-xl animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2"
           sideOffset={4}
           align="start"
         >
@@ -54,7 +54,7 @@ export function CustomSelect({ value, onChange, options, placeholder = 'Selecion
               }}
               className={cn(
                 'flex w-full items-center justify-between px-3 py-2 text-sm transition-colors hover:bg-terra-50',
-                opt.value === value ? 'font-semibold text-terra-600' : 'text-[#2A1508]',
+                opt.value === value ? 'font-semibold text-terra-600' : 'text-[#3D2B1F]',
               )}
             >
               {opt.label}
