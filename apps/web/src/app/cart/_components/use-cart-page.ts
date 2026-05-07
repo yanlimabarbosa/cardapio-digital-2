@@ -9,9 +9,10 @@ import { useCartStore, getTotalAmount } from '@/stores/cart-store';
 import { useCustomerStore } from '@/stores/customer-store';
 import { useCartHydration } from '@/hooks/menu/use-cart-hydration';
 import { useDeliveryAreas } from '@/hooks/menu/use-delivery-areas';
+import { useStoreStatus } from '@/hooks/menu/use-store-status';
 import { useValidateCoupon } from '@/hooks/customer/use-validate-coupon';
 import { maskPhone, maskCep } from '@/lib/utils';
-import { normalizeNeighborhood } from '@cardapio/shared';
+import { buildScheduleOptions, formatScheduledFor, normalizeNeighborhood } from '@cardapio/shared';
 import type { DeliveryAreaResponse } from '@cardapio/shared';
 
 const baseSchema = z.object({
@@ -66,13 +67,16 @@ export function useCartPage() {
     setDeliveryArea,
     couponCode,
     couponDiscount,
+    scheduledFor,
     setCoupon,
     clearCoupon,
+    setScheduledFor,
   } = useCartStore();
   const customerStore = useCustomerStore();
 
   const { isHydrating } = useCartHydration();
   const { data: deliveryAreas } = useDeliveryAreas();
+  const { data: storeStatus } = useStoreStatus();
   const validateCoupon = useValidateCoupon();
   const [loadingCep, setLoadingCep] = useState(false);
   const [couponInput, setCouponInput] = useState(couponCode ?? '');
@@ -86,6 +90,9 @@ export function useCartPage() {
   const effectiveDiscount = couponCode ? couponDiscount : 0;
   const totalAmount = Math.max(0, subtotal + effectiveFee - effectiveDiscount);
   const needsAddress = deliveryType === 'delivery';
+  const scheduleOptions = buildScheduleOptions(storeStatus?.weeklySchedule, new Date(), { intervalMinutes: 60, maxDays: 7, limit: 80 });
+  const scheduledForLabel = formatScheduledFor(scheduledFor);
+  const canOrderNow = storeStatus?.open !== false;
 
   const form = useForm<CartFormData>({
     resolver: zodResolver(baseSchema),
@@ -347,7 +354,7 @@ export function useCartPage() {
     setCouponError(null);
   }
 
-  const canSubmit = deliveryType === 'pickup' || (deliveryAreaId != null && !deliveryAreaError);
+  const canSubmit = (deliveryType === 'pickup' || (deliveryAreaId != null && !deliveryAreaError)) && (canOrderNow || !!scheduledFor);
 
   function onSubmit() {
     if (!canSubmit) return;
@@ -396,5 +403,10 @@ export function useCartPage() {
     handleApplyCoupon,
     handleRemoveCoupon,
     couponValidating: validateCoupon.isPending,
+    scheduledFor,
+    scheduledForLabel,
+    scheduleOptions,
+    setScheduledFor,
+    canOrderNow,
   };
 }

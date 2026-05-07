@@ -11,7 +11,7 @@ interface FieldProps {
 export function Field({ label, icon, error, required, children }: FieldProps) {
   return (
     <div>
-      <label className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-[#8A6F40]">
+      <label className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-[#8B7355]">
         {icon}
         {label}
         {required && <span className="text-red-400">*</span>}

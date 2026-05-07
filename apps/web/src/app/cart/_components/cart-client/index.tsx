@@ -2,18 +2,19 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Minus, Plus, Trash2, MapPin, Store, Loader2, ShoppingBag, User, Phone, MessageSquare, Check, AlertTriangle, ChevronDown, Tag, X } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, Trash2, MapPin, Store, Loader2, ShoppingBag, User, Phone, MessageSquare, Check, AlertTriangle, ChevronDown, Tag, X, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { getImageUrl } from '@/lib/admin-api';
 import { useCartPage } from '../use-cart-page';
 import { Field } from './field';
 import { useState, useMemo } from 'react';
 import type { DeliveryAreaResponse } from '@cardapio/shared';
+import { SchedulePicker } from '@/components/schedule/schedule-picker';
 
-const inputBase = 'h-11 w-full rounded-xl border bg-white px-4 text-base font-medium text-[#2A1508] outline-none transition-colors placeholder:text-[#B89D5F] focus:ring-2';
-const inputOk = `${inputBase} border-[#EAD8A0] focus:border-[#D4B878] focus:ring-[#EAD8A0]/50`;
+const inputBase = 'h-11 w-full rounded-xl border bg-white px-4 text-base font-medium text-[#3D2B1F] outline-none transition-colors placeholder:text-[#C4B5A0] focus:ring-2';
+const inputOk = `${inputBase} border-[#E8DDD0] focus:border-[#D4C8BA] focus:ring-[#E8DDD0]/50`;
 const inputErr = `${inputBase} border-red-300 focus:border-red-400 focus:ring-red-100`;
-const inputReadOnly = `${inputBase} border-[#EAD8A0] bg-[#F5EBC9] text-[#8A6F40] cursor-not-allowed`;
+const inputReadOnly = `${inputBase} border-[#E8DDD0] bg-[#f9e8d8] text-[#8B7355] cursor-not-allowed`;
 
 function NeighborhoodSelect({ areas, onSelect }: { areas: DeliveryAreaResponse[]; onSelect: (area: DeliveryAreaResponse) => void }) {
   const [search, setSearch] = useState('');
@@ -48,30 +49,30 @@ function NeighborhoodSelect({ areas, onSelect }: { areas: DeliveryAreaResponse[]
         onClick={() => setOpen(!open)}
         className={`${inputOk} flex items-center justify-between`}
       >
-        <span className="text-[#B89D5F]">Selecione seu bairro</span>
-        <ChevronDown className={`h-4 w-4 text-[#B89D5F] transition-transform ${open ? 'rotate-180' : ''}`} />
+        <span className="text-[#C4B5A0]">Selecione seu bairro</span>
+        <ChevronDown className={`h-4 w-4 text-[#C4B5A0] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-auto rounded-xl border border-[#EAD8A0] bg-white shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-auto rounded-xl border border-[#E8DDD0] bg-white shadow-lg">
           <div className="sticky top-0 bg-white p-2">
             <input
               type="text"
               placeholder="Buscar bairro..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-9 w-full rounded-lg border border-[#EAD8A0] px-3 text-sm text-[#2A1508] outline-none placeholder:text-[#B89D5F] focus:border-[#D4B878]"
+              className="h-9 w-full rounded-lg border border-[#E8DDD0] px-3 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA]"
               autoFocus
             />
           </div>
           {Object.entries(filtered).map(([city, cityAreas]) => (
             <div key={city}>
-              <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#7A4F1C]">{city}</div>
+              <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#8B7355]">{city}</div>
               {cityAreas.map((area) => (
                 <button
                   key={area.id}
                   type="button"
                   onClick={() => { onSelect(area); setOpen(false); setSearch(''); }}
-                  className="flex w-full items-center justify-between px-3 py-2 text-sm text-[#2A1508] transition-colors hover:bg-[#FDF7E3]"
+                  className="flex w-full items-center justify-between px-3 py-2 text-sm text-[#3D2B1F] transition-colors hover:bg-[#FAF6F1]"
                 >
                   <span>{area.neighborhood}</span>
                   <span className="text-xs font-semibold text-terra-600">{formatCurrency(area.fee)}</span>
@@ -80,7 +81,7 @@ function NeighborhoodSelect({ areas, onSelect }: { areas: DeliveryAreaResponse[]
             </div>
           ))}
           {Object.keys(filtered).length === 0 && (
-            <div className="px-3 py-4 text-center text-sm text-[#B89D5F]">Nenhum bairro encontrado</div>
+            <div className="px-3 py-4 text-center text-sm text-[#C4B5A0]">Nenhum bairro encontrado</div>
           )}
         </div>
       )}
@@ -128,11 +129,16 @@ export function CartClient() {
     handleApplyCoupon,
     handleRemoveCoupon,
     couponValidating,
+    scheduledFor,
+    scheduledForLabel,
+    scheduleOptions,
+    setScheduledFor,
+    canOrderNow,
   } = useCartPage();
 
   if (items.length === 0) {
     return (
-      <main className="flex min-h-dvh flex-col items-center justify-center bg-terra-50 px-4">
+      <main className="order-flow-brown flex min-h-dvh flex-col items-center justify-center bg-terra-50 px-4">
         <motion.div
           className="text-center"
           initial={{ opacity: 0, y: 20 }}
@@ -158,12 +164,12 @@ export function CartClient() {
   }
 
   return (
-    <main className="min-h-dvh bg-terra-50 pb-36">
-      <header className="relative overflow-hidden bg-terra-600 px-4 py-4 text-white">
+    <main className="order-flow-brown min-h-dvh bg-terra-50 pb-36">
+      <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
         <div className="absolute inset-0 tapioca-grain opacity-40" />
         <div className="container relative flex items-center gap-3">
           <Link href="/">
-            <button className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-terra-500">
+            <button className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10">
               <ArrowLeft className="h-5 w-5" />
             </button>
           </Link>
@@ -193,7 +199,7 @@ export function CartClient() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05, type: 'spring', damping: 20 }}
-                className="overflow-hidden rounded-xl border border-[#EAD8A0] bg-[#FBF6E9]"
+                className="overflow-hidden rounded-xl border border-[#E8DDD0] bg-[#FFFCF8]"
               >
                 <div className="flex gap-3 p-3">
                   {imgSrc ? (
@@ -246,7 +252,30 @@ export function CartClient() {
         </div>
 
         <div className="mt-6">
-          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">Como deseja receber?</h2>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#8B7355]">Horário do pedido</h2>
+          <div className="rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4">
+            <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#8B7355]">
+              <Clock className="h-3.5 w-3.5" />
+              Retirada ou entrega
+            </label>
+            <SchedulePicker
+              value={scheduledFor}
+              onChange={setScheduledFor}
+              options={scheduleOptions}
+              selectedLabel={scheduledForLabel}
+              allowNow={canOrderNow}
+            />
+            {scheduledForLabel && (
+              <p className="mt-2 text-sm font-semibold text-terra-700">Agendado para {scheduledForLabel}</p>
+            )}
+            {!canOrderNow && !scheduledForLabel && (
+              <p className="mt-2 text-sm font-semibold text-terra-700">Escolha um horário para continuar</p>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#8B7355]">Como deseja receber?</h2>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -255,7 +284,7 @@ export function CartClient() {
               className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 font-semibold transition-all ${
                 deliveryType === 'delivery'
                   ? 'border-terra-600 bg-terra-600 text-white shadow-lg shadow-terra-600/20'
-                  : 'border-[#EAD8A0] bg-[#FBF6E9] text-[#8A6F40] hover:border-[#D4B878]'
+                  : 'border-[#E8DDD0] bg-[#FFFCF8] text-[#8B7355] hover:border-[#D4C8BA]'
               }`}
             >
               <MapPin className="h-5 w-5" />
@@ -268,7 +297,7 @@ export function CartClient() {
               className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 font-semibold transition-all ${
                 deliveryType === 'pickup'
                   ? 'border-terra-600 bg-terra-600 text-white shadow-lg shadow-terra-600/20'
-                  : 'border-[#EAD8A0] bg-[#FBF6E9] text-[#8A6F40] hover:border-[#D4B878]'
+                  : 'border-[#E8DDD0] bg-[#FFFCF8] text-[#8B7355] hover:border-[#D4C8BA]'
               }`}
             >
               <Store className="h-5 w-5" />
@@ -283,8 +312,8 @@ export function CartClient() {
             animate={{ opacity: 1, height: 'auto' }}
             className="mt-6 overflow-hidden"
           >
-            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">Endereço de entrega</h2>
-            <div className="space-y-3 rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] p-4">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#8B7355]">Endereço de entrega</h2>
+            <div className="space-y-3 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4">
               <Field label="CEP" error={errors.cep?.message}>
                 <div className="flex gap-2">
                   <input
@@ -361,8 +390,8 @@ export function CartClient() {
         )}
 
         <div className="mt-6">
-          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">Seus dados</h2>
-          <div className="space-y-3 rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] p-4">
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#8B7355]">Seus dados</h2>
+          <div className="space-y-3 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4">
             <Field label="Nome" icon={<User className="h-3.5 w-3.5" />} error={errors.customerName?.message} required>
               <input
                 data-testid="customer-name"
@@ -386,15 +415,15 @@ export function CartClient() {
                 placeholder="Sem cebola, ponto da carne..."
                 value={watch('notes') || ''}
                 onChange={(e) => handleNotesChange(e.target.value)}
-                className="min-h-[80px] w-full resize-none rounded-xl border border-[#EAD8A0] bg-white px-4 py-2.5 text-base font-medium text-[#2A1508] outline-none transition-colors placeholder:text-[#B89D5F] focus:border-[#D4B878] focus:ring-2 focus:ring-[#EAD8A0]/50"
+                className="min-h-[80px] w-full resize-none rounded-xl border border-[#E8DDD0] bg-white px-4 py-2.5 text-base font-medium text-[#3D2B1F] outline-none transition-colors placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
               />
             </Field>
           </div>
         </div>
 
         <div className="mt-6">
-          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">Cupom de desconto</h2>
-          <div className="space-y-3 rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] p-4">
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#8B7355]">Cupom de desconto</h2>
+          <div className="space-y-3 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4">
             {couponCode ? (
               <div className="flex items-center justify-between rounded-lg bg-green-50 px-3 py-2.5">
                 <div className="flex items-center gap-2 text-sm font-medium text-green-700">
