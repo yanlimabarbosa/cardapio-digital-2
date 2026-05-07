@@ -39,8 +39,8 @@ export function DroppableColumn({
         headerBg,
       )}>
         <div className={cn('h-2.5 w-2.5 rounded-full shrink-0', dot)} />
-        <h2 className="font-display text-sm font-semibold text-[#2A1508]">{label}</h2>
-        <span className="rounded-full bg-white/70 px-1.5 py-0.5 text-[10px] font-bold text-[#8A6F40]">
+        <h2 className="font-display text-sm font-semibold text-[#3D2B1F]">{label}</h2>
+        <span className="rounded-full bg-white/70 px-1.5 py-0.5 text-[10px] font-bold text-[#8B7355]">
           {orders.length}
         </span>
       </div>
@@ -50,15 +50,15 @@ export function DroppableColumn({
         className={cn(
           'flex-1 space-y-2 rounded-xl border-2 border-dashed p-2 transition-colors',
           isOver && canAccept
-            ? 'border-[#6B3E14] bg-[#6B3E14]/5'
+            ? 'border-[#A0603A] bg-[#A0603A]/5'
             : isOver && !canAccept
               ? 'border-red-300 bg-red-50/50'
-              : 'border-transparent bg-[#FDF7E3]/50',
+              : 'border-transparent bg-[#FAF6F1]/50',
         )}
         style={{ minHeight: 120 }}
       >
         {orders.length === 0 ? (
-          <p className="py-6 text-center text-xs text-[#B89D5F]">Nenhum pedido</p>
+          <p className="py-6 text-center text-xs text-[#C4B5A0]">Nenhum pedido</p>
         ) : (
           orders.map((order) => (
             <DraggableCard

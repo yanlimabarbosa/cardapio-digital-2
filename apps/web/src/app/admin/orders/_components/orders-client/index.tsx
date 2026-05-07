@@ -96,11 +96,11 @@ export function OrdersClient() {
 
   return (
     <div>
-      <h1 className="mb-4 font-display text-2xl font-semibold text-[#2A1508]">Pedidos</h1>
+      <h1 className="mb-4 font-display text-2xl font-semibold text-[#3D2B1F]">Pedidos</h1>
 
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-[#6B3E14]" />
+          <Loader2 className="h-6 w-6 animate-spin text-[#A0603A]" />
         </div>
       ) : (
         <>
@@ -144,7 +144,7 @@ export function OrdersClient() {
             <div className="mt-6">
               <button
                 onClick={() => setShowCompleted(!showCompleted)}
-                className="flex items-center gap-2 text-sm font-semibold text-[#8A6F40] transition-colors hover:text-[#6B3E14]"
+                className="flex items-center gap-2 text-sm font-semibold text-[#8B7355] transition-colors hover:text-[#A0603A]"
               >
                 {showCompleted ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 Finalizados ({completedOrders.length})
@@ -163,10 +163,10 @@ export function OrdersClient() {
                       )}
                     >
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="text-sm font-semibold text-[#8A6F40]">
+                        <span className="text-sm font-semibold text-[#8B7355]">
                           #{order.orderNumber ?? '—'}
                         </span>
-                        <span className="text-sm text-[#2A1508]">{order.customerName}</span>
+                        <span className="text-sm text-[#3D2B1F]">{order.customerName}</span>
                         <span className={cn(
                           'rounded-full px-2 py-0.5 text-[10px] font-bold',
                           order.status === 'delivered'
@@ -176,7 +176,7 @@ export function OrdersClient() {
                           {STATUS_LABELS[order.status]}
                         </span>
                       </div>
-                      <span className="text-sm font-semibold text-[#8A6F40]">
+                      <span className="text-sm font-semibold text-[#8B7355]">
                         {formatCurrency(order.totalAmount)}
                       </span>
                     </div>
