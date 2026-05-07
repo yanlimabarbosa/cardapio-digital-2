@@ -5,24 +5,23 @@
 
 @layer base {
   :root {
-    /* Bem Comer Self-Service — Butter & Cocoa palette */
-    --background: 44 83% 94%;          /* #FDF7E3 warm cream */
-    --foreground: 24 78% 10%;          /* #2A1508 near-black cocoa */
-    --card: 0 0% 100%;                 /* pure white — max contrast vs cream bg */
-    --card-foreground: 24 78% 10%;
-    --primary: 45 92% 53%;             /* #F5C518 butter yellow */
-    --primary-foreground: 24 78% 10%;
-    --secondary: 44 61% 77%;           /* #EAD8A0 warm cream */
-    --secondary-foreground: 24 71% 18%;
-    --muted: 45 67% 87%;               /* #F5EBC9 */
-    --muted-foreground: 38 37% 39%;    /* #8A6F40 mustard-brown */
-    --accent: 26 67% 25%;              /* #6B3E14 cocoa */
-    --accent-foreground: 47 74% 95%;
+    --background: 28 33% 97%;
+    --foreground: 20 25% 12%;
+    --card: 30 25% 99%;
+    --card-foreground: 20 25% 12%;
+    --primary: 20 47% 43%;
+    --primary-foreground: 35 40% 96%;
+    --secondary: 28 30% 93%;
+    --secondary-foreground: 20 25% 15%;
+    --muted: 30 20% 94%;
+    --muted-foreground: 20 10% 45%;
+    --accent: 24 70% 50%;
+    --accent-foreground: 35 40% 96%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 44 61% 77%;
-    --input: 44 61% 77%;
-    --ring: 45 92% 53%;
+    --border: 28 18% 88%;
+    --input: 28 18% 88%;
+    --ring: 20 47% 43%;
     --radius: 0.625rem;
   }
 }
@@ -68,7 +67,7 @@
     scrollbar-width: none;
   }
   .text-shadow-warm {
-    text-shadow: 0 1px 0 rgba(42, 21, 8, 0.2), 0 2px 8px rgba(42, 21, 8, 0.15);
+    text-shadow: 0 1px 0 rgba(61, 43, 31, 0.2), 0 2px 8px rgba(61, 43, 31, 0.15);
   }
   .bg-cocoa-noise {
     background-color: #4A2810;
@@ -78,10 +77,10 @@
       linear-gradient(180deg, #5C3511 0%, #4A2810 58%, #3D1F0A 100%);
   }
   .bg-butter-noise {
-    background-color: #F5C518;
+    background-color: #d4742c;
     background-image:
-      radial-gradient(at 20% 20%, #FFE086 0px, transparent 50%),
-      radial-gradient(at 80% 70%, #E6B000 0px, transparent 55%);
+      radial-gradient(at 20% 20%, #e9b07f 0px, transparent 50%),
+      radial-gradient(at 80% 70%, #A0603A 0px, transparent 55%);
   }
 }
 
@@ -95,10 +94,10 @@
   }
   .btn-butter {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-butter-400 px-5 py-3 font-body font-semibold text-cocoa-800 shadow-butter transition-all;
-    background-image: linear-gradient(180deg, #FFD953 0%, #F5C518 52%, #E6B000 100%);
+    background-image: linear-gradient(180deg, #df8d4d 0%, #d4742c 52%, #A0603A 100%);
   }
   .btn-butter:hover {
-    @apply shadow-[0_8px_28px_-6px_rgba(245,197,24,0.7)];
+    @apply shadow-[0_8px_28px_-6px_rgba(160,96,58,0.55)];
     transform: translateY(-1px);
   }
   .btn-butter:active {
@@ -109,71 +108,145 @@
   }
   /* Fancy divider with butter dot */
   .rule-butter {
-    background-image: linear-gradient(to right, transparent, rgba(245, 197, 24, 0.5) 50%, transparent);
+    background-image: linear-gradient(to right, transparent, rgba(160, 96, 58, 0.45) 50%, transparent);
     height: 1px;
   }
 
   .admin-shell {
-    background: #fbf7ed;
-    color: #24180d;
+    --admin-white: #ffffff;
+    --admin-wash: #fbfaf8;
+    --admin-hover: #f5f0eb;
+    --admin-border: #e6ddd3;
+    --admin-border-strong: #d4c8ba;
+    --admin-brown: #4a2810;
+    --admin-brown-hover: #3d1f0a;
+    --admin-text: #3d2b1f;
+    --admin-muted: #8b7355;
+    background: var(--admin-white);
+    color: var(--admin-text);
   }
 
   .admin-shell .tapioca-grain,
   .admin-shell.tapioca-grain {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='adminNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23adminNoise)' opacity='0.025'/%3E%3C/svg%3E");
+    background-image: none !important;
   }
 
   .admin-shell main,
-  .admin-shell aside {
-    background-color: #fbf7ed !important;
-  }
-
-  .admin-shell [class*='bg-[#FDF7E3]'],
-  .admin-shell [class*='bg-[#FBF6E9]'],
-  .admin-shell [class*='bg-[#F0E3A8]'] {
-    background-color: #fffdf7 !important;
-  }
-
+  .admin-shell aside,
+  .admin-shell [class*='bg-[#FAF6F1]'],
+  .admin-shell [class*='bg-[#FFFCF8]'],
   .admin-shell [class*='bg-white'],
   .admin-shell [class*='bg-card'] {
-    background-color: #ffffff !important;
-  }
-
-  .admin-shell [class*='border-[#EAD8A0]'],
-  .admin-shell [class*='border-terra-200'] {
-    border-color: #d7bd7f !important;
-  }
-
-  .admin-shell [class*='text-[#2A1508]'] {
-    color: #24180d !important;
-  }
-
-  .admin-shell [class*='text-[#8A6F40]'],
-  .admin-shell [class*='text-[#B89D5F]'] {
-    color: #73582d !important;
-  }
-
-  .admin-shell input,
-  .admin-shell textarea,
-  .admin-shell select {
-    background-color: #ffffff !important;
-    border-color: #c7a862 !important;
-    color: #24180d !important;
+    background-color: var(--admin-white) !important;
   }
 
   .admin-shell table thead tr,
   .admin-shell [class*='bg-terra-50'],
   .admin-shell [class*='bg-terra-100'] {
-    background-color: #f7efd9 !important;
+    background-color: var(--admin-wash) !important;
   }
 
-  .admin-shell [class*='hover:bg-[#FDF7E3]']:hover,
-  .admin-shell [class*='hover:bg-terra-50']:hover {
-    background-color: #f4ead0 !important;
-  }
-
+  .admin-shell [class*='border-[#E8DDD0]'],
+  .admin-shell [class*='border-terra-200'],
   .admin-shell .border,
   .admin-shell [class*='border '] {
-    border-color: #d7bd7f;
+    border-color: var(--admin-border) !important;
+  }
+
+  .admin-shell [class*='text-[#3D2B1F]'],
+  .admin-shell [class*='text-terra-900'],
+  .admin-shell [class*='text-terra-800'] {
+    color: var(--admin-text) !important;
+  }
+
+  .admin-shell [class*='text-[#8B7355]'],
+  .admin-shell [class*='text-[#C4B5A0]'],
+  .admin-shell [class*='text-terra-500'],
+  .admin-shell [class*='text-terra-400'] {
+    color: var(--admin-muted) !important;
+  }
+
+  .admin-shell [class*='text-[#A0603A]'],
+  .admin-shell [class*='text-terra-600'],
+  .admin-shell [class*='text-terra-700'] {
+    color: var(--admin-brown) !important;
+  }
+
+  .admin-shell [class~='bg-[#A0603A]'],
+  .admin-shell [class*='bg-terra-600'] {
+    background-color: var(--admin-brown) !important;
+  }
+
+  .admin-shell [class*='hover:bg-[#8b4c2a]']:hover,
+  .admin-shell [class*='hover:bg-terra-700']:hover,
+  .admin-shell [class*='hover:bg-terra-500']:hover {
+    background-color: var(--admin-brown-hover) !important;
+  }
+
+  .admin-shell [class*='border-[#A0603A]'],
+  .admin-shell [class*='border-terra-600'] {
+    border-color: var(--admin-brown) !important;
+  }
+
+  .admin-shell input,
+  .admin-shell textarea,
+  .admin-shell select {
+    background-color: var(--admin-white) !important;
+    border-color: var(--admin-border-strong) !important;
+    color: var(--admin-text) !important;
+  }
+
+  .admin-shell [class*='hover:bg-[#FAF6F1]']:hover,
+  .admin-shell [class*='hover:bg-terra-50']:hover,
+  .admin-shell [class*='hover:bg-terra-100']:hover {
+    background-color: var(--admin-hover) !important;
+  }
+
+  .admin-shell [class*='shadow-[0_0_8px'] {
+    box-shadow: 0 1px 2px rgba(61, 43, 31, 0.04), 0 12px 28px -24px rgba(61, 43, 31, 0.34) !important;
+  }
+
+  .order-flow-brown [class*='bg-terra-600'] {
+    background-color: #4A2810 !important;
+  }
+
+  .order-flow-brown [class*='hover:bg-terra-700']:hover,
+  .order-flow-brown [class*='hover:bg-terra-500']:hover {
+    background-color: #3D1F0A !important;
+  }
+
+  .order-flow-brown [class*='border-terra-600'] {
+    border-color: #4A2810 !important;
+  }
+
+  .order-flow-brown [class*='text-terra-700'],
+  .order-flow-brown [class*='text-terra-600'] {
+    color: #4A2810 !important;
+  }
+
+  .order-flow-brown [class*='text-terra-500'],
+  .order-flow-brown [class*='text-terra-400'] {
+    color: #8B7355 !important;
+  }
+
+  .order-flow-brown [class*='text-terra-300'] {
+    color: #C4B5A0 !important;
+  }
+
+  .order-flow-brown [class*='text-terra-200'] {
+    color: #f9e8d8 !important;
+  }
+
+  .order-flow-brown [class*='shadow-terra-600'] {
+    --tw-shadow-color: rgb(74 40 16 / 0.2) !important;
+    --tw-shadow: var(--tw-shadow-colored) !important;
+  }
+
+  .order-flow-brown [class*='bg-terra-600/20'] {
+    background-color: rgb(74 40 16 / 0.2) !important;
+  }
+
+  .order-flow-brown [class*='bg-terra-600/10'] {
+    background-color: rgb(74 40 16 / 0.1) !important;
   }
 }

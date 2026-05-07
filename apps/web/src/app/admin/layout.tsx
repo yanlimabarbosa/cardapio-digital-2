@@ -53,20 +53,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="admin-shell flex min-h-dvh">
-      <aside className="hidden w-64 flex-col border-r border-[#EAD8A0] bg-[#FBF6E9] md:flex sticky top-0 h-dvh">
+      <aside className="hidden w-64 flex-col border-r border-[#E8DDD0] bg-[#FFFCF8] md:flex sticky top-0 h-dvh">
         <SidebarContent navItems={NAV_ITEMS} pathname={pathname} user={user} onLogout={handleLogout} />
       </aside>
 
-      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center border-b border-[#EAD8A0] bg-[#FBF6E9] px-4 md:hidden">
+      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center border-b border-[#E8DDD0] bg-[#FFFCF8] px-4 md:hidden">
         <button
           onClick={() => setMobileOpen(true)}
-          className="rounded-lg p-2 text-[#2A1508] transition-colors hover:bg-[#FDF7E3]"
+          className="rounded-lg p-2 text-[#3D2B1F] transition-colors hover:bg-[#FAF6F1]"
         >
           <Menu className="h-5 w-5" />
         </button>
         <div className="flex flex-1 items-center justify-center gap-2">
           <img src="/logo.png" alt="" className="h-7 w-7 rounded-full object-cover" />
-          <span className="font-display text-base font-semibold text-[#2A1508]">Bem Comer Self-Service</span>
+          <span className="font-display text-base font-semibold text-[#3D2B1F]">Bem Comer Self-Service</span>
         </div>
         <div className="w-9" />
       </div>
@@ -82,7 +82,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
-              className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#FBF6E9] shadow-2xl md:hidden"
+              className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#FFFCF8] shadow-2xl md:hidden"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <button
                 onClick={() => setMobileOpen(false)}
-                className="absolute right-3 top-4 rounded-full p-1.5 text-[#8A6F40] hover:bg-[#FDF7E3]"
+                className="absolute right-3 top-4 rounded-full p-1.5 text-[#8B7355] hover:bg-[#FAF6F1]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -106,7 +106,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
       </AnimatePresence>
 
-      <main className="flex-1 bg-[#FDF7E3] tapioca-grain">
+      <main className="flex-1 bg-[#FAF6F1] tapioca-grain">
         <div className="p-6 pt-20 md:p-8 md:pt-8">
           {children}
         </div>
