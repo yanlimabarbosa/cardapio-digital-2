@@ -1,4 +1,5 @@
 import { Entity, PrimaryKey, Property, OneToMany, Collection } from '@mikro-orm/core';
+import type { WeeklySchedule } from '@cardapio/shared';
 import { Product } from './product.entity';
 
 @Entity({ tableName: 'categories' })
@@ -20,6 +21,9 @@ export class Category {
 
   @Property({ default: true })
   isActive?: boolean = true;
+
+  @Property({ type: 'jsonb', nullable: true })
+  availabilitySchedule?: WeeklySchedule | null;
 
   @OneToMany(() => Product, (product) => product.category)
   products = new Collection<Product>(this);

@@ -1,4 +1,5 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import type { WeeklySchedule } from '@cardapio/shared';
 
 @Entity({ tableName: 'store_settings' })
 export class StoreSettings {
@@ -13,6 +14,9 @@ export class StoreSettings {
 
   @Property({ type: 'jsonb' })
   openDays!: number[]; // [1,2,3,4,5,6] = Mon-Sat (0=Sun)
+
+  @Property({ type: 'jsonb', nullable: true })
+  weeklySchedule?: WeeklySchedule | null;
 
   @Property({ default: false })
   forceClose?: boolean = false; // Manual override to close
