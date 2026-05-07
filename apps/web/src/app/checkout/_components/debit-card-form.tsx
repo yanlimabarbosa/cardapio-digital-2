@@ -238,7 +238,7 @@ export function DebitCardForm({
   }
 
   const inputClass =
-    'h-12 w-full rounded-xl border border-[#EAD8A0] bg-[#FBF6E9] px-4 text-sm font-medium text-[#2A1508] placeholder-[#B89D5F] outline-none transition-all focus:border-[#6B3E14] focus:ring-2 focus:ring-[#6B3E14]/20';
+    'h-12 w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-4 text-sm font-medium text-[#3D2B1F] placeholder-[#C4B5A0] outline-none transition-all focus:border-[#4A2810] focus:ring-2 focus:ring-[#4A2810]/20';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -246,15 +246,15 @@ export function DebitCardForm({
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', damping: 20 }}
-        className="rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] p-5"
+        className="rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] p-5"
       >
-        <p className="mb-4 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">
+        <p className="mb-4 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
           Dados do Cartão de Débito
         </p>
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">
+            <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">
               Número do Cartão
             </label>
             <div className="relative">
@@ -268,13 +268,13 @@ export function DebitCardForm({
                 required
                 className={inputClass + ' pr-12'}
               />
-              <CreditCard className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#B89D5F]" />
+              <CreditCard className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C4B5A0]" />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">Mês</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">Mês</label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -287,7 +287,7 @@ export function DebitCardForm({
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">Ano</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">Ano</label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -300,7 +300,7 @@ export function DebitCardForm({
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">CVV</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">CVV</label>
               <div className="relative">
                 <input
                   type="text"
@@ -312,13 +312,13 @@ export function DebitCardForm({
                   required
                   className={inputClass + ' pr-9'}
                 />
-                <Lock className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#B89D5F]" />
+                <Lock className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#C4B5A0]" />
               </div>
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">
+            <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">
               Nome no Cartão
             </label>
             <input
@@ -337,15 +337,15 @@ export function DebitCardForm({
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.08, type: 'spring', damping: 20 }}
-        className="rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] p-5"
+        className="rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] p-5"
       >
-        <p className="mb-4 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">
+        <p className="mb-4 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
           Dados do Pagador
         </p>
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">E-mail</label>
+            <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">E-mail</label>
             <input
               type="email"
               placeholder="seu@email.com"
@@ -357,7 +357,7 @@ export function DebitCardForm({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">CPF</label>
+            <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">CPF</label>
             <input
               type="text"
               inputMode="numeric"
@@ -376,16 +376,16 @@ export function DebitCardForm({
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.12, type: 'spring', damping: 20 }}
-        className="rounded-2xl border border-[#EAD8A0] bg-[#FBF6E9] p-5"
+        className="rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] p-5"
       >
-        <p className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#7A4F1C]">
+        <p className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
           <MapPin className="h-3.5 w-3.5" />
           Endereço de Cobrança
         </p>
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">CEP</label>
+            <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">CEP</label>
             <input
               type="text"
               inputMode="numeric"
@@ -397,7 +397,7 @@ export function DebitCardForm({
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">Rua</label>
+            <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">Rua</label>
             <input
               type="text"
               placeholder="Rua"
@@ -409,7 +409,7 @@ export function DebitCardForm({
           </div>
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">Número</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">Número</label>
               <input
                 type="text"
                 placeholder="123"
@@ -420,7 +420,7 @@ export function DebitCardForm({
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">Complemento</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">Complemento</label>
               <input
                 type="text"
                 placeholder="Apto, casa"
@@ -432,7 +432,7 @@ export function DebitCardForm({
           </div>
           <div className="grid grid-cols-[minmax(0,2fr)_80px] gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">Cidade</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">Cidade</label>
               <input
                 type="text"
                 placeholder="Cidade"
@@ -443,7 +443,7 @@ export function DebitCardForm({
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8A6F40]">UF</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">UF</label>
               <input
                 type="text"
                 placeholder="SP"
@@ -488,7 +488,7 @@ export function DebitCardForm({
       <button
         type="submit"
         disabled={isPending}
-        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#6B3E14] text-base font-bold text-white shadow-lg shadow-[#6B3E14]/20 transition-all hover:bg-[#5C2F10] active:scale-[0.98] disabled:opacity-60 disabled:shadow-none"
+        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#4A2810] text-base font-bold text-white shadow-lg shadow-[#4A2810]/20 transition-all hover:bg-[#3D1F0A] active:scale-[0.98] disabled:opacity-60 disabled:shadow-none"
       >
         {isPending ? (
           <>
@@ -503,11 +503,11 @@ export function DebitCardForm({
         )}
       </button>
 
-      <div className="mt-3 flex items-center justify-center gap-3 text-[11px] text-[#9A8654]">
+      <div className="mt-3 flex items-center justify-center gap-3 text-[11px] text-[#8B7355]">
         <span className="flex items-center gap-1">
           <Lock className="h-3 w-3" /> 3DS PagBank
         </span>
-        <span className="h-1 w-1 rounded-full bg-[#EAD8A0]" />
+        <span className="h-1 w-1 rounded-full bg-[#E8DDD0]" />
         <span>Dados criptografados</span>
       </div>
     </form>
