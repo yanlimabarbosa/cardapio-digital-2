@@ -89,8 +89,8 @@ export function CouponsClient() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-[#2A1508]">Cupons</h1>
-          <p className="text-sm text-[#8A6F40]">
+          <h1 className="font-display text-2xl font-bold text-[#3D2B1F]">Cupons</h1>
+          <p className="text-sm text-[#8B7355]">
             {filtered.length} {filtered.length === 1 ? 'cupom' : 'cupons'} cadastrados
           </p>
         </div>
@@ -104,13 +104,13 @@ export function CouponsClient() {
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#B89D5F]" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C4B5A0]" />
         <input
           type="text"
           placeholder="Buscar por codigo..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-10 w-full rounded-xl border border-[#EAD8A0] bg-white pl-9 pr-4 text-sm text-[#2A1508] outline-none placeholder:text-[#B89D5F] focus:border-[#D4B878] focus:ring-2 focus:ring-[#EAD8A0]/50 sm:max-w-xs"
+          className="h-10 w-full rounded-xl border border-[#E8DDD0] bg-white pl-9 pr-4 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50 sm:max-w-xs"
         />
       </div>
 
@@ -119,43 +119,43 @@ export function CouponsClient() {
           <Loader2 className="h-6 w-6 animate-spin text-terra-400" />
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-[#EAD8A0] bg-white">
+        <div className="overflow-hidden rounded-xl border border-[#E8DDD0] bg-white">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#EAD8A0] bg-[#FDF7E3]">
-                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-[#7A4F1C]">Codigo</th>
-                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-[#7A4F1C] hidden sm:table-cell">Tipo</th>
-                <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-[#7A4F1C]">Desconto</th>
-                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-[#7A4F1C] hidden sm:table-cell">Usos</th>
-                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-[#7A4F1C]">Acoes</th>
+              <tr className="border-b border-[#E8DDD0] bg-[#FAF6F1]">
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-[#8B7355]">Codigo</th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-[#8B7355] hidden sm:table-cell">Tipo</th>
+                <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-[#8B7355]">Desconto</th>
+                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-[#8B7355] hidden sm:table-cell">Usos</th>
+                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-[#8B7355]">Acoes</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAD8A0]">
+            <tbody className="divide-y divide-[#E8DDD0]">
               {filtered.map((c) => (
                 <tr
                   key={c.id}
-                  className={`transition-colors hover:bg-[#FDF7E3] ${!c.isActive ? 'opacity-50' : ''}`}
+                  className={`transition-colors hover:bg-[#FAF6F1] ${!c.isActive ? 'opacity-50' : ''}`}
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <Tag className="h-3.5 w-3.5 text-terra-400 shrink-0" />
-                      <span className="font-mono font-semibold text-[#2A1508]">{c.code}</span>
+                      <span className="font-mono font-semibold text-[#3D2B1F]">{c.code}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[#8A6F40] hidden sm:table-cell">
+                  <td className="px-4 py-3 text-[#8B7355] hidden sm:table-cell">
                     {c.discountType === 'percentage' ? 'Porcentagem' : 'Valor fixo'}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-terra-600">
                     {formatDiscountLabel(c)}
                   </td>
-                  <td className="px-4 py-3 text-center text-[#8A6F40] hidden sm:table-cell">
+                  <td className="px-4 py-3 text-center text-[#8B7355] hidden sm:table-cell">
                     {c.currentUses}/{c.maxUses || '\u221E'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1.5">
                       <button
                         onClick={() => openEdit(c)}
-                        className="rounded-lg p-1.5 text-[#8A6F40] transition-colors hover:bg-[#FDF7E3] hover:text-[#2A1508]"
+                        className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#3D2B1F]"
                         title="Editar"
                       >
                         <Pencil className="h-4 w-4" />
@@ -177,7 +177,7 @@ export function CouponsClient() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-[#B89D5F]">
+                  <td colSpan={5} className="px-4 py-8 text-center text-[#C4B5A0]">
                     {search ? 'Nenhum cupom encontrado' : 'Nenhum cupom cadastrado'}
                   </td>
                 </tr>
