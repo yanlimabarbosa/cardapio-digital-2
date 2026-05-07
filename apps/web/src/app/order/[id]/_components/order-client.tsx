@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/lib/utils';
+import { formatScheduledFor } from '@cardapio/shared';
 import { CheckCircle, Clock, ChefHat, PackageCheck, Home, Truck } from 'lucide-react';
 import { useOrderPage } from './use-order-page';
 
@@ -41,6 +42,7 @@ export function OrderClient() {
   }
 
   const icon = STATUS_ICONS[order.status] || STATUS_ICONS.pending_payment;
+  const scheduledLabel = formatScheduledFor(order.scheduledFor);
 
   return (
     <main className="min-h-dvh bg-terra-50 pb-8">
@@ -59,6 +61,11 @@ export function OrderClient() {
             </div>
             <h2 className="mt-4 font-display text-xl font-semibold text-terra-900">{statusInfo!.label}</h2>
             <p className="text-sm text-terra-500">{order.customerName}</p>
+            {scheduledLabel && (
+              <p className="mt-2 rounded-full bg-butter-100 px-3 py-1 text-sm font-semibold text-cocoa-800">
+                Agendado para {scheduledLabel}
+              </p>
+            )}
           </CardContent>
         </Card>
 

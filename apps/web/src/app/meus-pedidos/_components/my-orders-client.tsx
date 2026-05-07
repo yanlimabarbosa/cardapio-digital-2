@@ -8,6 +8,7 @@ import { SetPasswordDialog } from '@/components/auth/set-password-dialog';
 import { AuthDialog } from '@/components/auth/auth-dialog';
 import { ArrowLeft, Lock, PackageCheck, Clock, ChevronRight } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { formatScheduledFor } from '@cardapio/shared';
 
 const STATUS_LABELS: Record<string, string> = {
   pending_payment: 'Aguardando pagamento',
@@ -126,6 +127,9 @@ export function MyOrdersClient() {
                   href={`/order/${order.id}`}
                   className="flex items-center justify-between rounded-xl border border-terra-200 bg-white p-4 transition-shadow hover:shadow-md"
                 >
+                  {(() => {
+                    const scheduledLabel = formatScheduledFor(order.scheduledFor);
+                    return (
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-display font-semibold text-terra-900">
@@ -138,10 +142,12 @@ export function MyOrdersClient() {
                       <span>{formatCurrency(order.totalAmount)}</span>
                       <span className="flex items-center gap-0.5">
                         <Clock className="h-3 w-3" />
-                        {new Date(order.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        {scheduledLabel ?? new Date(order.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                   </div>
+                    );
+                  })()}
                   <ChevronRight className="h-5 w-5 text-terra-300" />
                 </Link>
               ))}
@@ -163,6 +169,9 @@ export function MyOrdersClient() {
                     href={`/order/${order.id}`}
                     className="flex items-center justify-between rounded-xl border border-terra-200 bg-white p-4 transition-shadow hover:shadow-md"
                   >
+                    {(() => {
+                      const scheduledLabel = formatScheduledFor(order.scheduledFor);
+                      return (
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-display font-semibold text-terra-900">
@@ -173,10 +182,12 @@ export function MyOrdersClient() {
                       <div className="mt-1 flex items-center gap-3 text-xs text-terra-800/50">
                         <span>{formatCurrency(order.totalAmount)}</span>
                         <span>
-                          {new Date(order.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                          {scheduledLabel ?? new Date(order.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                         </span>
                       </div>
                     </div>
+                      );
+                    })()}
                     <ChevronRight className="h-5 w-5 text-terra-300" />
                   </Link>
                 ))}

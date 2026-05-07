@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import { useUpdateOrderStatus } from '@/hooks/orders/use-update-order-status';
-import type { OrderResponse } from '@cardapio/shared';
+import { formatScheduledFor, type OrderResponse } from '@cardapio/shared';
 import { ChevronRight, Loader2 } from 'lucide-react';
 
 interface OrderCardProps {
@@ -26,6 +26,7 @@ export function OrderCard({ order }: OrderCardProps) {
   const minutesAgo = Math.floor(
     (Date.now() - new Date(order.createdAt).getTime()) / 60000,
   );
+  const scheduledLabel = formatScheduledFor(order.scheduledFor);
 
   return (
     <Card className="overflow-hidden">
@@ -59,6 +60,14 @@ export function OrderCard({ order }: OrderCardProps) {
             </span>
           )}
         </div>
+
+        {scheduledLabel && (
+          <div className="mt-2">
+            <span className="inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+              Agendado para {scheduledLabel}
+            </span>
+          </div>
+        )}
 
         <div className="mt-3 space-y-1">
           {order.items.map((item, i) => (
