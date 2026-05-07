@@ -16,6 +16,7 @@ interface HistoryOrder {
   paymentMethod: string;
   paymentStatus?: string;
   deliveryType: string;
+  scheduledFor?: string | null;
   deliveryAddress?: {
     neighborhood: string;
     city: string;

@@ -23,6 +23,7 @@ interface CustomerOrder {
   paymentMethod: string;
   paymentStatus: string | null;
   deliveryType: string;
+  scheduledFor?: string | null;
   items: OrderItem[];
   createdAt: string;
 }

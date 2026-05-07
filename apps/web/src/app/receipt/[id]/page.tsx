@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
 import { Loader2, Printer, Download } from 'lucide-react';
 import type { StoreSettingsData } from '@/types/admin';
+import { formatScheduledFor } from '@cardapio/shared';
 
 interface OrderExtra {
   name: string;
@@ -44,6 +45,7 @@ interface OrderData {
     state: string;
   } | null;
   notes: string | null;
+  scheduledFor?: string | null;
   items: OrderItem[];
   createdAt: string;
 }
@@ -128,6 +130,7 @@ export default function ReceiptPage() {
   const subtotal = order.items.reduce((sum, item) => {
     return sum + item.subtotal;
   }, 0);
+  const scheduledLabel = formatScheduledFor(order.scheduledFor);
 
   return (
     <div className="flex min-h-dvh flex-col items-center bg-gray-100 py-8 print:bg-white print:py-0">
@@ -135,7 +138,7 @@ export default function ReceiptPage() {
       <div className="mb-4 flex gap-3 print:hidden">
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#2A1508] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1A0C04]"
+          className="inline-flex items-center gap-2 rounded-lg bg-[#3D2B1F] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#2A1D16]"
         >
           <Printer className="h-4 w-4" />
           Imprimir
@@ -172,6 +175,9 @@ export default function ReceiptPage() {
         <p className="text-center">
           Pedido #{order.orderNumber} — {formatDateTime(order.createdAt)}
         </p>
+        {scheduledLabel && (
+          <p className="text-center font-bold">AGENDADO: {scheduledLabel}</p>
+        )}
 
         <pre className="mt-2 whitespace-pre-wrap">{DASH}</pre>
 
@@ -245,6 +251,7 @@ export default function ReceiptPage() {
 
         {/* Payment & Status */}
         <p>PAGAMENTO: {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}</p>
+        {scheduledLabel && <p>HORARIO: {scheduledLabel}</p>}
 
         {/* Customer info */}
         <div className="mt-2">
