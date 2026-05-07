@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Patch, Body, Param, UseGuards } from '@nestjs/common';
-import { IsString, IsOptional, IsBoolean, IsArray, IsUUID, MinLength } from 'class-validator';
+import { Controller, Get, Post, Put, Delete, Patch, Body, Param, UseGuards, Query } from '@nestjs/common';
+import { IsString, IsOptional, IsBoolean, IsArray, IsUUID, MinLength, IsObject } from 'class-validator';
 import { SectionsService } from './sections.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import type { WeeklySchedule } from '@cardapio/shared';
 
 class CreateSectionDto {
   @IsString()
@@ -11,6 +12,10 @@ class CreateSectionDto {
   @IsOptional()
   @IsString()
   emoji?: string;
+
+  @IsOptional()
+  @IsObject()
+  availabilitySchedule?: WeeklySchedule | null;
 }
 
 class UpdateSectionDto {
@@ -25,6 +30,10 @@ class UpdateSectionDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsObject()
+  availabilitySchedule?: WeeklySchedule | null;
 }
 
 class ReorderSectionsDto {
@@ -45,8 +54,8 @@ export class SectionsPublicController {
   constructor(private readonly service: SectionsService) {}
 
   @Get()
-  listPublic() {
-    return this.service.listPublic();
+  listPublic(@Query('scheduledFor') scheduledFor?: string) {
+    return this.service.listPublic(scheduledFor);
   }
 }
 
