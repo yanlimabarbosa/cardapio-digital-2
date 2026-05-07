@@ -1,19 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { StoreSettings } from '../../entities';
+import {
+  getCombinedScheduleAvailability,
+  legacyToWeeklySchedule,
+  normalizeWeeklySchedule,
+  formatScheduleDayRanges,
+  type WeeklySchedule,
+} from '@cardapio/shared';
 
 @Injectable()
 export class StoreService {
   constructor(private readonly em: EntityManager) {}
+
+  private readonly defaultSchedule: WeeklySchedule = {
+    0: [{ start: '11:00', end: '21:00' }],
+    1: [{ start: '11:00', end: '21:00' }],
+    2: [{ start: '11:00', end: '21:00' }],
+    3: [{ start: '11:00', end: '21:00' }],
+    4: [{ start: '11:00', end: '21:00' }],
+    5: [{ start: '11:00', end: '21:00' }],
+    6: [{ start: '11:00', end: '21:00' }],
+  };
 
   async getSettings(): Promise<StoreSettings> {
     let settings = await this.em.findOne(StoreSettings, { id: 1 });
     if (!settings) {
       settings = this.em.create(StoreSettings, {
         id: 1,
-        openingTime: '09:00',
-        closingTime: '23:00',
-        openDays: [1, 2, 3, 4, 5, 6], // Mon-Sat
+        openingTime: '11:00',
+        closingTime: '21:00',
+        openDays: [0, 1, 2, 3, 4, 5, 6],
+        weeklySchedule: this.defaultSchedule,
         forceClose: false,
       });
       await this.em.flush();
@@ -21,11 +39,20 @@ export class StoreService {
     return settings;
   }
 
-  async updateSettings(data: Partial<Pick<StoreSettings, 'openingTime' | 'closingTime' | 'openDays' | 'forceClose' | 'forceOpen' | 'pointsPerReal' | 'receiptCnpj' | 'receiptAddress' | 'receiptPhone' | 'receiptFooter' | 'bannerUrl'>>) {
+  getEffectiveSchedule(settings: StoreSettings): WeeklySchedule {
+    return normalizeWeeklySchedule(settings.weeklySchedule)
+      ?? normalizeWeeklySchedule(legacyToWeeklySchedule(settings.openDays, settings.openingTime, settings.closingTime))
+      ?? {};
+  }
+
+  async updateSettings(data: Partial<Pick<StoreSettings, 'openingTime' | 'closingTime' | 'openDays' | 'weeklySchedule' | 'forceClose' | 'forceOpen' | 'pointsPerReal' | 'receiptCnpj' | 'receiptAddress' | 'receiptPhone' | 'receiptFooter' | 'bannerUrl'>>) {
     const settings = await this.getSettings();
     if (data.openingTime !== undefined) settings.openingTime = data.openingTime;
     if (data.closingTime !== undefined) settings.closingTime = data.closingTime;
     if (data.openDays !== undefined) settings.openDays = data.openDays;
+    if (data.weeklySchedule !== undefined) {
+      settings.weeklySchedule = normalizeWeeklySchedule(data.weeklySchedule) ?? {};
+    }
     if (data.forceClose !== undefined) {
       settings.forceClose = data.forceClose;
       if (data.forceClose) settings.forceOpen = false; // can't be both
@@ -46,42 +73,57 @@ export class StoreService {
     return settings;
   }
 
-  async isOpen(): Promise<{ open: boolean; reason?: string; opensAt?: string; closesAt?: string; openDays?: number[]; bannerUrl?: string }> {
+  async isOpen(at = new Date(), options?: { ignoreForceOpen?: boolean }): Promise<{
+    open: boolean;
+    reason?: string;
+    opensAt?: string;
+    closesAt?: string;
+    openDays?: number[];
+    weeklySchedule?: WeeklySchedule;
+    nextOpenAt?: string;
+    nextOpenLabel?: string;
+    bannerUrl?: string;
+  }> {
     const settings = await this.getSettings();
-    const base = { opensAt: settings.openingTime, closesAt: settings.closingTime, openDays: settings.openDays, bannerUrl: settings.bannerUrl };
+    const weeklySchedule = this.getEffectiveSchedule(settings);
+    const base = {
+      opensAt: settings.openingTime,
+      closesAt: settings.closingTime,
+      openDays: settings.openDays,
+      weeklySchedule,
+      bannerUrl: settings.bannerUrl,
+    };
 
     if (settings.forceClose) {
       return { open: false, reason: 'Estamos temporariamente fechados', ...base };
     }
 
-    if (settings.forceOpen) {
+    if (settings.forceOpen && !options?.ignoreForceOpen) {
       return { open: true, ...base };
     }
 
-    const now = new Date();
-    const dayOfWeek = now.getDay();
+    const availability = getCombinedScheduleAvailability(
+      [{ schedule: weeklySchedule, defaultAvailable: false }],
+      at,
+    );
 
-    if (!settings.openDays.includes(dayOfWeek)) {
-      return { open: false, reason: 'Fechado hoje', ...base };
-    }
-
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const [openH, openM] = settings.openingTime.split(':').map(Number);
-    const [closeH, closeM] = settings.closingTime.split(':').map(Number);
-    const openMinutes = openH * 60 + openM;
-    const closeMinutes = closeH * 60 + closeM;
-
-    const isOpen = openMinutes < closeMinutes
-      ? currentMinutes >= openMinutes && currentMinutes < closeMinutes
-      : currentMinutes >= openMinutes || currentMinutes < closeMinutes;
-
-    if (!isOpen) {
-      const reason = currentMinutes < openMinutes
-        ? `Abrimos às ${settings.openingTime}`
-        : `Fechamos às ${settings.closingTime}`;
-      return { open: false, reason, ...base };
+    if (!availability.available) {
+      return {
+        open: false,
+        reason: availability.nextAvailableLabel
+          ? availability.nextAvailableLabel.replace('Disponível', 'Abrimos')
+          : 'Fechado hoje',
+        nextOpenAt: availability.nextAvailableAt,
+        nextOpenLabel: availability.nextAvailableLabel,
+        ...base,
+      };
     }
 
     return { open: true, ...base };
+  }
+
+  getScheduleSummary(settings: StoreSettings): string[] {
+    const schedule = this.getEffectiveSchedule(settings);
+    return [0, 1, 2, 3, 4, 5, 6].map((day) => formatScheduleDayRanges(schedule, day as 0 | 1 | 2 | 3 | 4 | 5 | 6));
   }
 }
