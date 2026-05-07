@@ -49,6 +49,7 @@ interface CartState {
   deliveryFee: number;
   couponCode: string | null;
   couponDiscount: number;
+  scheduledFor: string | null;
   setCoupon: (code: string | null, discount: number) => void;
   clearCoupon: () => void;
   addItem: (item: Omit<CartItem, 'key' | 'quantity'>, quantity?: number) => void;
@@ -61,6 +62,7 @@ interface CartState {
   setDeliveryType: (type: 'pickup' | 'delivery') => void;
   setDeliveryAddress: (address: Partial<DeliveryAddress>) => void;
   setDeliveryArea: (id: string | null, fee: number) => void;
+  setScheduledFor: (scheduledFor: string | null) => void;
   clearCart: () => void;
 }
 
@@ -89,6 +91,7 @@ export const useCartStore = create<CartState>()(
       deliveryFee: 0,
       couponCode: null,
       couponDiscount: 0,
+      scheduledFor: null,
 
       setCoupon: (code, discount) => set({ couponCode: code, couponDiscount: discount }),
       clearCoupon: () => set({ couponCode: null, couponDiscount: 0 }),
@@ -155,6 +158,7 @@ export const useCartStore = create<CartState>()(
           deliveryAddress: { ...state.deliveryAddress, ...partial },
         })),
       setDeliveryArea: (id, fee) => set({ deliveryAreaId: id, deliveryFee: fee }),
+      setScheduledFor: (scheduledFor) => set({ scheduledFor }),
 
       clearCart: () =>
         set({
@@ -164,6 +168,7 @@ export const useCartStore = create<CartState>()(
           deliveryFee: 0,
           couponCode: null,
           couponDiscount: 0,
+          scheduledFor: null,
         }),
     }),
     {
