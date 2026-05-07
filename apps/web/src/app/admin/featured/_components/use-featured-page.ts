@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
 import type { AdminProduct } from '@/types/admin';
+import type { WeeklySchedule } from '@cardapio/shared';
 
 interface AdminSection {
   id: string;
@@ -12,6 +13,7 @@ interface AdminSection {
   emoji: string;
   sortOrder: number;
   isActive: boolean;
+  availabilitySchedule?: WeeklySchedule | null;
   productCount: number;
   products: Array<{ id: string; name: string; price: number; imageUrl?: string }>;
 }
@@ -34,7 +36,7 @@ export function useFeaturedPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (dto: { label: string; emoji?: string }) =>
+    mutationFn: (dto: { label: string; emoji?: string; availabilitySchedule?: WeeklySchedule | null }) =>
       adminFetch('/api/admin/sections', token, {
         method: 'POST',
         body: JSON.stringify(dto),
@@ -47,7 +49,7 @@ export function useFeaturedPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, ...dto }: { id: string; label?: string; emoji?: string; isActive?: boolean }) =>
+    mutationFn: ({ id, ...dto }: { id: string; label?: string; emoji?: string; isActive?: boolean; availabilitySchedule?: WeeklySchedule | null }) =>
       adminFetch(`/api/admin/sections/${id}`, token, {
         method: 'PUT',
         body: JSON.stringify(dto),
