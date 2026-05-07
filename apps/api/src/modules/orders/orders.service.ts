@@ -8,6 +8,7 @@ import { StoreService } from '../store/store.service';
 import { CustomersService } from '../customers/customers.service';
 import { CouponsService } from '../coupons/coupons.service';
 import { getEffectivePrice } from '../../utils/product-price';
+import { getCombinedScheduleAvailability, normalizeWeeklySchedule } from '@cardapio/shared';
 
 const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.PENDING_PAYMENT]: [OrderStatus.PAID, OrderStatus.CANCELLED],
@@ -32,10 +33,9 @@ export class OrdersService {
   ) {}
 
   async create(dto: CreateOrderDto, customerToken?: string) {
-    const storeStatus = await this.storeService.isOpen();
-    if (!storeStatus.open) {
-      throw new BadRequestException(storeStatus.reason || 'Restaurante fechado no momento');
-    }
+    const scheduledFor = this.parseScheduledFor(dto.scheduledFor);
+    const targetDate = scheduledFor ?? new Date();
+    await this.assertStoreCanAcceptOrder(scheduledFor);
 
     const em = this.em.fork();
 
@@ -56,8 +56,19 @@ export class OrdersService {
     const products = await em.find(
       Product,
       { id: { $in: productIds } },
-      { populate: ['extras', 'optionGroups', 'optionGroups.options'] },
+      { populate: ['category', 'extras', 'optionGroups', 'optionGroups.options'] },
     );
+
+    for (const item of dto.items) {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product) {
+        throw new NotFoundException(`Product ${item.productId} not found`);
+      }
+      if (!product.isActive) {
+        throw new BadRequestException(`Product ${product.name} is unavailable`);
+      }
+      this.assertProductAvailableAt(product, targetDate);
+    }
 
     let calculatedTotal = 0;
 
@@ -79,6 +90,7 @@ export class OrdersService {
       deliveryType: dto.deliveryType || 'pickup',
       deliveryAddress: dto.deliveryAddress || undefined,
       notes: dto.notes,
+      scheduledFor: scheduledFor ?? undefined,
       status: OrderStatus.PENDING_PAYMENT,
       totalAmount: '0',
     });
@@ -203,7 +215,7 @@ export class OrdersService {
     let totalPointsSpent = 0;
     if (dto.redeemedItems?.length && customer) {
       const redeemProductIds = dto.redeemedItems.map((r) => r.productId);
-      const redeemProducts = await em.find(Product, { id: { $in: redeemProductIds } });
+      const redeemProducts = await em.find(Product, { id: { $in: redeemProductIds } }, { populate: ['category'] });
 
       for (const ri of dto.redeemedItems) {
         const product = redeemProducts.find((p) => p.id === ri.productId);
@@ -213,6 +225,7 @@ export class OrdersService {
         if (!product.isRedeemable || !product.isActive) {
           throw new BadRequestException(`Produto ${product.name} nao esta disponivel para resgate`);
         }
+        this.assertProductAvailableAt(product, targetDate);
         totalPointsSpent += product.redemptionCost ?? 0;
 
         em.create(OrderItem, {
@@ -366,6 +379,7 @@ export class OrdersService {
       deliveryType: order.deliveryType || 'pickup',
       deliveryAddress: order.deliveryAddress,
       notes: order.notes,
+      scheduledFor: order.scheduledFor?.toISOString() ?? null,
       items: order.items.getItems().map((item) => ({
         id: item.id,
         productName: item.productName,
@@ -378,5 +392,41 @@ export class OrdersService {
       createdAt: order.createdAt!.toISOString(),
       updatedAt: order.updatedAt!.toISOString(),
     };
+  }
+
+  private parseScheduledFor(value?: string | null): Date | null {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      throw new BadRequestException('Horário agendado inválido');
+    }
+    if (date.getTime() < Date.now() - 60_000) {
+      throw new BadRequestException('Horário agendado já passou');
+    }
+    return date;
+  }
+
+  private async assertStoreCanAcceptOrder(scheduledFor: Date | null) {
+    const status = scheduledFor
+      ? await this.storeService.isOpen(scheduledFor, { ignoreForceOpen: true })
+      : await this.storeService.isOpen();
+
+    if (!status.open) {
+      throw new BadRequestException(status.reason || 'Restaurante fechado no horário selecionado');
+    }
+  }
+
+  private assertProductAvailableAt(product: Product, at: Date) {
+    const availability = getCombinedScheduleAvailability([
+      { schedule: normalizeWeeklySchedule(product.category.availabilitySchedule), defaultAvailable: true },
+    ], at);
+
+    if (!availability.available) {
+      throw new BadRequestException(
+        availability.nextAvailableLabel
+          ? `${product.name}: ${availability.nextAvailableLabel}`
+          : `${product.name} indisponível no horário selecionado`,
+      );
+    }
   }
 }
