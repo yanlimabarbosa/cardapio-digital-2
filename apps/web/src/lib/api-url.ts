@@ -4,7 +4,11 @@ const apiPort = process.env.NEXT_PUBLIC_API_PORT ?? '3334';
 export const API_URL = resolveApiUrl();
 
 function resolveApiUrl(): string {
-  if (configuredApiUrl && configuredApiUrl !== 'same-origin' && !isLocalDevUrl(configuredApiUrl)) {
+  if (configuredApiUrl === 'same-origin') {
+    return '';
+  }
+
+  if (configuredApiUrl && !isLocalDevUrl(configuredApiUrl)) {
     return configuredApiUrl;
   }
 
@@ -12,7 +16,7 @@ function resolveApiUrl(): string {
     return `${window.location.protocol}//${window.location.hostname}:${apiPort}`;
   }
 
-  return configuredApiUrl && configuredApiUrl !== 'same-origin' ? configuredApiUrl : '';
+  return configuredApiUrl || '';
 }
 
 function isLocalDevUrl(value: string): boolean {
