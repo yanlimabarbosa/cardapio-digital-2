@@ -9,10 +9,29 @@ import { JwtService } from '@nestjs/jwt';
 import { WS_EVENTS } from '@cardapio/shared';
 import { Order } from '../../entities';
 
+function isAllowedLocalOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    return (
+      url.hostname === 'localhost' ||
+      url.hostname === '127.0.0.1' ||
+      /^[0-9.]+$/.test(url.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
 @WebSocketGateway({
   namespace: 'kitchen',
   cors: {
-    origin: (process.env.CORS_ORIGIN || 'http://localhost:3000').split(','),
+    origin: (origin, callback) => {
+      const allowedOrigins = new Set((process.env.CORS_ORIGIN || 'http://localhost:3000').split(',').map((value) => value.trim()).filter(Boolean));
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.has(origin) || isAllowedLocalOrigin(origin)) return callback(null, true);
+      return callback(new Error(`CORS blocked for origin ${origin}`), false);
+    },
     credentials: true,
   },
 })

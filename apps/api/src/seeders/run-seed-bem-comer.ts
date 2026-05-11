@@ -267,6 +267,7 @@ async function seed() {
   await em.execute('DELETE FROM option_groups');
   await em.execute('DELETE FROM section_products');
   await em.execute('DELETE FROM order_items');
+  await em.execute('DELETE FROM coupon_usages');
   await em.execute('DELETE FROM orders');
   await em.execute('DELETE FROM products');
   await em.execute('DELETE FROM categories');

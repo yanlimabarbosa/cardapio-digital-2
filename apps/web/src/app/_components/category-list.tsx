@@ -75,10 +75,6 @@ export function CategoryList({ categories, sections, storeOpen = true }: Categor
 
   function handleSelectProduct(product: Product) {
     if (!product.isActive) return;
-    if (product.isAvailable === false) {
-      if (!product.nextAvailableAt) return;
-      setScheduledFor(product.nextAvailableAt);
-    }
     setSelectedProduct(product);
     setDialogOpen(true);
   }

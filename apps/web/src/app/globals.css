@@ -56,6 +56,13 @@
     -webkit-box-shadow: 0 0 0 30px hsl(var(--card)) inset;
     caret-color: hsl(var(--foreground));
   }
+  @media (max-width: 640px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
 }
 
 @layer utilities {

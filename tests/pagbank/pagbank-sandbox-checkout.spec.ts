@@ -5,7 +5,7 @@ import path from 'node:path';
 
 const evidenceDir = path.join(process.cwd(), 'test-results', 'pagbank-homologation');
 const backendEvidenceFile = path.join(evidenceDir, 'pagbank-backend-exchanges.jsonl');
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3334';
 const e2eAdminEmail = process.env.E2E_ADMIN_EMAIL ?? 'admin@bemcomer.com';
 const e2eAdminPassword = process.env.E2E_ADMIN_PASSWORD ?? 'BemComer@2026#Painel47';
 const transparentPngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';

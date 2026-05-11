@@ -1,8 +1,10 @@
 'use client';
 
+import { RotateCcw } from 'lucide-react';
 import { useDashboardPage } from '../use-dashboard-page';
 import { motion } from 'framer-motion';
 import { cn, formatCurrency } from '@/lib/utils';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
   AreaChart,
   Area,
@@ -43,7 +45,21 @@ const cardVariants = {
 };
 
 export function DashboardClient() {
-  const { data, stats, storeSettings, storeStatus, storeMode, setStoreModeMutation, updateSettingsMutation } = useDashboardPage();
+  const {
+    data,
+    stats,
+    storeSettings,
+    storeStatus,
+    storeMode,
+    setStoreModeMutation,
+    updateSettingsMutation,
+    range,
+    setRange,
+    resetRange,
+    setTodayRange,
+    setLast7DaysRange,
+    setLast30DaysRange,
+  } = useDashboardPage();
 
   const statusPieData = STATUS_CHART_DATA
     .map((s) => ({ ...s, value: data?.ordersByStatus?.[s.key] ?? 0 }))
@@ -53,7 +69,7 @@ export function DashboardClient() {
     const date = new Date(d.date + 'T12:00:00');
     return {
       ...d,
-      label: SHORT_DAYS[date.getDay()] + ' ' + date.getDate(),
+      label: `${SHORT_DAYS[date.getDay()]} ${String(date.getDate()).padStart(2, '0')}`,
     };
   });
 
@@ -64,9 +80,67 @@ export function DashboardClient() {
       label: `${h.hour}h`,
     }));
 
+  const presetValue = getDashboardPreset(range);
+
   return (
     <div className="space-y-5">
-      <h1 className="font-display text-2xl font-semibold text-[#3D2B1F]">Dashboard</h1>
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-[#3D2B1F]">Dashboard</h1>
+          <p className="mt-1 text-sm text-[#8B7355]">Filtre os números por intervalo de datas.</p>
+        </div>
+
+        <div className="w-full rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 shadow-[0_0_8px_rgba(61,43,31,0.10)] xl:w-auto">
+          <div className="flex flex-col gap-2 xl:flex-row xl:items-center">
+            <div className="flex flex-wrap items-center gap-2">
+              <PresetButton active={presetValue === 'today'} onClick={setTodayRange}>
+                Hoje
+              </PresetButton>
+              <PresetButton active={presetValue === '7d'} onClick={setLast7DaysRange}>
+                7 dias
+              </PresetButton>
+              <PresetButton active={presetValue === '30d'} onClick={setLast30DaysRange}>
+                30 dias
+              </PresetButton>
+              <button
+                type="button"
+                onClick={resetRange}
+                className="inline-flex items-center gap-1 rounded-full border border-[#E8DDD0] px-3 py-1.5 text-xs font-bold text-[#8B7355] transition-colors hover:bg-[#FAF6F1]"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Limpar
+              </button>
+            </div>
+
+            <div className="hidden h-7 w-px bg-[#E8DDD0] xl:block" />
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <label className="block">
+                <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
+                  De
+                </span>
+                <DatePicker
+                  value={range.from}
+                  onChange={(value) => setRange((current) => ({ ...current, from: value }))}
+                  placeholder="Selecionar"
+                  className="h-9 sm:w-[10.5rem]"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
+                  Até
+                </span>
+                <DatePicker
+                  value={range.to}
+                  onChange={(value) => setRange((current) => ({ ...current, to: value }))}
+                  placeholder="Selecionar"
+                  className="h-9 sm:w-[10.5rem]"
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <motion.div
         variants={containerVariants}
@@ -94,7 +168,7 @@ export function DashboardClient() {
       </motion.div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <SectionCard title="Receita — Últimos 7 dias" className="lg:col-span-2" delay={0.1}>
+        <SectionCard title="Receita por dia" className="lg:col-span-2" delay={0.1}>
           <div className="h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={weeklyData}>
@@ -135,7 +209,7 @@ export function DashboardClient() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Pedidos por Status" delay={0.15}>
+        <SectionCard title="Pedidos por status" delay={0.15}>
           {statusPieData.length === 0 ? (
             <div className="flex h-[220px] items-center justify-center">
               <p className="text-sm text-[#C4B5A0]">Sem dados</p>
@@ -197,7 +271,7 @@ export function DashboardClient() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SectionCard title="Receita por Hora — Hoje" delay={0.2}>
+        <SectionCard title="Receita por hora" delay={0.2}>
           <div className="h-[200px]">
             {hourlyData.length === 0 ? (
               <div className="flex h-full items-center justify-center">
@@ -238,7 +312,7 @@ export function DashboardClient() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Mais Vendidos — Hoje" delay={0.25}>
+        <SectionCard title="Mais vendidos" delay={0.25}>
           <div className="h-[200px]">
             {!data?.topProducts?.length ? (
               <div className="flex h-full items-center justify-center">
@@ -295,4 +369,69 @@ export function DashboardClient() {
       )}
     </div>
   );
+}
+
+function PresetButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'rounded-full border px-3 py-1.5 text-xs font-bold transition-colors',
+        active
+          ? 'border-[#4A2810] bg-[#4A2810] text-white shadow-sm'
+          : 'border-[#E8DDD0] bg-white text-[#3D2B1F] hover:bg-[#FAF6F1]',
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function getDashboardPreset(range: { from: string; to: string }): 'today' | '7d' | '30d' | 'custom' {
+  const today = toInputDate(new Date());
+  const days = diffDays(range.from, range.to);
+
+  if (range.from === today && range.to === today) return 'today';
+  if (days === 6 && isExpectedRelativeRange(range.from, range.to, 6)) return '7d';
+  if (days === 29 && isExpectedRelativeRange(range.from, range.to, 29)) return '30d';
+  return 'custom';
+}
+
+function isExpectedRelativeRange(from: string, to: string, daysBack: number): boolean {
+  const now = new Date();
+  const expectedTo = toInputDate(now);
+  const expectedFrom = new Date(now);
+  expectedFrom.setDate(expectedFrom.getDate() - daysBack);
+  return from === toInputDate(expectedFrom) && to === expectedTo;
+}
+
+function diffDays(from: string, to: string): number {
+  const fromDate = new Date(`${from}T12:00:00`);
+  const toDate = new Date(`${to}T12:00:00`);
+  const diff = toDate.getTime() - fromDate.getTime();
+  return Math.round(diff / (1000 * 60 * 60 * 24));
+}
+
+function toInputDate(date: Date): string {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Recife',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const parts: Record<string, string> = {};
+  for (const part of formatter.formatToParts(date)) {
+    if (part.type !== 'literal') parts[part.type] = part.value;
+  }
+  return `${parts.year}-${parts.month}-${parts.day}`;
 }

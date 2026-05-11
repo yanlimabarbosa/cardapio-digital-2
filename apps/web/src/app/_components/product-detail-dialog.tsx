@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatScheduledFor, type Product, type OptionGroup } from '@cardapio/shared';
 import { Modal } from '@/components/ui/modal';
@@ -21,7 +21,9 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
   const [selectedExtras, setSelectedExtras] = useState<CartExtra[]>([]);
   const [groupSelections, setGroupSelections] = useState<Record<string, string[]>>({});
   const [imageOpen, setImageOpen] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const addItem = useCartStore((s) => s.addItem);
+  const setScheduledFor = useCartStore((s) => s.setScheduledFor);
   const scheduledFor = useCartStore((s) => s.scheduledFor);
 
   const close = useCallback(() => {
@@ -52,6 +54,9 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
   const itemTotal = (displayPrice + optionsTotal) * quantity;
   const hasOptions = isCompound || product.extras.length > 0;
   const scheduledForLabel = formatScheduledFor(scheduledFor);
+  const nextAvailableAt = product.nextAvailableAt ?? null;
+  const nextAvailableLabel = formatScheduledFor(nextAvailableAt);
+  const canPreorder = product.isActive && product.isAvailable === false && !!nextAvailableAt;
   const canAdd = storeOpen || !!scheduledFor;
 
   // Validation: all required groups must be satisfied
@@ -68,19 +73,23 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
   }
 
   function toggleGroupOption(group: OptionGroup, optionId: string) {
-    setGroupSelections((prev) => {
-      const current = prev[group.id] ?? [];
-      if (current.includes(optionId)) {
-        return { ...prev, [group.id]: current.filter((id) => id !== optionId) };
-      }
-      // Single selection (maxSelections === 1): replace
-      if (group.maxSelections === 1) {
-        return { ...prev, [group.id]: [optionId] };
-      }
-      // Multi: check max
-      if (current.length >= group.maxSelections) return prev;
-      return { ...prev, [group.id]: [...current, optionId] };
-    });
+    const current = groupSelections[group.id] ?? [];
+    const wasSelected = current.includes(optionId);
+    let nextSelection = current;
+
+    if (wasSelected) {
+      nextSelection = current.filter((id) => id !== optionId);
+    } else if (group.maxSelections === 1) {
+      nextSelection = [optionId];
+    } else if (current.length < group.maxSelections) {
+      nextSelection = [...current, optionId];
+    }
+
+    setGroupSelections((prev) => ({ ...prev, [group.id]: nextSelection }));
+
+    if (!wasSelected && isGroupReadyToAdvance(group, nextSelection)) {
+      window.setTimeout(() => scrollToNextGroup(group.id), 0);
+    }
   }
 
   function handleAdd() {
@@ -128,6 +137,36 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
     onClose();
   }
 
+  function handleScheduleForNextAvailable() {
+    if (!nextAvailableAt) return;
+    setScheduledFor(nextAvailableAt);
+  }
+
+  function isGroupReadyToAdvance(group: OptionGroup, selectedIds: string[]) {
+    if (selectedIds.length === 0) return false;
+    if (group.required) {
+      const requiredCount = group.minSelections === group.maxSelections ? group.minSelections : group.maxSelections;
+      return selectedIds.length >= Math.max(1, requiredCount);
+    }
+    return selectedIds.length >= group.maxSelections;
+  }
+
+  function scrollToNextGroup(groupId: string) {
+    const optionGroups = product?.optionGroups ?? [];
+    const currentIndex = optionGroups.findIndex((group) => group.id === groupId);
+    const nextGroup = optionGroups[currentIndex + 1];
+    if (!nextGroup) return;
+    const container = scrollAreaRef.current;
+    const target = Array.from(container?.querySelectorAll<HTMLElement>('[data-option-group-id]') ?? [])
+      .find((element) => element.dataset.optionGroupId === nextGroup.id);
+    if (!container || !target) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const top = Math.max(0, container.scrollTop + targetRect.top - containerRect.top - 12);
+    container.scrollTo({ top, behavior: 'smooth' });
+  }
+
   // ─── Option Groups Section (compound products) ─────
   const optionGroupsSection = isCompound ? (
     <div>
@@ -137,13 +176,16 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
         const isMaxed = selected.length >= group.maxSelections;
 
         return (
-          <motion.div
+          <div
             key={group.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: gi * 0.05, type: 'spring', damping: 24, stiffness: 300 }}
-            className={gi > 0 ? 'border-t-[6px] border-[#f9e8d8] md:border-t-0 md:border-t md:border-[#f9e8d8]' : 'border-t-[6px] border-[#f9e8d8] md:border-t-0'}
+            data-option-group-id={group.id}
+            className={gi > 0 ? 'border-t-[6px] border-[#f9e8d8] md:border-t-0 md:border-t md:border-[#f9e8d8] scroll-mt-4' : 'border-t-[6px] border-[#f9e8d8] md:border-t-0 scroll-mt-4'}
           >
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: gi * 0.05, type: 'spring', damping: 24, stiffness: 300 }}
+            >
             <div className="px-5 pb-2 pt-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -221,7 +263,8 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
                 );
               })}
             </div>
-          </motion.div>
+            </motion.div>
+          </div>
         );
       })}
     </div>
@@ -316,6 +359,21 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
             <span className="font-display">{formatCurrency(itemTotal)}</span>
           </button>
         </div>
+      ) : canPreorder ? (
+        <div className="space-y-3">
+          <div className="rounded-xl border border-[#E8DDD0] bg-[#FAF6F1] px-4 py-3 text-sm text-[#4A2810]">
+            Disponível para agendamento{nextAvailableLabel ? ` em ${nextAvailableLabel}` : ''}.
+          </div>
+          <button
+            type="button"
+            data-testid="schedule-next-available"
+            onClick={handleScheduleForNextAvailable}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl font-extrabold tracking-tight text-cream-50 shadow-cocoa transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+            style={{ backgroundImage: 'linear-gradient(180deg, #5C3511 0%, #4A2810 58%, #3D1F0A 100%)' }}
+          >
+            <span>Agendar para {nextAvailableLabel ?? 'próximo horário'}</span>
+          </button>
+        </div>
       ) : (
         <button type="button" disabled className="flex h-12 w-full items-center justify-center rounded-lg bg-[#D4C8BA] font-semibold text-white cursor-not-allowed">
           Loja fechada
@@ -340,7 +398,7 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
 
       {/* ─── Mobile layout ─── */}
       <div className="flex min-h-0 flex-1 flex-col md:hidden">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div ref={scrollAreaRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] touch-pan-y">
           {imgSrc ? (
             <div className="relative cursor-pointer" onClick={() => setImageOpen(true)}>
               <img src={imgSrc} alt={product.name} className="aspect-[4/3] w-full object-cover" />
@@ -410,7 +468,7 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
             </div>
           </div>
           <div className="flex min-h-0 flex-1 flex-col border-l border-[#f9e8d8] bg-white">
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] touch-pan-y">
               {optionsContent}
               <div className="h-4" />
             </div>
@@ -470,6 +528,21 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
                 >
                   <span>Adicionar</span>
                   <span className="font-display">{formatCurrency(itemTotal)}</span>
+                </button>
+              </div>
+            ) : canPreorder ? (
+              <div className="mt-6 space-y-3">
+                <div className="rounded-xl border border-[#E8DDD0] bg-[#FAF6F1] px-4 py-3 text-sm text-[#4A2810]">
+                  Disponível para agendamento{nextAvailableLabel ? ` em ${nextAvailableLabel}` : ''}.
+                </div>
+                <button
+                  type="button"
+                  data-testid="schedule-next-available"
+                  onClick={handleScheduleForNextAvailable}
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl font-extrabold tracking-tight text-cream-50 shadow-cocoa transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                  style={{ backgroundImage: 'linear-gradient(180deg, #5C3511 0%, #4A2810 58%, #3D1F0A 100%)' }}
+                >
+                  <span>Agendar para {nextAvailableLabel ?? 'próximo horário'}</span>
                 </button>
               </div>
             ) : (

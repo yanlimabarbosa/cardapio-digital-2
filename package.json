@@ -5,10 +5,13 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
+    "check": "pnpm check:api-architecture && pnpm --filter api exec tsc --noEmit --pretty false && pnpm --filter web exec tsc --noEmit --pretty false",
+    "check:api-architecture": "node scripts/check-api-architecture.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
+    "smoke:api": "node scripts/api-smoke.mjs",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down"
   },

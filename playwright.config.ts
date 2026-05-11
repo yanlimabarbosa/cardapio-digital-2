@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const webBaseUrl = process.env.WEB_BASE_URL ?? 'http://localhost:3848';
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3334';
 
 export default defineConfig({
   testDir: './tests',

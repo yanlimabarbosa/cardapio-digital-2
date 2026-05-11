@@ -3,7 +3,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock-upgrade';
 
 interface ModalProps {
   open: boolean;
@@ -17,8 +16,6 @@ interface ModalProps {
 
 export function Modal({ open, onClose, children, className = '', historyBack = true }: ModalProps) {
   const pushedRef = useRef(false);
-  const scrollableRef = useRef<HTMLDivElement>(null);
-
   // Back button closes modal
   useEffect(() => {
     if (!historyBack) return;
@@ -47,13 +44,16 @@ export function Modal({ open, onClose, children, className = '', historyBack = t
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  // Lock body scroll
+  // Lock page scroll while modal is open without intercepting touch scroll
   useEffect(() => {
     if (!open) return;
-    const el = scrollableRef.current;
-    if (el) disableBodyScroll(el);
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     return () => {
-      if (el) enableBodyScroll(el);
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
     };
   }, [open]);
 
@@ -71,7 +71,6 @@ export function Modal({ open, onClose, children, className = '', historyBack = t
           aria-hidden="true"
         >
           <motion.div
-            ref={scrollableRef}
             role="dialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}

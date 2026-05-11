@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,10 +10,12 @@ import { useCustomerStore } from '@/stores/customer-store';
 import { useCartHydration } from '@/hooks/menu/use-cart-hydration';
 import { useDeliveryAreas } from '@/hooks/menu/use-delivery-areas';
 import { useStoreStatus } from '@/hooks/menu/use-store-status';
+import { usePruneExpiredScheduledFor } from '@/hooks/menu/use-prune-expired-scheduled-for';
 import { useValidateCoupon } from '@/hooks/customer/use-validate-coupon';
 import { maskPhone, maskCep } from '@/lib/utils';
 import { buildScheduleOptions, formatScheduledFor, normalizeNeighborhood } from '@cardapio/shared';
 import type { DeliveryAreaResponse } from '@cardapio/shared';
+import { getCartAvailabilityIssue } from '@/hooks/menu/cart-availability';
 
 const baseSchema = z.object({
   customerName: z.string().min(2, 'Informe seu nome'),
@@ -73,8 +75,9 @@ export function useCartPage() {
     setScheduledFor,
   } = useCartStore();
   const customerStore = useCustomerStore();
+  usePruneExpiredScheduledFor();
 
-  const { isHydrating } = useCartHydration();
+  const { isHydrating, freshProducts } = useCartHydration();
   const { data: deliveryAreas } = useDeliveryAreas();
   const { data: storeStatus } = useStoreStatus();
   const validateCoupon = useValidateCoupon();
@@ -95,6 +98,10 @@ export function useCartPage() {
   );
   const scheduledForLabel = formatScheduledFor(scheduledFor);
   const canOrderNow = storeStatus?.open !== false;
+  const availabilityIssue = useMemo(
+    () => getCartAvailabilityIssue(items, freshProducts, scheduledFor),
+    [items, freshProducts, scheduledFor],
+  );
 
   const form = useForm<CartFormData>({
     resolver: zodResolver(baseSchema),
@@ -187,6 +194,7 @@ export function useCartPage() {
   async function fetchCep(rawValue: string) {
     const cep = rawValue.replace(/\D/g, '');
     if (cep.length !== 8) return;
+    const maskedCep = maskCep(rawValue);
 
     setLoadingCep(true);
     setDeliveryAreaError(null);
@@ -209,7 +217,7 @@ export function useCartPage() {
         setValue('neighborhood', fields.neighborhood);
         setValue('city', fields.city);
         setValue('state', fields.state);
-        setDeliveryAddress(fields);
+        setDeliveryAddress({ cep: maskedCep, ...fields });
 
         if (fields.neighborhood && fields.city) {
           const matched = findDeliveryArea(fields.city, fields.neighborhood);
@@ -240,8 +248,7 @@ export function useCartPage() {
 
   function handleCepChange(value: string) {
     const masked = maskCep(value);
-    setValue('cep', masked, { shouldValidate: true });
-    setDeliveryAddress({ cep: masked });
+    setValue('cep', masked);
 
     // Reset delivery area state when CEP changes
     if (cepAutoFilled || deliveryAreaError || showNeighborhoodSelect) {
@@ -254,10 +261,11 @@ export function useCartPage() {
       setValue('neighborhood', '');
       setValue('city', '');
       setValue('state', '');
-      setDeliveryAddress({ street: '', neighborhood: '', city: '', state: '' });
     }
 
-    fetchCep(masked);
+    if (masked.replace(/\D/g, '').length === 8) {
+      fetchCep(masked);
+    }
   }
 
   function handleDeliveryAreaSelect(area: DeliveryAreaResponse) {
@@ -272,38 +280,31 @@ export function useCartPage() {
 
   function handlePhoneChange(value: string) {
     const masked = maskPhone(value);
-    setValue('customerPhone', masked, { shouldValidate: true });
-    setCustomerPhone(masked);
+    setValue('customerPhone', masked);
   }
 
   function handleNumberChange(value: string) {
-    setValue('number', value, { shouldValidate: true });
-    setDeliveryAddress({ number: value });
+    setValue('number', value);
   }
 
   function handleStreetChange(value: string) {
-    setValue('street', value, { shouldValidate: true });
-    setDeliveryAddress({ street: value });
+    setValue('street', value);
   }
 
   function handleNeighborhoodChange(value: string) {
-    setValue('neighborhood', value, { shouldValidate: true });
-    setDeliveryAddress({ neighborhood: value });
+    setValue('neighborhood', value);
   }
 
   function handleNameChange(value: string) {
-    setValue('customerName', value, { shouldValidate: true });
-    setCustomerName(value);
+    setValue('customerName', value);
   }
 
   function handleNotesChange(value: string) {
     setValue('notes', value);
-    setNotes(value);
   }
 
   function handleComplementChange(value: string) {
     setValue('complement', value);
-    setDeliveryAddress({ complement: value });
   }
 
   function handleDeliveryTypeChange(type: 'pickup' | 'delivery') {
@@ -356,10 +357,30 @@ export function useCartPage() {
     setCouponError(null);
   }
 
-  const canSubmit = (deliveryType === 'pickup' || (deliveryAreaId != null && !deliveryAreaError)) && (canOrderNow || !!scheduledFor);
+  const canSubmit =
+    (deliveryType === 'pickup' || (deliveryAreaId != null && !deliveryAreaError)) &&
+    (canOrderNow || !!scheduledFor) &&
+    !availabilityIssue;
 
-  function onSubmit() {
+  function syncFormToCart(data: CartFormData) {
+    setCustomerName(data.customerName);
+    setCustomerPhone(data.customerPhone);
+    setNotes(data.notes ?? '');
+    setDeliveryType(data.deliveryType);
+    setDeliveryAddress({
+      cep: data.cep ?? '',
+      street: data.street ?? '',
+      number: data.number ?? '',
+      complement: data.complement ?? '',
+      neighborhood: data.neighborhood ?? '',
+      city: data.city ?? '',
+      state: data.state ?? '',
+    });
+  }
+
+  function onSubmit(data: CartFormData) {
     if (!canSubmit) return;
+    syncFormToCart(data);
     router.push('/checkout');
   }
 
@@ -410,6 +431,7 @@ export function useCartPage() {
     scheduleOptions,
     setScheduledFor,
     canOrderNow,
+    availabilityIssue,
   };
 }
 

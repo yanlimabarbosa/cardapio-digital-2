@@ -7,6 +7,7 @@
     "dev": "nest start --watch",
     "start": "node dist/main",
     "start:prod": "node dist/main",
+    "test:unit": "node --test -r ts-node/register $(find test -name '*.test.ts' -type f | sort)",
     "seed": "ts-node src/seeders/run-seed.ts",
     "seed:bemcomer": "ts-node src/seeders/run-seed-bem-comer.ts",
     "seed:bemcomer:images": "ts-node src/seeders/seed-bem-comer-images.ts",

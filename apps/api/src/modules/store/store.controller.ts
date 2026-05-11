@@ -1,17 +1,20 @@
 import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
-import { StoreService } from './store.service';
+import {
+  GetStoreStatusUseCase,
+  GetStoreStatusResult,
+} from './application/use-cases/get-store-status.use-case';
 
 @Controller('store')
 export class StoreController {
-  constructor(private readonly storeService: StoreService) {}
+  public constructor(private readonly getStoreStatusUseCase: GetStoreStatusUseCase) {}
 
   @Get('status')
-  getStatus(@Query('scheduledFor') scheduledFor?: string) {
-    if (!scheduledFor) return this.storeService.isOpen();
+  public getStatus(@Query('scheduledFor') scheduledFor?: string): Promise<GetStoreStatusResult> {
+    if (!scheduledFor) return this.getStoreStatusUseCase.execute();
     const date = new Date(scheduledFor);
     if (Number.isNaN(date.getTime())) {
       throw new BadRequestException('Horário agendado inválido');
     }
-    return this.storeService.isOpen(date, { ignoreForceOpen: true });
+    return this.getStoreStatusUseCase.execute({ at: date, ignoreForceOpen: true });
   }
 }

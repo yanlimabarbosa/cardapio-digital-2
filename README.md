@@ -235,6 +235,13 @@ pnpm dev
 
 ## Estrutura do Projeto
 
+O backend deve convergir para uma topologia única por bounded context:
+`apps/api/src/modules/<context>`. Cada contexto deve carregar o seu próprio
+`<context>.module.ts`, regras de domínio, casos de uso e adapters. A pasta
+`apps/api/src/contexts/*` foi uma etapa intermediária da refatoração hexagonal;
+ela não é mais o destino final e deve desaparecer conforme cada contexto for
+consolidado dentro de `modules/<context>`.
+
 ```
 cardapio-digital/
 ├── apps/
@@ -242,13 +249,20 @@ cardapio-digital/
 │   │   ├── src/
 │   │   │   ├── entities/        → Modelos do banco (Order, Product, Category, etc.)
 │   │   │   ├── modules/
-│   │   │   │   ├── admin/       → CRUD admin (categorias, produtos, extras, reorder)
-│   │   │   │   ├── auth/        → Login JWT
-│   │   │   │   ├── orders/      → Pedidos (criar, status, cozinha)
-│   │   │   │   ├── payments/    → Pix, Cartão, Webhook, Processador de fila
-│   │   │   │   ├── products/    → Menu público
-│   │   │   │   ├── store/       → Horário de funcionamento e controle manual
-│   │   │   │   └── websocket/   → Real-time (Socket.io)
+│   │   │   │   ├── store/
+│   │   │   │   │   ├── store.module.ts       → Composition root NestJS
+│   │   │   │   │   ├── domain/               → Políticas, value objects e regras ricas
+│   │   │   │   │   ├── application/          → Use cases, ports e read models
+│   │   │   │   │   └── adapters/             → HTTP, persistência, filas, sockets, gateways
+│   │   │   │   ├── orders/                   → Mesmo formato por contexto
+│   │   │   │   ├── payments/
+│   │   │   │   ├── menu/
+│   │   │   │   ├── admin/
+│   │   │   │   └── ...
+│   │   │   ├── shared/
+│   │   │   │   ├── domain/       → Regras backend compartilhadas e deliberadas (pricing, loyalty)
+│   │   │   │   ├── application/  → Ports e contratos compartilhados entre contextos
+│   │   │   │   └── infrastructure/ → Implementações técnicas compartilhadas
 │   │   │   ├── migrations/
 │   │   │   └── seeders/
 │   │   └── uploads/             → Imagens dos produtos

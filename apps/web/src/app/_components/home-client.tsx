@@ -219,7 +219,7 @@ export function HomeClient() {
               onClick={clearScheduledFor}
               className="rounded-full border border-cocoa-700/20 px-3 py-1 text-xs font-bold text-cocoa-700 transition-colors hover:bg-white"
             >
-              Pedir agora
+              Cancelar agendamento
             </button>
           </div>
         </div>

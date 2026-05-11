@@ -1,0 +1,28 @@
+export class AdminCouponResponseDto {
+  public constructor(
+    public readonly id: string,
+    public readonly code: string,
+    public readonly discountType: string,
+    public readonly discountValue: number,
+    public readonly maxDiscount: number | null,
+    public readonly minOrderAmount: number,
+    public readonly minQuantity: number,
+    public readonly validFrom: string | null,
+    public readonly validUntil: string | null,
+    public readonly validDays: number[] | null,
+    public readonly validTimeFrom: string | null,
+    public readonly validTimeTo: string | null,
+    public readonly maxUses: number,
+    public readonly maxUsesPerCustomer: number,
+    public readonly currentUses: number,
+    public readonly firstOrderOnly: boolean,
+    public readonly excludePromotional: boolean,
+    public readonly deliveryTypeRestriction: string | null,
+    public readonly applicableProductIds: string[] | null,
+    public readonly applicableCategoryIds: string[] | null,
+    public readonly applicableSectionIds: string[] | null,
+    public readonly isActive: boolean,
+    public readonly createdAt: string,
+    public readonly updatedAt: string,
+  ) {}
+}

@@ -1,11 +1,21 @@
-import { Logger } from '@nestjs/common';
+import { MikroORM, RequestContext } from '@mikro-orm/core';
+import { Inject, Logger, Optional } from '@nestjs/common';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { EntityManager } from '@mikro-orm/postgresql';
-import { Order } from '../../entities';
-import { OrderStatus, PaymentStatus } from '@cardapio/shared';
-import { GatewayPaymentStatus, PaymentsService } from './payments.service';
-import { KitchenGateway } from '../websocket/websocket.gateway';
+import type { GatewayPaymentStatus } from './domain/payment-status.policy';
+import {
+  PAYMENT_GATEWAY,
+  type PaymentGateway,
+} from './application/ports/payment-gateway.port';
+import {
+  PAYMENT_ORDER_REPOSITORY,
+  type ApplyQueuedPaymentResultCommand,
+  type PaymentOrderRepository,
+} from './application/ports/payment-order.port';
+import {
+  PAYMENT_REALTIME_NOTIFIER,
+  type PaymentRealtimeNotifier,
+} from './application/ports/payment-realtime-notifier.port';
 import { PAYMENT_QUEUE } from './payment.constants';
 
 type PaymentJobData = {
@@ -15,83 +25,84 @@ type PaymentJobData = {
   receivedAt?: string;
 };
 
+type PaymentProcessResult =
+  | {
+    readonly processed: true;
+    readonly status: GatewayPaymentStatus;
+  }
+  | {
+    readonly reason?: string;
+    readonly skipped: true;
+  };
+
 @Processor(PAYMENT_QUEUE)
 export class PaymentProcessor extends WorkerHost {
   private readonly logger = new Logger(PaymentProcessor.name);
 
-  constructor(
-    private readonly em: EntityManager,
-    private readonly paymentsService: PaymentsService,
-    private readonly kitchenGateway: KitchenGateway,
+  public constructor(
+    @Inject(PAYMENT_GATEWAY)
+    private readonly paymentGateway: PaymentGateway,
+    @Inject(PAYMENT_ORDER_REPOSITORY)
+    private readonly paymentOrders: PaymentOrderRepository,
+    @Inject(PAYMENT_REALTIME_NOTIFIER)
+    private readonly paymentRealtimeNotifier: PaymentRealtimeNotifier,
+    @Optional()
+    private readonly orm?: MikroORM,
   ) {
     super();
   }
 
-  async process(job: Job<PaymentJobData>) {
-    const em = this.em.fork();
+  public async process(job: Job<PaymentJobData>): Promise<PaymentProcessResult> {
+    if (this.orm) {
+      return RequestContext.create(this.orm.em, async (): Promise<PaymentProcessResult> => this.processPaymentJob(job));
+    }
 
+    return this.processPaymentJob(job);
+  }
+
+  private async processPaymentJob(job: Job<PaymentJobData>): Promise<PaymentProcessResult> {
     if (job.data.referenceId && job.data.status) {
-      return this.applyPaymentResult(em, {
+      return this.applyPaymentResult({
         paymentId: job.data.paymentId,
         referenceId: job.data.referenceId,
         status: job.data.status,
       });
     }
 
-    const pagBankOrder = await this.paymentsService.getPagBankOrder(job.data.paymentId);
+    const paymentStatus = await this.paymentGateway.getPaymentStatus({ externalId: job.data.paymentId });
 
-    return this.applyPaymentResult(em, {
-      paymentId: pagBankOrder.id,
-      referenceId: pagBankOrder.reference_id,
-      status: this.paymentsService.mapPagBankOrderStatus(pagBankOrder),
+    return this.applyPaymentResult({
+      paymentId: paymentStatus.externalId,
+      referenceId: paymentStatus.referenceId,
+      status: paymentStatus.status,
     });
   }
 
-  private async applyPaymentResult(
-    em: EntityManager,
-    payment: {
-      paymentId: string;
-      referenceId?: string;
-      status: GatewayPaymentStatus;
-    },
-  ) {
-    let order = await em.findOne(Order, { paymentId: payment.paymentId }, { populate: ['items'] });
-    if (!order && payment.referenceId) {
-      order = await em.findOne(Order, { id: payment.referenceId }, { populate: ['items'] });
-    }
-    if (!order) {
-      throw new Error(`Order not found for payment ${payment.paymentId}`);
-    }
+  private async applyPaymentResult(payment: ApplyQueuedPaymentResultCommand): Promise<PaymentProcessResult> {
+    const result = await this.paymentOrders.applyQueuedPaymentResult(payment);
 
-    if (order.paymentStatus === PaymentStatus.APPROVED && payment.status === 'approved') {
+    if ('skipped' in result) {
+      if (result.reason) {
+        this.logger.warn(
+          `Payment ${payment.paymentId} arrived for terminal order ${result.order.id} (${result.order.status}) - skipped`,
+        );
+        return { skipped: true, reason: result.reason };
+      }
+
       this.logger.debug(`Payment ${payment.paymentId} already processed - skipped`);
       return { skipped: true };
     }
 
-    const terminalStatuses = [OrderStatus.DELIVERED, OrderStatus.CANCELLED];
-    if (terminalStatuses.includes(order.status as OrderStatus)) {
-      this.logger.warn(`Payment ${payment.paymentId} arrived for terminal order ${order.id} (${order.status}) - skipped`);
-      return { skipped: true, reason: `Order already in terminal state: ${order.status}` };
-    }
-
     if (payment.status === 'approved') {
-      order.paymentStatus = PaymentStatus.APPROVED;
-      order.status = OrderStatus.PAID;
-      this.logger.log(`PagBank payment ${payment.paymentId} APPROVED - Order #${order.orderNumber} marked as paid`);
+      this.logger.log(`PagBank payment ${payment.paymentId} APPROVED - Order #${result.order.orderNumber} marked as paid`);
     } else if (payment.status === 'rejected') {
-      order.paymentStatus = PaymentStatus.REJECTED;
-      this.logger.warn(`PagBank payment ${payment.paymentId} REJECTED - Order #${order.orderNumber}`);
+      this.logger.warn(`PagBank payment ${payment.paymentId} REJECTED - Order #${result.order.orderNumber}`);
     } else if (payment.status === 'refunded') {
-      order.paymentStatus = PaymentStatus.REFUNDED;
-      this.logger.warn(`PagBank payment ${payment.paymentId} REFUNDED - Order #${order.orderNumber}`);
-    } else {
-      order.paymentStatus = PaymentStatus.PENDING;
+      this.logger.warn(`PagBank payment ${payment.paymentId} REFUNDED - Order #${result.order.orderNumber}`);
     }
 
-    await em.flush();
-
-    if (payment.status === 'approved') {
-      this.kitchenGateway.emitNewOrder(order);
+    if (result.newOrderNotification) {
+      await this.paymentRealtimeNotifier.newOrderPaid(result.newOrderNotification);
     }
 
     return { processed: true, status: payment.status };

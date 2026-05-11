@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore, getTotalAmount } from '@/stores/cart-store';
 import { useCustomerStore } from '@/stores/customer-store';
@@ -8,6 +8,9 @@ import { useCreateOrder } from '@/hooks/orders/use-create-order';
 import { usePixPayment } from '@/hooks/payments/use-pix-payment';
 import { useStoreStatus } from '@/hooks/menu/use-store-status';
 import { useRedeemableProducts } from '@/hooks/customer/use-redeemable-products';
+import { usePruneExpiredScheduledFor } from '@/hooks/menu/use-prune-expired-scheduled-for';
+import { useCartHydration } from '@/hooks/menu/use-cart-hydration';
+import { getCartAvailabilityIssue } from '@/hooks/menu/cart-availability';
 import { isValidCpf, isValidEmail, normalizeEmail } from '@/lib/utils';
 import { getPagBankPaymentErrorMessage } from '@/lib/payment-provider';
 import { formatScheduledFor, type PaymentMethod, type PixPaymentResponse } from '@cardapio/shared';
@@ -20,6 +23,8 @@ export function useCheckoutPage() {
   const pixPayment = usePixPayment();
   const { data: storeStatus } = useStoreStatus();
   const { data: redeemableData } = useRedeemableProducts();
+  usePruneExpiredScheduledFor();
+  const { freshProducts } = useCartHydration();
 
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit_card' | 'debit_card'>('pix');
   const [redeemedItems, setRedeemedItems] = useState<string[]>([]);
@@ -35,6 +40,10 @@ export function useCheckoutPage() {
   const effectiveDiscount = couponCode ? couponDiscount : 0;
   const subtotal = getTotalAmount(items);
   const totalAmount = savedTotal || Math.max(0, subtotal + effectiveFee - effectiveDiscount);
+  const availabilityIssue = useMemo(
+    () => getCartAvailabilityIssue(items, freshProducts, scheduledFor),
+    [items, freshProducts, scheduledFor],
+  );
 
   // Use customer store name/phone if available, fallback to cart store
   const effectiveName = customerStore.name || customerName || '';
@@ -66,6 +75,10 @@ export function useCheckoutPage() {
 
   async function handlePay() {
     setError(null);
+    if (availabilityIssue) {
+      setError(availabilityIssue);
+      return;
+    }
     if (!validatePayer()) return;
     setStep('processing');
 
@@ -201,6 +214,7 @@ export function useCheckoutPage() {
     handleCardSuccess,
     createOrderPending: createOrder.isPending,
     pixPaymentPending: pixPayment.isPending,
+    availabilityIssue,
     storeClosed: !scheduledFor && storeStatus?.open === false,
     // Loyalty
     redeemableProducts,

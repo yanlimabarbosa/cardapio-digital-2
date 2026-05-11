@@ -14,11 +14,17 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CustomersService } from '../customers/customers.service';
+import {
+  CustomerLoyaltyAdjustmentRejectedError,
+  CustomerNotFoundError,
+} from '../customers/application/errors/customer.errors';
+import { AdjustCustomerLoyaltyUseCase } from '../customers/application/use-cases/adjust-customer-loyalty.use-case';
+import { ListAdminCustomersUseCase } from '../customers/application/use-cases/list-admin-customers.use-case';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
@@ -32,7 +38,7 @@ const imageStorage = diskStorage({
 });
 
 const imageFileFilter = (
-  _req: any,
+  _req: unknown,
   file: Express.Multer.File,
   cb: (error: Error | null, accept: boolean) => void,
 ) => {
@@ -42,37 +48,205 @@ const imageFileFilter = (
     cb(new BadRequestException('Tipo de arquivo não permitido. Use JPG, PNG ou WebP.'), false);
   }
 };
-import { AdminService } from './admin.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { CreateExtraDto } from './dto/create-extra.dto';
-import { UpdateExtraDto } from './dto/update-extra.dto';
-import { ReorderDto } from './dto/reorder.dto';
-import { CreateOptionGroupDto } from './dto/create-option-group.dto';
-import { UpdateOptionGroupDto } from './dto/update-option-group.dto';
-import { StoreService } from '../store/store.service';
+import { CreateCategoryDto } from './dto/request/create-category.dto';
+import { UpdateCategoryDto } from './dto/request/update-category.dto';
+import { CreateProductDto } from './dto/request/create-product.dto';
+import { UpdateProductDto } from './dto/request/update-product.dto';
+import { CreateExtraDto } from './dto/request/create-extra.dto';
+import { UpdateExtraDto } from './dto/request/update-extra.dto';
+import { ReorderDto } from './dto/request/reorder.dto';
+import { CreateOptionGroupDto } from './dto/request/create-option-group.dto';
+import { UpdateOptionGroupDto } from './dto/request/update-option-group.dto';
+import { UpdateStoreSettingsDto } from './dto/request/update-store-settings.dto';
+import {
+  GetStoreSettingsResult,
+  GetStoreSettingsUseCase,
+} from '../store/application/use-cases/get-store-settings.use-case';
+import {
+  ToggleStoreForceCloseResult,
+  ToggleStoreForceCloseUseCase,
+} from '../store/application/use-cases/toggle-store-force-close.use-case';
+import {
+  ToggleStoreForceOpenResult,
+  ToggleStoreForceOpenUseCase,
+} from '../store/application/use-cases/toggle-store-force-open.use-case';
+import {
+  UpdateStoreSettingsResult,
+  UpdateStoreSettingsUseCase,
+} from '../store/application/use-cases/update-store-settings.use-case';
+import { ListAdminCategoriesUseCase } from './application/use-cases/list-admin-categories.use-case';
+import { CreateAdminGroupOptionUseCase } from './application/use-cases/create-admin-group-option.use-case';
+import { CreateAdminProductExtraUseCase } from './application/use-cases/create-admin-product-extra.use-case';
+import { DeleteAdminGroupOptionUseCase } from './application/use-cases/delete-admin-group-option.use-case';
+import { DeleteAdminProductExtraUseCase } from './application/use-cases/delete-admin-product-extra.use-case';
+import { GetAdminDashboardUseCase } from './application/use-cases/get-admin-dashboard.use-case';
+import { UpdateAdminProductExtraUseCase } from './application/use-cases/update-admin-product-extra.use-case';
+import { ListAdminFeaturedProductsUseCase } from './application/use-cases/list-admin-featured-products.use-case';
+import { ListAdminOptionGroupsUseCase } from './application/use-cases/list-admin-option-groups.use-case';
+import { ListAdminOrderHistoryUseCase } from './application/use-cases/list-admin-order-history.use-case';
+import { ListAdminOrdersUseCase } from './application/use-cases/list-admin-orders.use-case';
+import { ListAdminProductExtrasUseCase } from './application/use-cases/list-admin-product-extras.use-case';
+import { ListAdminProductsUseCase } from './application/use-cases/list-admin-products.use-case';
+import { ReorderAdminCategoriesUseCase } from './application/use-cases/reorder-admin-categories.use-case';
+import { ReorderAdminGroupOptionsUseCase } from './application/use-cases/reorder-admin-group-options.use-case';
+import { ReorderAdminOptionGroupsUseCase } from './application/use-cases/reorder-admin-option-groups.use-case';
+import { ReorderAdminProductsUseCase } from './application/use-cases/reorder-admin-products.use-case';
+import { SetAdminFeaturedProductsUseCase } from './application/use-cases/set-admin-featured-products.use-case';
+import { CreateAdminOptionGroupUseCase } from './application/use-cases/create-admin-option-group.use-case';
+import { DeleteAdminOptionGroupUseCase } from './application/use-cases/delete-admin-option-group.use-case';
+import { UpdateAdminOptionGroupUseCase } from './application/use-cases/update-admin-option-group.use-case';
+import { UpdateAdminGroupOptionUseCase } from './application/use-cases/update-admin-group-option.use-case';
+import { CreateAdminCategoryUseCase } from './application/use-cases/create-admin-category.use-case';
+import {
+  AdminCategoryNotFoundError,
+  DeleteAdminCategoryUseCase,
+} from './application/use-cases/delete-admin-category.use-case';
+import {
+  AdminProductCategoryNotFoundError,
+  AdminProductNotFoundError,
+} from './application/errors/admin-product.errors';
+import {
+  AdminOptionGroupNotFoundError,
+  AdminOptionGroupValidationError,
+} from './application/errors/admin-option-group.errors';
+import {
+  AdminGroupOptionNotFoundError,
+  AdminProductExtraNotFoundError,
+} from './application/errors/admin-product-extra.errors';
+import { DeleteAdminProductUseCase } from './application/use-cases/delete-admin-product.use-case';
+import { ToggleAdminProductUseCase } from './application/use-cases/toggle-admin-product.use-case';
+import { CreateAdminProductUseCase } from './application/use-cases/create-admin-product.use-case';
+import { UpdateAdminProductUseCase } from './application/use-cases/update-admin-product.use-case';
+import {
+  toAdminCategoryMutationResponseDto,
+  toAdminCategoryResponseDto,
+} from './admin-category.mapper';
+import { toAdminDashboardResponseDto } from './admin-dashboard.mapper';
+import {
+  toAdjustCustomerLoyaltyResponseDto,
+  toAdminCustomerResponseDto,
+} from './admin-customer.mapper';
+import { toAdminOrderHistoryResponseDto } from './admin-order-history.mapper';
+import { toAdminOrderResponseDto } from './admin-order.mapper';
+import {
+  toAdminFeaturedProductResponseDto,
+  toAdminGroupOptionMutationResponseDto,
+  toAdminGroupOptionResponseDto,
+  toAdminProductOptionGroupResponseDto,
+  toAdminProductExtraListResponseDto,
+  toAdminProductExtraMutationResponseDto,
+  toAdminProductMutationResponseDto,
+  toAdminProductResponseDto,
+} from './admin-product.mapper';
+import {
+  UpdateAdminCategoryNotFoundError,
+  UpdateAdminCategoryUseCase,
+} from './application/use-cases/update-admin-category.use-case';
+import { AdminCategoryResponseDto } from './dto/response/admin-category-response.dto';
+import { AdminFeaturedProductResponseDto } from './dto/response/admin-featured-product-response.dto';
+import { AdminGroupOptionMutationResponseDto } from './dto/response/admin-group-option-mutation-response.dto';
+import { AdminProductExtraMutationResponseDto } from './dto/response/admin-product-extra-mutation-response.dto';
+import { AdminProductExtraListResponseDto } from './dto/response/admin-product-extra-response.dto';
+import { AdminProductMutationResponseDto } from './dto/response/admin-product-mutation-response.dto';
+import {
+  AdminProductExtraResponseDto,
+  AdminProductOptionGroupResponseDto,
+  AdminProductResponseDto,
+} from './dto/response/admin-product-response.dto';
+import { ReorderCategoriesResponseDto } from './dto/response/reorder-categories-response.dto';
+import { ReorderGroupOptionsResponseDto } from './dto/response/reorder-group-options-response.dto';
+import { ReorderOptionGroupsResponseDto } from './dto/response/reorder-option-groups-response.dto';
+import { ReorderProductsResponseDto } from './dto/response/reorder-products-response.dto';
+import { DeleteCategoryResponseDto } from './dto/response/delete-category-response.dto';
+import { DeleteExtraResponseDto } from './dto/response/delete-extra-response.dto';
+import { DeleteGroupOptionResponseDto } from './dto/response/delete-group-option-response.dto';
+import { DeleteOptionGroupResponseDto } from './dto/response/delete-option-group-response.dto';
+import { DeleteProductResponseDto } from './dto/response/delete-product-response.dto';
+import { ToggleProductResponseDto } from './dto/response/toggle-product-response.dto';
+import { AdminCategoryMutationResponseDto } from './dto/response/admin-category-mutation-response.dto';
+import { SetFeaturedProductsDto } from './dto/request/set-featured-products.dto';
+import { SetFeaturedProductsResponseDto } from './dto/response/set-featured-products-response.dto';
+import { AdminDashboardResponseDto } from './dto/response/admin-dashboard-response.dto';
+import { AdminCustomerResponseDto } from './dto/response/admin-customer-response.dto';
+import { AdjustCustomerLoyaltyDto } from './dto/request/adjust-customer-loyalty.dto';
+import { AdjustCustomerLoyaltyResponseDto } from './dto/response/adjust-customer-loyalty-response.dto';
+import { AdminOrderHistoryResponseDto } from './dto/response/admin-order-history-response.dto';
+import { AdminOrderResponseDto } from './dto/response/admin-order-response.dto';
+import { ListAdminOrderHistoryQueryDto } from './dto/request/list-admin-order-history-query.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('admin')
 export class AdminController {
-  constructor(
-    private readonly adminService: AdminService,
-    private readonly storeService: StoreService,
-    private readonly customersService: CustomersService,
+  public constructor(
+    private readonly getAdminDashboardUseCase: GetAdminDashboardUseCase,
+    private readonly listAdminCategoriesUseCase: ListAdminCategoriesUseCase,
+    private readonly listAdminProductsUseCase: ListAdminProductsUseCase,
+    private readonly listAdminFeaturedProductsUseCase: ListAdminFeaturedProductsUseCase,
+    private readonly listAdminProductExtrasUseCase: ListAdminProductExtrasUseCase,
+    private readonly listAdminOptionGroupsUseCase: ListAdminOptionGroupsUseCase,
+    private readonly listAdminOrdersUseCase: ListAdminOrdersUseCase,
+    private readonly listAdminOrderHistoryUseCase: ListAdminOrderHistoryUseCase,
+    private readonly createAdminOptionGroupUseCase: CreateAdminOptionGroupUseCase,
+    private readonly deleteAdminOptionGroupUseCase: DeleteAdminOptionGroupUseCase,
+    private readonly updateAdminOptionGroupUseCase: UpdateAdminOptionGroupUseCase,
+    private readonly createAdminGroupOptionUseCase: CreateAdminGroupOptionUseCase,
+    private readonly updateAdminGroupOptionUseCase: UpdateAdminGroupOptionUseCase,
+    private readonly createAdminProductExtraUseCase: CreateAdminProductExtraUseCase,
+    private readonly deleteAdminGroupOptionUseCase: DeleteAdminGroupOptionUseCase,
+    private readonly deleteAdminProductExtraUseCase: DeleteAdminProductExtraUseCase,
+    private readonly updateAdminProductExtraUseCase: UpdateAdminProductExtraUseCase,
+    private readonly reorderAdminCategoriesUseCase: ReorderAdminCategoriesUseCase,
+    private readonly reorderAdminGroupOptionsUseCase: ReorderAdminGroupOptionsUseCase,
+    private readonly reorderAdminOptionGroupsUseCase: ReorderAdminOptionGroupsUseCase,
+    private readonly reorderAdminProductsUseCase: ReorderAdminProductsUseCase,
+    private readonly setAdminFeaturedProductsUseCase: SetAdminFeaturedProductsUseCase,
+    private readonly deleteAdminCategoryUseCase: DeleteAdminCategoryUseCase,
+    private readonly deleteAdminProductUseCase: DeleteAdminProductUseCase,
+    private readonly toggleAdminProductUseCase: ToggleAdminProductUseCase,
+    private readonly createAdminProductUseCase: CreateAdminProductUseCase,
+    private readonly updateAdminProductUseCase: UpdateAdminProductUseCase,
+    private readonly updateAdminCategoryUseCase: UpdateAdminCategoryUseCase,
+    private readonly createAdminCategoryUseCase: CreateAdminCategoryUseCase,
+    private readonly getStoreSettingsUseCase: GetStoreSettingsUseCase,
+    private readonly updateStoreSettingsUseCase: UpdateStoreSettingsUseCase,
+    private readonly toggleStoreForceCloseUseCase: ToggleStoreForceCloseUseCase,
+    private readonly toggleStoreForceOpenUseCase: ToggleStoreForceOpenUseCase,
+    private readonly listAdminCustomersUseCase: ListAdminCustomersUseCase,
+    private readonly adjustCustomerLoyaltyUseCase: AdjustCustomerLoyaltyUseCase,
   ) {}
 
   @Get('customers')
-  listCustomers(@Query('search') search?: string) {
-    return this.customersService.listAll(search);
+  public async listCustomers(@Query('search') search?: string): Promise<AdminCustomerResponseDto[]> {
+    const customers = await this.listAdminCustomersUseCase.execute(search);
+
+    return customers.map(toAdminCustomerResponseDto);
   }
 
   // ─── Loyalty ────────────────────────────────────────
 
   @Post('loyalty/adjust')
-  adjustLoyalty(@Body() body: { customerId: string; points: number; description?: string }) {
-    return this.customersService.adjustPoints(body.customerId, body.points, body.description);
+  public async adjustLoyalty(
+    @Body() body: AdjustCustomerLoyaltyDto,
+  ): Promise<AdjustCustomerLoyaltyResponseDto> {
+    try {
+      const result = await this.adjustCustomerLoyaltyUseCase.execute({
+        customerId: body.customerId,
+        points: body.points,
+        description: body.description,
+      });
+
+      return toAdjustCustomerLoyaltyResponseDto(result);
+    } catch (error: unknown) {
+      if (error instanceof CustomerNotFoundError) {
+        throw new NotFoundException('Cliente nao encontrado');
+      }
+
+      if (error instanceof CustomerLoyaltyAdjustmentRejectedError) {
+        throw new BadRequestException(error.reason);
+      }
+
+      throw error;
+    }
   }
 
   // ─── Upload ───────────────────────────────────────
@@ -93,199 +267,516 @@ export class AdminController {
   // ─── Dashboard ─────────────────────────────────────
 
   @Get('dashboard')
-  getDashboard() {
-    return this.adminService.getDashboard();
+  public async getDashboard(
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ): Promise<AdminDashboardResponseDto> {
+    const dashboard = await this.getAdminDashboardUseCase.execute({
+      from: this.parseDateQuery(from, 'from'),
+      to: this.parseDateQuery(to, 'to'),
+    });
+
+    return toAdminDashboardResponseDto(dashboard);
+  }
+
+  private parseDateQuery(value: string | undefined, field: 'from' | 'to'): Date | undefined {
+    if (!value) return undefined;
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      throw new BadRequestException(`Filtro ${field} inválido`);
+    }
+
+    return date;
   }
 
   // ─── Categories ────────────────────────────────────
 
   @Get('categories')
-  listCategories() {
-    return this.adminService.listCategories();
+  public async listCategories(): Promise<AdminCategoryResponseDto[]> {
+    const categories = await this.listAdminCategoriesUseCase.execute();
+
+    return categories.map(toAdminCategoryResponseDto);
   }
 
   @Post('categories')
-  createCategory(@Body() dto: CreateCategoryDto) {
-    return this.adminService.createCategory(dto);
+  public async createCategory(@Body() dto: CreateCategoryDto): Promise<AdminCategoryMutationResponseDto> {
+    const category = await this.createAdminCategoryUseCase.execute({
+      name: dto.name,
+      description: dto.description,
+      imageUrl: dto.imageUrl,
+      sortOrder: dto.sortOrder,
+      availabilitySchedule: dto.availabilitySchedule,
+    });
+
+    return toAdminCategoryMutationResponseDto(category);
   }
 
   @Patch('categories/reorder')
-  reorderCategories(@Body() dto: ReorderDto) {
-    return this.adminService.reorderCategories(dto.items);
+  public async reorderCategories(@Body() dto: ReorderDto): Promise<ReorderCategoriesResponseDto> {
+    const result = await this.reorderAdminCategoriesUseCase.execute({ items: dto.items });
+
+    return new ReorderCategoriesResponseDto(result.success);
   }
 
   @Put('categories/:id')
-  updateCategory(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
-    return this.adminService.updateCategory(id, dto);
+  public async updateCategory(
+    @Param('id') id: string,
+    @Body() dto: UpdateCategoryDto,
+  ): Promise<AdminCategoryMutationResponseDto> {
+    try {
+      const category = await this.updateAdminCategoryUseCase.execute({
+        id,
+        name: dto.name,
+        description: dto.description,
+        imageUrl: dto.imageUrl,
+        sortOrder: dto.sortOrder,
+        isActive: dto.isActive,
+        availabilitySchedule: dto.availabilitySchedule,
+      });
+
+      return toAdminCategoryMutationResponseDto(category);
+    } catch (error) {
+      if (error instanceof UpdateAdminCategoryNotFoundError) {
+        throw new NotFoundException('Category not found');
+      }
+
+      throw error;
+    }
   }
 
   @Delete('categories/:id')
-  deleteCategory(@Param('id') id: string) {
-    return this.adminService.deleteCategory(id);
+  public async deleteCategory(@Param('id') id: string): Promise<DeleteCategoryResponseDto> {
+    try {
+      const result = await this.deleteAdminCategoryUseCase.execute({ id });
+
+      return new DeleteCategoryResponseDto(result.success);
+    } catch (error) {
+      if (error instanceof AdminCategoryNotFoundError) {
+        throw new NotFoundException('Category not found');
+      }
+
+      throw error;
+    }
   }
 
   // ─── Products ──────────────────────────────────────
 
   @Get('products')
-  listProducts() {
-    return this.adminService.listProducts();
+  public async listProducts(): Promise<AdminProductResponseDto[]> {
+    const products = await this.listAdminProductsUseCase.execute();
+
+    return products.map(toAdminProductResponseDto);
   }
 
   @Post('products')
-  createProduct(@Body() dto: CreateProductDto) {
-    return this.adminService.createProduct(dto);
+  public async createProduct(@Body() dto: CreateProductDto): Promise<AdminProductMutationResponseDto> {
+    try {
+      const product = await this.createAdminProductUseCase.execute({
+        name: dto.name,
+        categoryId: dto.categoryId,
+        price: dto.price,
+        description: dto.description,
+        imageUrl: dto.imageUrl,
+        isCompound: dto.isCompound,
+        isRedeemable: dto.isRedeemable,
+        redemptionCost: dto.redemptionCost,
+      });
+
+      return toAdminProductMutationResponseDto(product);
+    } catch (error) {
+      if (error instanceof AdminProductCategoryNotFoundError) {
+        throw new NotFoundException('Category not found');
+      }
+
+      throw error;
+    }
   }
 
   @Patch('products/reorder')
-  reorderProducts(@Body() dto: ReorderDto) {
-    return this.adminService.reorderProducts(dto.items);
+  public async reorderProducts(@Body() dto: ReorderDto): Promise<ReorderProductsResponseDto> {
+    const result = await this.reorderAdminProductsUseCase.execute({ items: dto.items });
+
+    return new ReorderProductsResponseDto(result.success);
   }
 
   @Put('products/:id')
-  updateProduct(@Param('id') id: string, @Body() dto: UpdateProductDto) {
-    return this.adminService.updateProduct(id, dto);
+  public async updateProduct(
+    @Param('id') id: string,
+    @Body() dto: UpdateProductDto,
+  ): Promise<AdminProductMutationResponseDto> {
+    try {
+      const product = await this.updateAdminProductUseCase.execute({
+        id,
+        name: dto.name,
+        categoryId: dto.categoryId,
+        price: dto.price,
+        description: dto.description,
+        imageUrl: dto.imageUrl,
+        isActive: dto.isActive,
+        isPromotional: dto.isPromotional,
+        promotionalPrice: dto.promotionalPrice,
+        promotionStartDate: dto.promotionStartDate,
+        promotionEndDate: dto.promotionEndDate,
+        isCompound: dto.isCompound,
+        isRedeemable: dto.isRedeemable,
+        redemptionCost: dto.redemptionCost,
+      });
+
+      return toAdminProductMutationResponseDto(product);
+    } catch (error) {
+      if (error instanceof AdminProductNotFoundError) {
+        throw new NotFoundException('Product not found');
+      }
+
+      if (error instanceof AdminProductCategoryNotFoundError) {
+        throw new NotFoundException('Category not found');
+      }
+
+      throw error;
+    }
   }
 
   @Patch('products/:id/toggle')
-  toggleProduct(@Param('id') id: string) {
-    return this.adminService.toggleProduct(id);
+  public async toggleProduct(@Param('id') id: string): Promise<ToggleProductResponseDto> {
+    try {
+      const result = await this.toggleAdminProductUseCase.execute({ id });
+
+      return new ToggleProductResponseDto(result.id, result.isActive);
+    } catch (error) {
+      if (error instanceof AdminProductNotFoundError) {
+        throw new NotFoundException('Product not found');
+      }
+
+      throw error;
+    }
   }
 
   @Delete('products/:id')
-  deleteProduct(@Param('id') id: string) {
-    return this.adminService.deleteProduct(id);
+  public async deleteProduct(@Param('id') id: string): Promise<DeleteProductResponseDto> {
+    try {
+      const result = await this.deleteAdminProductUseCase.execute({ id });
+
+      return new DeleteProductResponseDto(result.success);
+    } catch (error) {
+      if (error instanceof AdminProductNotFoundError) {
+        throw new NotFoundException('Product not found');
+      }
+
+      throw error;
+    }
   }
 
   // ─── Featured ─────────────────────────────────────
 
   @Get('featured')
-  listFeatured() {
-    return this.adminService.listFeatured();
+  public async listFeatured(): Promise<AdminFeaturedProductResponseDto[]> {
+    const products = await this.listAdminFeaturedProductsUseCase.execute();
+
+    return products.map(toAdminFeaturedProductResponseDto);
   }
 
   @Put('featured')
-  setFeatured(@Body() body: { productIds: string[] }) {
-    return this.adminService.setFeatured(body.productIds);
+  public async setFeatured(@Body() dto: SetFeaturedProductsDto): Promise<SetFeaturedProductsResponseDto> {
+    const result = await this.setAdminFeaturedProductsUseCase.execute({ productIds: dto.productIds });
+
+    return new SetFeaturedProductsResponseDto(result.success);
   }
 
   // ─── Extras ────────────────────────────────────────
 
   @Get('products/:productId/extras')
-  listExtras(@Param('productId') productId: string) {
-    return this.adminService.listExtras(productId);
+  public async listExtras(
+    @Param('productId') productId: string,
+  ): Promise<AdminProductExtraListResponseDto[]> {
+    try {
+      const extras = await this.listAdminProductExtrasUseCase.execute({ productId });
+
+      return extras.map(toAdminProductExtraListResponseDto);
+    } catch (error) {
+      if (error instanceof AdminProductNotFoundError) {
+        throw new NotFoundException('Product not found');
+      }
+
+      throw error;
+    }
   }
 
   @Post('products/:productId/extras')
-  createExtra(@Param('productId') productId: string, @Body() dto: CreateExtraDto) {
-    return this.adminService.createExtra(productId, dto);
+  public async createExtra(
+    @Param('productId') productId: string,
+    @Body() dto: CreateExtraDto,
+  ): Promise<AdminProductExtraMutationResponseDto> {
+    try {
+      const extra = await this.createAdminProductExtraUseCase.execute({
+        productId,
+        name: dto.name,
+        price: dto.price,
+        imageUrl: dto.imageUrl,
+      });
+
+      return toAdminProductExtraMutationResponseDto(extra);
+    } catch (error) {
+      if (error instanceof AdminProductNotFoundError) {
+        throw new NotFoundException('Product not found');
+      }
+
+      throw error;
+    }
   }
 
   @Put('extras/:id')
-  updateExtra(@Param('id') id: string, @Body() dto: UpdateExtraDto) {
-    return this.adminService.updateExtra(id, dto);
+  public async updateExtra(
+    @Param('id') id: string,
+    @Body() dto: UpdateExtraDto,
+  ): Promise<AdminProductExtraMutationResponseDto> {
+    try {
+      const extra = await this.updateAdminProductExtraUseCase.execute({
+        id,
+        name: dto.name,
+        price: dto.price,
+        imageUrl: dto.imageUrl,
+        isActive: dto.isActive,
+      });
+
+      return toAdminProductExtraMutationResponseDto(extra);
+    } catch (error) {
+      if (error instanceof AdminProductExtraNotFoundError) {
+        throw new NotFoundException('Extra not found');
+      }
+
+      throw error;
+    }
   }
 
   @Delete('extras/:id')
-  deleteExtra(@Param('id') id: string) {
-    return this.adminService.deleteExtra(id);
+  public async deleteExtra(@Param('id') id: string): Promise<DeleteExtraResponseDto> {
+    try {
+      const result = await this.deleteAdminProductExtraUseCase.execute({ id });
+
+      return new DeleteExtraResponseDto(result.success);
+    } catch (error) {
+      if (error instanceof AdminProductExtraNotFoundError) {
+        throw new NotFoundException('Extra not found');
+      }
+
+      throw error;
+    }
   }
 
   // ─── Option Groups ─────────────────────────────────
 
   @Get('products/:productId/option-groups')
-  listOptionGroups(@Param('productId') productId: string) {
-    return this.adminService.listOptionGroups(productId);
+  public async listOptionGroups(
+    @Param('productId') productId: string,
+  ): Promise<AdminProductOptionGroupResponseDto[]> {
+    try {
+      const optionGroups = await this.listAdminOptionGroupsUseCase.execute({ productId });
+
+      return optionGroups.map(toAdminProductOptionGroupResponseDto);
+    } catch (error) {
+      if (error instanceof AdminProductNotFoundError) {
+        throw new NotFoundException('Product not found');
+      }
+
+      throw error;
+    }
   }
 
   @Post('products/:productId/option-groups')
-  createOptionGroup(@Param('productId') productId: string, @Body() dto: CreateOptionGroupDto) {
-    return this.adminService.createOptionGroup(productId, dto);
+  public async createOptionGroup(
+    @Param('productId') productId: string,
+    @Body() dto: CreateOptionGroupDto,
+  ): Promise<AdminProductOptionGroupResponseDto> {
+    try {
+      const optionGroup = await this.createAdminOptionGroupUseCase.execute({
+        productId,
+        name: dto.name,
+        minSelections: dto.minSelections,
+        maxSelections: dto.maxSelections,
+        sortOrder: dto.sortOrder,
+      });
+
+      return toAdminProductOptionGroupResponseDto(optionGroup);
+    } catch (error) {
+      if (error instanceof AdminProductNotFoundError) {
+        throw new NotFoundException('Product not found');
+      }
+
+      if (error instanceof AdminOptionGroupValidationError) {
+        throw new BadRequestException(error.message);
+      }
+
+      throw error;
+    }
   }
 
   @Put('option-groups/:id')
-  updateOptionGroup(@Param('id') id: string, @Body() dto: UpdateOptionGroupDto) {
-    return this.adminService.updateOptionGroup(id, dto);
+  public async updateOptionGroup(
+    @Param('id') id: string,
+    @Body() dto: UpdateOptionGroupDto,
+  ): Promise<AdminProductOptionGroupResponseDto> {
+    try {
+      const optionGroup = await this.updateAdminOptionGroupUseCase.execute({
+        id,
+        name: dto.name,
+        minSelections: dto.minSelections,
+        maxSelections: dto.maxSelections,
+        sortOrder: dto.sortOrder,
+        isActive: dto.isActive,
+      });
+
+      return toAdminProductOptionGroupResponseDto(optionGroup);
+    } catch (error) {
+      if (error instanceof AdminOptionGroupNotFoundError) {
+        throw new NotFoundException('Option group not found');
+      }
+
+      if (error instanceof AdminOptionGroupValidationError) {
+        throw new BadRequestException(error.message);
+      }
+
+      throw error;
+    }
   }
 
   @Delete('option-groups/:id')
-  deleteOptionGroup(@Param('id') id: string) {
-    return this.adminService.deleteOptionGroup(id);
+  public async deleteOptionGroup(@Param('id') id: string): Promise<DeleteOptionGroupResponseDto> {
+    try {
+      const result = await this.deleteAdminOptionGroupUseCase.execute({ id });
+
+      return new DeleteOptionGroupResponseDto(result.success);
+    } catch (error) {
+      if (error instanceof AdminOptionGroupNotFoundError) {
+        throw new NotFoundException('Option group not found');
+      }
+
+      throw error;
+    }
   }
 
   @Patch('option-groups/reorder')
-  reorderOptionGroups(@Body() dto: ReorderDto) {
-    return this.adminService.reorderOptionGroups(dto.items);
+  public async reorderOptionGroups(@Body() dto: ReorderDto): Promise<ReorderOptionGroupsResponseDto> {
+    const result = await this.reorderAdminOptionGroupsUseCase.execute({ items: dto.items });
+
+    return new ReorderOptionGroupsResponseDto(result.success);
   }
 
   // ─── Group Options ────────────────────────────────
 
   @Post('option-groups/:groupId/options')
-  createGroupOption(@Param('groupId') groupId: string, @Body() dto: CreateExtraDto) {
-    return this.adminService.createGroupOption(groupId, dto);
+  public async createGroupOption(
+    @Param('groupId') groupId: string,
+    @Body() dto: CreateExtraDto,
+  ): Promise<AdminProductExtraResponseDto> {
+    try {
+      const option = await this.createAdminGroupOptionUseCase.execute({
+        groupId,
+        name: dto.name,
+        price: dto.price,
+        imageUrl: dto.imageUrl,
+      });
+
+      return toAdminGroupOptionResponseDto(option);
+    } catch (error) {
+      if (error instanceof AdminOptionGroupNotFoundError) {
+        throw new NotFoundException('Option group not found');
+      }
+
+      throw error;
+    }
   }
 
   @Put('option-group-options/:id')
-  updateGroupOption(@Param('id') id: string, @Body() dto: UpdateExtraDto) {
-    return this.adminService.updateGroupOption(id, dto);
+  public async updateGroupOption(
+    @Param('id') id: string,
+    @Body() dto: UpdateExtraDto,
+  ): Promise<AdminGroupOptionMutationResponseDto> {
+    try {
+      const option = await this.updateAdminGroupOptionUseCase.execute({
+        id,
+        name: dto.name,
+        price: dto.price,
+        imageUrl: dto.imageUrl,
+        isActive: dto.isActive,
+      });
+
+      return toAdminGroupOptionMutationResponseDto(option);
+    } catch (error) {
+      if (error instanceof AdminGroupOptionNotFoundError) {
+        throw new NotFoundException('Option not found');
+      }
+
+      throw error;
+    }
   }
 
   @Delete('option-group-options/:id')
-  deleteGroupOption(@Param('id') id: string) {
-    return this.adminService.deleteGroupOption(id);
+  public async deleteGroupOption(@Param('id') id: string): Promise<DeleteGroupOptionResponseDto> {
+    try {
+      const result = await this.deleteAdminGroupOptionUseCase.execute({ id });
+
+      return new DeleteGroupOptionResponseDto(result.success);
+    } catch (error) {
+      if (error instanceof AdminGroupOptionNotFoundError) {
+        throw new NotFoundException('Option not found');
+      }
+
+      throw error;
+    }
   }
 
   @Patch('option-group-options/reorder')
-  reorderGroupOptions(@Body() dto: ReorderDto) {
-    return this.adminService.reorderGroupOptions(dto.items);
+  public async reorderGroupOptions(@Body() dto: ReorderDto): Promise<ReorderGroupOptionsResponseDto> {
+    const result = await this.reorderAdminGroupOptionsUseCase.execute({ items: dto.items });
+
+    return new ReorderGroupOptionsResponseDto(result.success);
   }
 
   // ─── Orders ────────────────────────────────────────
 
   @Get('orders')
-  listOrders(@Query('status') status?: string) {
-    return this.adminService.listOrders(status);
+  public async listOrders(@Query('status') status?: string): Promise<AdminOrderResponseDto[]> {
+    const orders = await this.listAdminOrdersUseCase.execute({ status });
+
+    return orders.map(toAdminOrderResponseDto);
   }
 
   @Get('orders/history')
-  listOrdersHistory(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('search') search?: string,
-    @Query('status') status?: string,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-  ) {
-    return this.adminService.listOrdersHistory({
-      page: page || 1,
-      limit: Math.min(limit || 20, 100),
-      search,
-      status,
-      from,
-      to,
+  public async listOrdersHistory(
+    @Query() query: ListAdminOrderHistoryQueryDto,
+  ): Promise<AdminOrderHistoryResponseDto> {
+    const result = await this.listAdminOrderHistoryUseCase.execute({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+      status: query.status,
+      from: query.from,
+      to: query.to,
     });
+
+    return toAdminOrderHistoryResponseDto(result);
   }
 
   // ─── Store Settings ───────────────────────────────
 
   @Get('store-settings')
-  getStoreSettings() {
-    return this.storeService.getSettings();
+  public getStoreSettings(): Promise<GetStoreSettingsResult> {
+    return this.getStoreSettingsUseCase.execute();
   }
 
   @Put('store-settings')
-  updateStoreSettings(@Body() data: any) {
-    return this.storeService.updateSettings(data);
+  public updateStoreSettings(@Body() data: UpdateStoreSettingsDto): Promise<UpdateStoreSettingsResult> {
+    return this.updateStoreSettingsUseCase.execute({ data });
   }
 
   @Patch('store-settings/toggle-close')
-  async toggleForceClose() {
-    const settings = await this.storeService.getSettings();
-    return this.storeService.updateSettings({ forceClose: !settings.forceClose });
+  public toggleForceClose(): Promise<ToggleStoreForceCloseResult> {
+    return this.toggleStoreForceCloseUseCase.execute();
   }
 
   @Patch('store-settings/toggle-open')
-  async toggleForceOpen() {
-    const settings = await this.storeService.getSettings();
-    return this.storeService.updateSettings({ forceOpen: !settings.forceOpen });
+  public toggleForceOpen(): Promise<ToggleStoreForceOpenResult> {
+    return this.toggleStoreForceOpenUseCase.execute();
   }
 }

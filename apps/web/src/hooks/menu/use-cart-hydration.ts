@@ -30,5 +30,8 @@ export function useCartHydration() {
     }
   }, [freshProducts, hydrateItems, hydrationKey]);
 
-  return { isHydrating: isLoading && productIds.length > 0 && hydratedRef.current !== hydrationKey };
+  return {
+    isHydrating: isLoading && productIds.length > 0 && hydratedRef.current !== hydrationKey,
+    freshProducts: freshProducts ?? [],
+  };
 }

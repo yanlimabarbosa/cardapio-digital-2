@@ -107,15 +107,8 @@ export function CartClient() {
     onSubmit,
     handleCepChange,
     handlePhoneChange,
-    handleNameChange,
-    handleNotesChange,
-    handleNumberChange,
-    handleStreetChange,
-    handleNeighborhoodChange,
-    handleComplementChange,
     handleDeliveryTypeChange,
     handleDeliveryAreaSelect,
-    watch,
     deliveryAreaError,
     cepAutoFilled,
     showNeighborhoodSelect,
@@ -134,6 +127,7 @@ export function CartClient() {
     scheduleOptions,
     setScheduledFor,
     canOrderNow,
+    availabilityIssue,
   } = useCartPage();
 
   if (items.length === 0) {
@@ -274,6 +268,12 @@ export function CartClient() {
           </div>
         </div>
 
+        {availabilityIssue && (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+            {availabilityIssue}
+          </div>
+        )}
+
         <div className="mt-6">
           <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#8B7355]">Como deseja receber?</h2>
           <div className="grid grid-cols-2 gap-3">
@@ -319,8 +319,7 @@ export function CartClient() {
                   <input
                     data-testid="cep-input"
                     placeholder="00000-000"
-                    value={deliveryAddress.cep}
-                    onChange={(e) => handleCepChange(e.target.value)}
+                    {...register('cep', { onChange: (e) => handleCepChange(e.target.value) })}
                     maxLength={9}
                     className={errors.cep ? inputErr : inputOk}
                   />
@@ -330,8 +329,7 @@ export function CartClient() {
               <Field label="Rua" error={errors.street?.message} required>
                 <input
                   placeholder="Rua / Avenida"
-                  value={watch('street') || ''}
-                  onChange={(e) => handleStreetChange(e.target.value)}
+                  {...register('street')}
                   readOnly={cepAutoFilled}
                   className={cepAutoFilled ? inputReadOnly : errors.street ? inputErr : inputOk}
                 />
@@ -341,16 +339,14 @@ export function CartClient() {
                   <input
                     data-testid="address-number"
                     placeholder="123"
-                    value={watch('number') || ''}
-                    onChange={(e) => handleNumberChange(e.target.value)}
+                    {...register('number')}
                     className={errors.number ? inputErr : inputOk}
                   />
                 </Field>
                 <Field label="Complemento">
                   <input
                     placeholder="Apto, bloco..."
-                    value={watch('complement') || ''}
-                    onChange={(e) => handleComplementChange(e.target.value)}
+                    {...register('complement')}
                     className={inputOk}
                   />
                 </Field>
@@ -361,8 +357,7 @@ export function CartClient() {
                 ) : (
                   <input
                     placeholder="Bairro"
-                    value={watch('neighborhood') || ''}
-                    onChange={(e) => handleNeighborhoodChange(e.target.value)}
+                    {...register('neighborhood')}
                     readOnly={cepAutoFilled}
                     className={cepAutoFilled ? inputReadOnly : errors.neighborhood ? inputErr : inputOk}
                   />
@@ -379,7 +374,7 @@ export function CartClient() {
               {deliveryFee > 0 && !deliveryAreaError && (
                 <div className="flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2.5 text-sm font-medium text-green-700">
                   <Check className="h-4 w-4 shrink-0" />
-                  Taxa de entrega: {formatCurrency(deliveryFee)} ({watch('neighborhood')})
+                  Taxa de entrega: {formatCurrency(deliveryFee)}
                 </div>
               )}
 
@@ -396,8 +391,7 @@ export function CartClient() {
               <input
                 data-testid="customer-name"
                 placeholder="Nome completo"
-                value={watch('customerName') || ''}
-                onChange={(e) => handleNameChange(e.target.value)}
+                {...register('customerName')}
                 className={errors.customerName ? inputErr : inputOk}
               />
             </Field>
@@ -405,16 +399,14 @@ export function CartClient() {
               <input
                 data-testid="customer-phone"
                 placeholder="(83) 99999-9999"
-                value={watch('customerPhone') || ''}
-                onChange={(e) => handlePhoneChange(e.target.value)}
+                {...register('customerPhone', { onChange: (e) => handlePhoneChange(e.target.value) })}
                 className={errors.customerPhone ? inputErr : inputOk}
               />
             </Field>
             <Field label="Observações" icon={<MessageSquare className="h-3.5 w-3.5" />}>
               <textarea
                 placeholder="Sem cebola, ponto da carne..."
-                value={watch('notes') || ''}
-                onChange={(e) => handleNotesChange(e.target.value)}
+                {...register('notes')}
                 className="min-h-[80px] w-full resize-none rounded-xl border border-[#E8DDD0] bg-white px-4 py-2.5 text-base font-medium text-[#3D2B1F] outline-none transition-colors placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
               />
             </Field>

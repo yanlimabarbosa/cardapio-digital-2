@@ -1,35 +1,100 @@
-import { Controller, Post, Get, Param, Body } from '@nestjs/common';
-import { PaymentsService } from './payments.service';
-import { CreatePixPaymentDto } from './dto/create-pix-payment.dto';
-import { CreateCardPaymentDto } from './dto/create-card-payment.dto';
-import { CreateDebitCardPaymentDto } from './dto/create-debit-card-payment.dto';
+import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import { CreatePixPaymentDto } from './dto/request/create-pix-payment.dto';
+import { CreateCardPaymentDto } from './dto/request/create-card-payment.dto';
+import { CreateDebitCardPaymentDto } from './dto/request/create-debit-card-payment.dto';
+import {
+  CreatePixPaymentResult,
+  CreatePixPaymentUseCase,
+  PaymentOrderNotFoundError,
+} from './application/use-cases/create-pix-payment.use-case';
+import {
+  CardPaymentInputError,
+  CardPaymentOrderNotFoundError,
+  CreateCardPaymentResult,
+  CreateCardPaymentUseCase,
+} from './application/use-cases/create-card-payment.use-case';
+import {
+  CreateDebitCardPaymentResult,
+  CreateDebitCardPaymentUseCase,
+  DebitCardPaymentInputError,
+  DebitCardPaymentOrderNotFoundError,
+} from './application/use-cases/create-debit-card-payment.use-case';
+import {
+  CreatePayment3dsSessionResult,
+  CreatePayment3dsSessionUseCase,
+} from './application/use-cases/create-payment-3ds-session.use-case';
+import {
+  GetPaymentStatusResult,
+  GetPaymentStatusUseCase,
+  PaymentStatusOrderNotFoundError,
+} from './application/use-cases/get-payment-status.use-case';
 
 @Controller('payments')
 export class PaymentsController {
-  constructor(private readonly paymentsService: PaymentsService) {}
+  public constructor(
+    private readonly createPixPaymentUseCase: CreatePixPaymentUseCase,
+    private readonly createCardPaymentUseCase: CreateCardPaymentUseCase,
+    private readonly createPayment3dsSessionUseCase: CreatePayment3dsSessionUseCase,
+    private readonly createDebitCardPaymentUseCase: CreateDebitCardPaymentUseCase,
+    private readonly getPaymentStatusUseCase: GetPaymentStatusUseCase,
+  ) {}
 
   @Post('pix')
-  createPixPayment(@Body() dto: CreatePixPaymentDto) {
-    return this.paymentsService.createPixPayment(dto);
+  public async createPixPayment(@Body() dto: CreatePixPaymentDto): Promise<CreatePixPaymentResult> {
+    try {
+      return await this.createPixPaymentUseCase.execute(dto);
+    } catch (error: unknown) {
+      if (error instanceof PaymentOrderNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Post('credit-card')
-  createCardPayment(@Body() dto: CreateCardPaymentDto) {
-    return this.paymentsService.createCardPayment(dto);
+  public async createCardPayment(@Body() dto: CreateCardPaymentDto): Promise<CreateCardPaymentResult> {
+    try {
+      return await this.createCardPaymentUseCase.execute(dto);
+    } catch (error: unknown) {
+      if (error instanceof CardPaymentOrderNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof CardPaymentInputError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Post('3ds-session')
-  create3dsSession() {
-    return this.paymentsService.createPagBank3dsSession();
+  public create3dsSession(): Promise<CreatePayment3dsSessionResult> {
+    return this.createPayment3dsSessionUseCase.execute();
   }
 
   @Post('debit-card')
-  createDebitCardPayment(@Body() dto: CreateDebitCardPaymentDto) {
-    return this.paymentsService.createDebitCardPayment(dto);
+  public async createDebitCardPayment(@Body() dto: CreateDebitCardPaymentDto): Promise<CreateDebitCardPaymentResult> {
+    try {
+      return await this.createDebitCardPaymentUseCase.execute(dto);
+    } catch (error: unknown) {
+      if (error instanceof DebitCardPaymentOrderNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof DebitCardPaymentInputError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Get(':orderId/status')
-  getPaymentStatus(@Param('orderId') orderId: string) {
-    return this.paymentsService.getPaymentStatus(orderId);
+  public async getPaymentStatus(@Param('orderId') orderId: string): Promise<GetPaymentStatusResult> {
+    try {
+      return await this.getPaymentStatusUseCase.execute({ orderId });
+    } catch (error: unknown) {
+      if (error instanceof PaymentStatusOrderNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 }

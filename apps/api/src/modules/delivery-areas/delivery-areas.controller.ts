@@ -1,74 +1,162 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { IsString, IsNumber, IsOptional, IsBoolean, Min, MinLength } from 'class-validator';
-import { DeliveryAreasService } from './delivery-areas.service';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
+import { IsBoolean, IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import {
+  DeliveryAreaAlreadyExistsError,
+  DeliveryAreaNotFoundError,
+} from './application/errors/delivery-area.errors';
+import { CreateDeliveryAreaUseCase } from './application/use-cases/create-delivery-area.use-case';
+import { DeleteDeliveryAreaUseCase } from './application/use-cases/delete-delivery-area.use-case';
+import { ListActiveDeliveryAreasUseCase } from './application/use-cases/list-active-delivery-areas.use-case';
+import { ListAdminDeliveryAreasUseCase } from './application/use-cases/list-admin-delivery-areas.use-case';
+import { UpdateDeliveryAreaUseCase } from './application/use-cases/update-delivery-area.use-case';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { toDeliveryAreaResponseDto } from './delivery-area.mapper';
+import { DeliveryAreaResponseDto } from './dto/response/delivery-area-response.dto';
 
 class CreateDeliveryAreaDto {
+  /** Delivery neighborhood name. */
   @IsString()
   @MinLength(1)
-  neighborhood!: string;
+  declare public readonly neighborhood: string;
 
+  /** Delivery city name. */
   @IsString()
   @MinLength(1)
-  city!: string;
+  declare public readonly city: string;
 
+  /** Delivery fee charged for this area. */
   @IsNumber()
   @Min(0)
-  fee!: number;
+  declare public readonly fee: number;
 }
 
 class UpdateDeliveryAreaDto {
+  /** Delivery neighborhood name. */
   @IsOptional()
   @IsString()
-  neighborhood?: string;
+  declare public readonly neighborhood?: string;
 
+  /** Delivery city name. */
   @IsOptional()
   @IsString()
-  city?: string;
+  declare public readonly city?: string;
 
+  /** Delivery fee charged for this area. */
   @IsOptional()
   @IsNumber()
   @Min(0)
-  fee?: number;
+  declare public readonly fee?: number;
 
+  /** Whether this delivery area can be selected by customers. */
   @IsOptional()
   @IsBoolean()
-  isActive?: boolean;
+  declare public readonly isActive?: boolean;
 }
 
 @Controller('delivery-areas')
 export class DeliveryAreasController {
-  constructor(private readonly service: DeliveryAreasService) {}
+  public constructor(private readonly listActiveDeliveryAreasUseCase: ListActiveDeliveryAreasUseCase) {}
 
-  // Public — returns active delivery areas with normalizedKeys for client-side matching
   @Get()
-  listActive() {
-    return this.service.listActive();
+  public async listActive(): Promise<DeliveryAreaResponseDto[]> {
+    const areas = await this.listActiveDeliveryAreasUseCase.execute();
+
+    return areas.map(toDeliveryAreaResponseDto);
   }
 }
 
 @UseGuards(JwtAuthGuard)
 @Controller('admin/delivery-areas')
 export class AdminDeliveryAreasController {
-  constructor(private readonly service: DeliveryAreasService) {}
+  public constructor(
+    private readonly createDeliveryAreaUseCase: CreateDeliveryAreaUseCase,
+    private readonly deleteDeliveryAreaUseCase: DeleteDeliveryAreaUseCase,
+    private readonly listAdminDeliveryAreasUseCase: ListAdminDeliveryAreasUseCase,
+    private readonly updateDeliveryAreaUseCase: UpdateDeliveryAreaUseCase,
+  ) {}
 
   @Get()
-  listAll() {
-    return this.service.listAll();
+  public async listAll(): Promise<DeliveryAreaResponseDto[]> {
+    const areas = await this.listAdminDeliveryAreasUseCase.execute();
+
+    return areas.map(toDeliveryAreaResponseDto);
   }
 
   @Post()
-  create(@Body() dto: CreateDeliveryAreaDto) {
-    return this.service.create(dto);
+  public async create(@Body() dto: CreateDeliveryAreaDto): Promise<DeliveryAreaResponseDto> {
+    try {
+      const area = await this.createDeliveryAreaUseCase.execute({
+        neighborhood: dto.neighborhood,
+        city: dto.city,
+        fee: dto.fee,
+      });
+
+      return toDeliveryAreaResponseDto(area);
+    } catch (error: unknown) {
+      if (error instanceof DeliveryAreaAlreadyExistsError) {
+        throw new BadRequestException('Essa área de entrega já existe');
+      }
+
+      throw error;
+    }
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateDeliveryAreaDto) {
-    return this.service.update(id, dto);
+  public update(
+    @Param('id') id: string,
+    @Body() dto: UpdateDeliveryAreaDto,
+  ): Promise<DeliveryAreaResponseDto> {
+    return this.updateDeliveryArea(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.service.remove(id);
+  public async remove(@Param('id') id: string): Promise<void> {
+    try {
+      await this.deleteDeliveryAreaUseCase.execute(id);
+    } catch (error: unknown) {
+      if (error instanceof DeliveryAreaNotFoundError) {
+        throw new NotFoundException('Área de entrega não encontrada');
+      }
+
+      throw error;
+    }
+  }
+
+  private async updateDeliveryArea(
+    id: string,
+    dto: UpdateDeliveryAreaDto,
+  ): Promise<DeliveryAreaResponseDto> {
+    try {
+      const area = await this.updateDeliveryAreaUseCase.execute({
+        id,
+        neighborhood: dto.neighborhood,
+        city: dto.city,
+        fee: dto.fee,
+        isActive: dto.isActive,
+      });
+
+      return toDeliveryAreaResponseDto(area);
+    } catch (error: unknown) {
+      if (error instanceof DeliveryAreaNotFoundError) {
+        throw new NotFoundException('Área de entrega não encontrada');
+      }
+
+      if (error instanceof DeliveryAreaAlreadyExistsError) {
+        throw new BadRequestException('Essa área de entrega já existe');
+      }
+
+      throw error;
+    }
   }
 }

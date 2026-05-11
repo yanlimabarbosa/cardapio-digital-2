@@ -46,7 +46,7 @@ export function CheckoutClient() {
     loyaltyBalance,
   } = useCheckoutPage();
   const payerInputClass =
-    'h-12 w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-4 text-sm font-medium text-[#3D2B1F] placeholder-[#C4B5A0] outline-none transition-all focus:border-[#4A2810] focus:ring-2 focus:ring-[#4A2810]/20';
+    'h-12 w-full rounded-xl border border-[#E8DDD0] bg-white px-4 text-base font-medium text-[#3D2B1F] placeholder-[#C4B5A0] outline-none transition-all focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50 sm:text-sm';
 
   if (step === 'processing') {
     return (
