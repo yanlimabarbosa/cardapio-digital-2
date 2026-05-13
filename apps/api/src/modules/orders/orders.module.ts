@@ -17,12 +17,14 @@ import { ORDER_COUPON_VALIDATOR, OrderCouponValidator } from './application/port
 import { ORDER_CREATION_REPORTER, OrderCreationReporter } from './application/ports/order-creation-reporter.port';
 import { ORDER_CREATION_REPOSITORY, OrderCreationRepository } from './application/ports/order-creation.repository.port';
 import { ORDER_CUSTOMER_REPOSITORY, OrderCustomerRepository } from './application/ports/order-customer.port';
+import { ORDER_DELIVERY_ADDRESS_RESOLVER, OrderDeliveryAddressResolver } from './application/ports/order-delivery-address-resolver.port';
 import { ORDER_DELIVERY_AREA_REPOSITORY, OrderDeliveryAreaRepository } from './application/ports/order-delivery-area.port';
 import { ORDER_LOYALTY_REDEMPTION_REPOSITORY, OrderLoyaltyRedemptionRepository } from './application/ports/order-loyalty-redemption.port';
 import { ORDER_PRODUCT_CATALOG_REPOSITORY, OrderProductCatalogRepository } from './application/ports/order-product-catalog.port';
 import { ORDER_SEQUENCE_REPOSITORY, OrderSequenceRepository } from './application/ports/order-sequence.port';
 import { ORDER_STORE_AVAILABILITY_CHECKER, OrderStoreAvailabilityChecker } from './application/ports/order-store-availability.port';
 import { ValidateCouponUseCaseOrderCouponValidator } from './adapters/coupons/validate-coupon-use-case-order-coupon.validator';
+import { ViaCepOrderDeliveryAddressResolver } from './adapters/delivery/via-cep-order-delivery-address.resolver';
 import { NestOrderCreationReporter } from './adapters/logging/nest-order-creation.reporter';
 import { MikroOrmOrderCreationRepository } from './adapters/persistence/mikro-orm-order-creation.repository';
 import { MikroOrmOrderCouponUsageRepository } from './adapters/persistence/mikro-orm-order-coupon-usage.repository';
@@ -86,6 +88,10 @@ const orderSystemClock: Clock = {
       inject: [EntityManager],
     },
     {
+      provide: ORDER_DELIVERY_ADDRESS_RESOLVER,
+      useFactory: (): ViaCepOrderDeliveryAddressResolver => new ViaCepOrderDeliveryAddressResolver(),
+    },
+    {
       provide: ORDER_CUSTOMER_REPOSITORY,
       useFactory: (em: EntityManager): MikroOrmOrderCustomerRepository =>
         new MikroOrmOrderCustomerRepository(em),
@@ -146,6 +152,7 @@ const orderSystemClock: Clock = {
         orderCouponUsageRepository: OrderCouponUsageRepository,
         orderLoyaltyRedemptionRepository: OrderLoyaltyRedemptionRepository,
         orderCreationReporter: OrderCreationReporter,
+        orderDeliveryAddressResolver: OrderDeliveryAddressResolver,
       ): CreateOrderUseCase =>
         new CreateOrderUseCase(
           unitOfWork,
@@ -160,6 +167,7 @@ const orderSystemClock: Clock = {
           orderCouponUsageRepository,
           orderLoyaltyRedemptionRepository,
           orderCreationReporter,
+          orderDeliveryAddressResolver,
         ),
       inject: [
         MikroOrmUnitOfWork,
@@ -173,6 +181,7 @@ const orderSystemClock: Clock = {
         ORDER_COUPON_USAGE_REPOSITORY,
         ORDER_LOYALTY_REDEMPTION_REPOSITORY,
         ORDER_CREATION_REPORTER,
+        ORDER_DELIVERY_ADDRESS_RESOLVER,
       ],
     },
     {
