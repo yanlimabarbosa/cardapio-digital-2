@@ -4,7 +4,9 @@ import { Plus, Trash2 } from 'lucide-react';
 import {
   WEEKDAYS,
   getShortDayName,
+  minutesToTime,
   normalizeWeeklySchedule,
+  timeToMinutes,
   type TimeRange,
   type Weekday,
   type WeeklySchedule,
@@ -54,9 +56,9 @@ export function WeeklyScheduleEditor({
 
   function addRange(day: Weekday) {
     const ranges = schedule[day] ?? [];
-    const nextRange = ranges.length === 0
-      ? { start: '11:00', end: '15:00' }
-      : { start: '18:00', end: '21:00' };
+    const nextRange = getNextAvailableRange(ranges);
+    if (!nextRange) return;
+
     commit({ ...schedule, [day]: [...ranges, nextRange] });
   }
 
@@ -154,4 +156,21 @@ function emptySchedule(): WeeklySchedule {
     schedule[day] = [];
   }
   return schedule;
+}
+
+function getNextAvailableRange(ranges: TimeRange[]): TimeRange | null {
+  const sorted = [...ranges].sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+  if (sorted.length === 0) return { start: '11:00', end: '15:00' };
+  if (!hasExactRange({ start: '18:00', end: '21:00' }, sorted)) return { start: '18:00', end: '21:00' };
+
+  const last = sorted[sorted.length - 1];
+  const start = last ? timeToMinutes(last.end) : timeToMinutes('11:00');
+  const end = Math.min(start + 60, (24 * 60) - 1);
+
+  if (start >= end) return null;
+  return { start: minutesToTime(start), end: minutesToTime(end) };
+}
+
+function hasExactRange(candidate: TimeRange, ranges: TimeRange[]): boolean {
+  return ranges.some((range) => range.start === candidate.start && range.end === candidate.end);
 }

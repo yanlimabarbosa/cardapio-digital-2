@@ -58,7 +58,7 @@ export function normalizeWeeklySchedule(schedule?: WeeklySchedule | null): Weekl
       .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
 
     if (ranges.length > 0 || Object.prototype.hasOwnProperty.call(schedule, day) || Object.prototype.hasOwnProperty.call(schedule, String(day))) {
-      normalized[day] = mergeRanges(ranges);
+      normalized[day] = ranges;
     }
   }
 
@@ -213,22 +213,6 @@ function getRawRanges(schedule: WeeklySchedule | null | undefined, day: number):
   const numeric = (schedule as Record<number, TimeRange[] | undefined>)[day];
   const stringKey = (schedule as Record<string, TimeRange[] | undefined>)[String(day)];
   return Array.isArray(numeric) ? numeric : Array.isArray(stringKey) ? stringKey : [];
-}
-
-function mergeRanges(ranges: TimeRange[]): TimeRange[] {
-  const merged: MinuteRange[] = [];
-
-  for (const range of ranges) {
-    const next = { start: timeToMinutes(range.start), end: timeToMinutes(range.end) };
-    const current = merged[merged.length - 1];
-    if (current && next.start <= current.end) {
-      current.end = Math.max(current.end, next.end);
-    } else {
-      merged.push(next);
-    }
-  }
-
-  return merged.map((range) => ({ start: minutesToTime(range.start), end: minutesToTime(range.end) }));
 }
 
 function getOverlappingRanges(rules: ScheduleRule[], day: Weekday): MinuteRange[] {

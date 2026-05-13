@@ -42,15 +42,15 @@ function SectionDialog({
       <DialogContent open className="max-w-2xl border-[#E8DDD0] bg-white p-0">
         <form
           onSubmit={(e) => { e.preventDefault(); if (label.trim()) onSave({ label: label.trim(), emoji, availabilitySchedule }); }}
-          className="flex max-h-full flex-col"
+          className="flex min-h-0 flex-1 flex-col"
         >
-          <DialogHeader className="border-b border-[#E8DDD0] px-6 pb-4 pt-6">
+          <DialogHeader className="shrink-0 border-b border-[#E8DDD0] px-6 pb-4 pt-6">
             <DialogTitle className="font-display text-lg font-semibold text-[#3D2B1F]">
               {section ? 'Editar seção' : 'Nova seção'}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="min-h-0 space-y-4 overflow-y-auto px-6 py-5">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5 overscroll-contain [-webkit-overflow-scrolling:touch]">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">Nome da seção</label>
               <input
@@ -82,7 +82,7 @@ function SectionDialog({
             </div>
           </div>
 
-          <DialogFooter className="border-t border-[#E8DDD0] px-6 py-4">
+          <DialogFooter className="shrink-0 border-t border-[#E8DDD0] px-6 py-4">
             <button type="button" onClick={onClose} className="rounded-xl border border-[#E8DDD0] px-4 py-2.5 text-sm font-semibold text-[#8B7355] transition-colors hover:bg-[#FAF6F1]">
               Cancelar
             </button>
@@ -143,11 +143,11 @@ function ProductsManager({
   return (
     <Dialog open onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
       <DialogContent open className="max-w-2xl border-[#E8DDD0] bg-white p-0">
-        <DialogHeader className="border-b border-[#E8DDD0] px-6 pb-4 pt-6">
+        <DialogHeader className="shrink-0 border-b border-[#E8DDD0] px-6 pb-4 pt-6">
           <DialogTitle className="font-display text-lg font-semibold text-[#3D2B1F]">Gerenciar produtos</DialogTitle>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5 overscroll-contain [-webkit-overflow-scrolling:touch]">
           {selected.length > 0 && (
             <div>
               <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-[#8B7355]">Produtos na seção ({selected.length})</h3>
@@ -227,7 +227,7 @@ function ProductsManager({
           </div>
         </div>
 
-        <DialogFooter className="border-t border-[#E8DDD0] px-6 py-4">
+        <DialogFooter className="shrink-0 border-t border-[#E8DDD0] px-6 py-4">
           <button type="button" onClick={onClose} className="rounded-xl border border-[#E8DDD0] px-4 py-2.5 text-sm font-semibold text-[#8B7355] transition-colors hover:bg-[#FAF6F1]">
             Cancelar
           </button>

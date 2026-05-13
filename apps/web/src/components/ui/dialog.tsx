@@ -26,12 +26,12 @@ const DialogContent = React.forwardRef<
             exit={{ opacity: 0, transition: { duration: 0.1 } }}
           />
         </DialogPrimitive.Overlay>
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+        <div className="fixed inset-0 z-50 flex min-h-0 items-center justify-center p-4 pointer-events-none">
           <DialogPrimitive.Content forceMount asChild ref={ref} {...props}>
             <motion.div
               className={cn(
                 'pointer-events-auto relative flex w-full max-w-lg flex-col rounded-2xl border border-terra-200 bg-white shadow-2xl',
-                'max-h-full overflow-hidden overscroll-none',
+                'max-h-[calc(100dvh-2rem)] min-h-0 overflow-hidden overscroll-none',
                 className,
               )}
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
