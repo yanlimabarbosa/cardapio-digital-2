@@ -29,6 +29,7 @@ export class MikroOrmDeliveryAreaWriteRepository implements DeliveryAreaWriteRep
       city: data.city,
       fee: data.fee.toFixed(2),
       normalizedKey: data.normalizedKey,
+      matchNormalizedKeys: [data.normalizedKey],
     });
 
     await em.flush();
@@ -119,6 +120,7 @@ export class MikroOrmDeliveryAreaWriteRepository implements DeliveryAreaWriteRep
       city: area.city,
       fee: Number.parseFloat(area.fee),
       normalizedKey: area.normalizedKey,
+      matchNormalizedKeys: area.matchNormalizedKeys.length > 0 ? area.matchNormalizedKeys : [area.normalizedKey],
       isActive: area.isActive ?? true,
     };
   }

@@ -20,7 +20,7 @@ export class MikroOrmDeliveryAreaReadRepository implements DeliveryAreaReadRepos
     const areas = await this.em.find(
       DeliveryArea,
       {},
-      { orderBy: { city: 'ASC', neighborhood: 'ASC' } },
+      { orderBy: { isActive: 'DESC', city: 'ASC', neighborhood: 'ASC' } },
     );
 
     return areas.map((area): DeliveryAreaReadModel => this.toReadModel(area));
@@ -33,7 +33,12 @@ export class MikroOrmDeliveryAreaReadRepository implements DeliveryAreaReadRepos
       city: area.city,
       fee: Number.parseFloat(area.fee),
       normalizedKey: area.normalizedKey,
+      matchNormalizedKeys: this.matchNormalizedKeys(area),
       isActive: area.isActive ?? true,
     };
+  }
+
+  private matchNormalizedKeys(area: DeliveryArea): readonly string[] {
+    return area.matchNormalizedKeys.length > 0 ? area.matchNormalizedKeys : [area.normalizedKey];
   }
 }
