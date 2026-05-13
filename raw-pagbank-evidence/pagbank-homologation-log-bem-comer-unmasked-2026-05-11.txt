@@ -1,0 +1,479 @@
+LOG DE HOMOLOGACAO PAGBANK - BEM COMER
+Gerado em: 2026-05-11
+Ambiente PagBank: Sandbox
+Webhook configurado no request: https://cardapiobemcomer.com.br/api/webhooks/pagbank
+Observacao: arquivo gerado a partir de chamadas reais ao Sandbox PagBank. Headers de Authorization/Bearer token nao sao incluidos, pois nao fazem parte do body de request/response solicitado.
+
+============================================================
+MEIO DE PAGAMENTO: PIX - QR Code
+Endpoint: POST https://sandbox.api.pagseguro.com/orders
+Status HTTP: 201
+Order ID PagBank: ORDE_A79F7706-8625-4B68-96A3-0C43514858D9
+
+Request
+{
+  "reference_id": "f4cf233e-ae2d-49a0-8547-c47ef78bbe0e",
+  "customer": {
+    "name": "Cliente Sandbox Pix",
+    "email": "sandbox.pix@cardapiobemcomer.com.br",
+    "tax_id": "09299641447",
+    "phones": [
+      {
+        "country": "55",
+        "area": "83",
+        "number": "999999999",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "f4cf233e-ae2d-49a0-8547-c47ef78bbe0e",
+      "name": "Pedido #56",
+      "quantity": 1,
+      "unit_amount": 1700
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 1700
+      },
+      "expiration_date": "2026-05-11T13:28:18.131Z"
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ]
+}
+
+RESPONSE
+{
+  "id": "ORDE_A79F7706-8625-4B68-96A3-0C43514858D9",
+  "reference_id": "f4cf233e-ae2d-49a0-8547-c47ef78bbe0e",
+  "created_at": "2026-05-11T09:58:18.753-03:00",
+  "customer": {
+    "name": "Cliente Sandbox Pix",
+    "email": "sandbox.pix@cardapiobemcomer.com.br",
+    "tax_id": "09299641447",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "83",
+        "number": "999999999"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "f4cf233e-ae2d-49a0-8547-c47ef78bbe0e",
+      "name": "Pedido #56",
+      "quantity": 1,
+      "unit_amount": 1700
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_DF985A29-2932-4A72-B137-6A3CD9E2192B",
+      "expiration_date": "2026-05-11T10:28:18.000-03:00",
+      "amount": {
+        "value": 1700
+      },
+      "text": "00020101021226850014br.gov.bcb.pix2563api-h.pagseguro.com/pix/v2/DF985A29-2932-4A72-B137-6A3CD9E2192B5204531153039865802BR5922BEM COMER RESTAURANTE 6011Joao Pessoa62070503***63040B7C",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_DF985A29-2932-4A72-B137-6A3CD9E2192B/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_DF985A29-2932-4A72-B137-6A3CD9E2192B/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_A79F7706-8625-4B68-96A3-0C43514858D9",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_A79F7706-8625-4B68-96A3-0C43514858D9/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+============================================================
+MEIO DE PAGAMENTO: CARTAO DE CREDITO
+Endpoint: POST https://sandbox.api.pagseguro.com/orders
+Status HTTP: 201
+Order ID PagBank: ORDE_21903974-3935-4B2B-8A0D-B10390965955
+Charge ID PagBank: CHAR_4DA098D1-02E9-4370-9700-EC597436404F
+Status Charge: PAID
+
+Request
+{
+  "reference_id": "c845420a-1061-405a-b753-92e493df3050",
+  "customer": {
+    "name": "Cliente Sandbox Credito Aprovado",
+    "email": "sandbox.cartao@cardapiobemcomer.com.br",
+    "tax_id": "09299641447",
+    "phones": [
+      {
+        "country": "55",
+        "area": "83",
+        "number": "999999999",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "c845420a-1061-405a-b753-92e493df3050",
+      "name": "Pedido #57",
+      "quantity": 1,
+      "unit_amount": 1700
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ],
+  "charges": [
+    {
+      "reference_id": "c845420a-1061-405a-b753-92e493df3050",
+      "description": "Pedido #57",
+      "amount": {
+        "value": 1700,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "Nsd45oGZtte4wbjG5ggXscSJt04MAK9COFuE5u5XGqVBeJmSdozESco3iR+Aqb6whLbgXD0QldLQj/c0P5XkuNW/wJSRJo1/nfgSAN+tBw/5GeWvkF/39zOdtGSTYoeukHfj6Gv3y56g/SGoV2tHz6RzsCCDdYS/lIFmp0EYdWbo2WSW1s5uTLeEcpTJvOiUmlB5qRQesgPZ0fzEtYE8MMDpmgOgYXTTbVSdREniaDO18Ec7QMunfmM1bPwMQirX0K7b84BBJsNozq4nPZyM8vgro3X61zllKEVDkFoK0YIW94zbbBduIuVnz7aGCsRAQQGqLd0/nIpWO5mOb+Vk3g==",
+          "store": false
+        },
+        "holder": {
+          "name": "Cliente Sandbox Credito Aprovado",
+          "tax_id": "09299641447"
+        }
+      }
+    }
+  ]
+}
+
+RESPONSE
+{
+  "id": "ORDE_21903974-3935-4B2B-8A0D-B10390965955",
+  "reference_id": "c845420a-1061-405a-b753-92e493df3050",
+  "created_at": "2026-05-11T09:58:49.759-03:00",
+  "customer": {
+    "name": "Cliente Sandbox Credito Aprovado",
+    "email": "sandbox.cartao@cardapiobemcomer.com.br",
+    "tax_id": "09299641447",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "83",
+        "number": "999999999"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "c845420a-1061-405a-b753-92e493df3050",
+      "name": "Pedido #57",
+      "quantity": 1,
+      "unit_amount": 1700
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_4DA098D1-02E9-4370-9700-EC597436404F",
+      "reference_id": "c845420a-1061-405a-b753-92e493df3050",
+      "status": "PAID",
+      "created_at": "2026-05-11T09:58:50.370-03:00",
+      "paid_at": "2026-05-11T09:58:50.000-03:00",
+      "description": "Pedido #57",
+      "amount": {
+        "value": 1700,
+        "currency": "BRL",
+        "summary": {
+          "total": 1700,
+          "paid": 1700,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO",
+        "reference": "032416400102",
+        "raw_data": {
+          "authorization_code": "145803",
+          "nsu": "032416400102",
+          "reason_code": "00"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "visa",
+          "first_digits": "453962",
+          "last_digits": "2097",
+          "exp_month": "12",
+          "exp_year": "2030",
+          "holder": {
+            "name": "CLIENTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {},
+          "country": "BRA"
+        },
+        "soft_descriptor": "Bemcomer"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_21903974-3935-4B2B-8A0D-B10390965955"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_4DA098D1-02E9-4370-9700-EC597436404F",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_4DA098D1-02E9-4370-9700-EC597436404F/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_21903974-3935-4B2B-8A0D-B10390965955",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_21903974-3935-4B2B-8A0D-B10390965955/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+============================================================
+MEIO DE PAGAMENTO: SESSAO 3DS PAGBANK - PRE-DEBITO
+Endpoint: POST https://sandbox.sdk.pagseguro.com/checkout-sdk/sessions
+Status HTTP: 201
+
+Request
+{}
+
+RESPONSE
+{
+  "session": "d7JLrT4gi8p7gb/zCjTbJDyIy+g4GbJIYmXmefez48dypAL+dWhWAERVBB7O5P4CVc0fqBR+nq/qY7/Ad0hscbOd51d8H8TOv7Mtb5xoSYPXO9vkhPQVLZPIICqM055e0zYoKSix2VCCToZVZ6tKrjVcne4+9utdyv6AaV/+R5sQof4vucvSeIZSI+sjRMOZMUK3xm3cfZ4oawEbYDmC1OkfqyBrOOxUWxlDAosRmvL6LTZr9kGcfIVWU2lIYSzvZlmQrT65Z1pZz+iwFR1u/dCEfv2AnnZhWMYhiQam4CErbXRKxrtPjg1MVrI5KRK2l7QvJMtfPfFta9g65r9nvw==",
+  "expires_at": 1778506161529
+}
+
+============================================================
+MEIO DE PAGAMENTO: CARTAO DE DEBITO COM 3DS
+Endpoint: POST https://sandbox.api.pagseguro.com/orders
+Status HTTP: 201
+Order ID PagBank: ORDE_EA803DDC-6A84-402B-B504-76460E5DF845
+Charge ID PagBank: CHAR_6750F78E-B2A8-4481-8CCF-FD8783CDEE1C
+Status Charge: PAID
+
+Request
+{
+  "reference_id": "78228ae4-8044-494f-a794-7525936923a6",
+  "customer": {
+    "name": "Jose da Silva",
+    "email": "sandbox.debito@cardapiobemcomer.com.br",
+    "tax_id": "09299641447",
+    "phones": [
+      {
+        "country": "55",
+        "area": "83",
+        "number": "999999999",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "78228ae4-8044-494f-a794-7525936923a6",
+      "name": "Pedido #58",
+      "quantity": 1,
+      "unit_amount": 1000
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ],
+  "charges": [
+    {
+      "reference_id": "78228ae4-8044-494f-a794-7525936923a6",
+      "description": "Pedido #58",
+      "amount": {
+        "value": 1000,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "DEBIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "Og8i6+iJ6m1c76Ag69o5UtoQ+dEV69K1uwIm+uRZj/aZqUDJ0XC5CsdpRnWEis8IB7RU17N6IgWiO0ai1mA/L51dzD6tw5vtETR/cz0mY2KnGviygbCTFuKgw3ex4F/lMGWli+9uRMRM/mUvgChRhqdq6p/htBJgw583q5rdSobPyMOS4a4Liea7WiGXDr8Z2shJ0BSW/2oaBvLurkwyl6/qyqr2Gj62DBCr6Fgff9w7gtpsEdf+dtSN9DEOYekJWXRXttEG0v1eqi3ItlSxYakOtDtKWsSXN9xaLahuA15SeXmF3wkgfy+ONeIeg6o9gTQuoZx0g+K9e/oVges4kw==",
+          "store": false
+        },
+        "holder": {
+          "name": "Jose da Silva",
+          "tax_id": "09299641447"
+        },
+        "authentication_method": {
+          "type": "THREEDS",
+          "id": "3DS_A2A887EB-1A1F-40F8-88DC-E5762B28F9AE"
+        }
+      }
+    }
+  ]
+}
+
+RESPONSE
+{
+  "id": "ORDE_EA803DDC-6A84-402B-B504-76460E5DF845",
+  "reference_id": "78228ae4-8044-494f-a794-7525936923a6",
+  "created_at": "2026-05-11T09:59:25.208-03:00",
+  "customer": {
+    "name": "Jose da Silva",
+    "email": "sandbox.debito@cardapiobemcomer.com.br",
+    "tax_id": "09299641447",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "83",
+        "number": "999999999"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "78228ae4-8044-494f-a794-7525936923a6",
+      "name": "Pedido #58",
+      "quantity": 1,
+      "unit_amount": 1000
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_6750F78E-B2A8-4481-8CCF-FD8783CDEE1C",
+      "reference_id": "78228ae4-8044-494f-a794-7525936923a6",
+      "status": "PAID",
+      "created_at": "2026-05-11T09:59:25.803-03:00",
+      "paid_at": "2026-05-11T09:59:26.000-03:00",
+      "description": "Pedido #58",
+      "amount": {
+        "value": 1000,
+        "currency": "BRL",
+        "summary": {
+          "total": 1000,
+          "paid": 1000,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO",
+        "reference": "032416400102",
+        "raw_data": {
+          "authorization_code": "145803",
+          "nsu": "032416400102",
+          "reason_code": "00"
+        }
+      },
+      "payment_method": {
+        "type": "DEBIT_CARD",
+        "card": {
+          "brand": "elo",
+          "first_digits": "650505",
+          "last_digits": "1000",
+          "exp_month": "12",
+          "exp_year": "2029",
+          "holder": {
+            "name": "JOSE DA SILVA"
+          },
+          "issuer": {},
+          "country": "BRA"
+        },
+        "authentication_method": {
+          "type": "THREEDS",
+          "status": "AUTHENTICATED"
+        },
+        "soft_descriptor": "Bemcomer"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_EA803DDC-6A84-402B-B504-76460E5DF845"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_6750F78E-B2A8-4481-8CCF-FD8783CDEE1C",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_6750F78E-B2A8-4481-8CCF-FD8783CDEE1C/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_EA803DDC-6A84-402B-B504-76460E5DF845",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_EA803DDC-6A84-402B-B504-76460E5DF845/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
