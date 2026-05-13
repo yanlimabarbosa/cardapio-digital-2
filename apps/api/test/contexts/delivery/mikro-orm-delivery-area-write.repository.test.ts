@@ -34,6 +34,7 @@ test('creates a delivery area through the provided transaction context', async (
         city: 'João Pessoa',
         fee: '10.00',
         normalizedKey: 'joao pessoa bessa',
+        matchNormalizedKeys: ['joao pessoa bessa'],
       },
     },
   ]);
@@ -46,6 +47,7 @@ test('creates a delivery area through the provided transaction context', async (
       city: 'João Pessoa',
       fee: 10,
       normalizedKey: 'joao pessoa bessa',
+      matchNormalizedKeys: ['joao pessoa bessa'],
       isActive: true,
     },
   });
@@ -112,6 +114,7 @@ test('updates a delivery area through the provided transaction context', async (
       city: 'Recife',
       fee: 9,
       normalizedKey: 'recife boa viagem',
+      matchNormalizedKeys: ['recife centro'],
       isActive: false,
     },
   });
@@ -192,6 +195,7 @@ type CreateCall = {
 type DeliveryAreaCreatePayload = {
   readonly city: string;
   readonly fee: string;
+  readonly matchNormalizedKeys?: string[];
   readonly neighborhood: string;
   readonly normalizedKey: string;
 };
@@ -242,6 +246,7 @@ function createDeliveryArea(id: string, data?: DeliveryAreaCreatePayload): Deliv
   area.city = data?.city ?? 'Recife';
   area.fee = data?.fee ?? '7.50';
   area.normalizedKey = data?.normalizedKey ?? 'recife centro';
+  area.matchNormalizedKeys = data?.matchNormalizedKeys ?? ['recife centro'];
   area.isActive = true;
 
   return area;

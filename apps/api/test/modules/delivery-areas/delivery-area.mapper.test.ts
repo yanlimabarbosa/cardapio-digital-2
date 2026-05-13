@@ -10,6 +10,7 @@ test('maps delivery area read models to response DTOs', (): void => {
     city: 'Recife',
     fee: 7.5,
     normalizedKey: 'recife-centro',
+    matchNormalizedKeys: ['recife-centro'],
     isActive: true,
   });
 
@@ -19,5 +20,6 @@ test('maps delivery area read models to response DTOs', (): void => {
   assert.equal(result.city, 'Recife');
   assert.equal(result.fee, 7.5);
   assert.equal(result.normalizedKey, 'recife-centro');
+  assert.deepEqual(result.matchNormalizedKeys, ['recife-centro']);
   assert.equal(result.isActive, true);
 });

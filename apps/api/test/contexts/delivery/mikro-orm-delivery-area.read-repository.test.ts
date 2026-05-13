@@ -25,12 +25,13 @@ test('lists active delivery areas with the legacy ordering and response shape', 
       city: 'Recife',
       fee: 7.5,
       normalizedKey: 'recife-centro',
+      matchNormalizedKeys: ['recife-centro'],
       isActive: true,
     },
   ]);
 });
 
-test('lists all admin delivery areas with inactive rows included', async (): Promise<void> => {
+test('lists all admin delivery areas with active rows first', async (): Promise<void> => {
   const area = createDeliveryArea('area-2', { fee: '9.00', isActive: false });
   const em = new FakeEntityManager([area]);
   const repository = new MikroOrmDeliveryAreaReadRepository(em as unknown as EntityManager);
@@ -41,7 +42,7 @@ test('lists all admin delivery areas with inactive rows included', async (): Pro
     {
       entity: DeliveryArea,
       where: {},
-      options: { orderBy: { city: 'ASC', neighborhood: 'ASC' } },
+      options: { orderBy: { isActive: 'DESC', city: 'ASC', neighborhood: 'ASC' } },
     },
   ]);
   assert.deepEqual(result, [
@@ -51,6 +52,7 @@ test('lists all admin delivery areas with inactive rows included', async (): Pro
       city: 'Recife',
       fee: 9,
       normalizedKey: 'recife-centro',
+      matchNormalizedKeys: ['recife-centro'],
       isActive: false,
     },
   ]);
@@ -61,6 +63,7 @@ type FindCall = {
   readonly options: {
     readonly orderBy: {
       readonly city: 'ASC';
+      readonly isActive?: 'DESC';
       readonly neighborhood: 'ASC';
     };
   };
@@ -93,6 +96,7 @@ function createDeliveryArea(
   area.city = 'Recife';
   area.fee = overrides.fee;
   area.normalizedKey = 'recife-centro';
+  area.matchNormalizedKeys = ['recife-centro'];
   area.isActive = overrides.isActive;
 
   return area;
