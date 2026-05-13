@@ -25,6 +25,7 @@ export class MikroOrmOrderDeliveryAreaRepository implements OrderDeliveryAreaRep
       id: area.id,
       feeAmount: area.fee,
       feeCents: this.decimalToCents(area.fee),
+      matchNormalizedKeys: area.matchNormalizedKeys.length > 0 ? area.matchNormalizedKeys : [area.normalizedKey],
     };
   }
 

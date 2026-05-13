@@ -1,4 +1,5 @@
 export type OrderDeliveryFeeRequest = {
+  readonly deliveryMatchKey?: string | null;
   readonly deliveryAreaId?: string | null;
   readonly deliveryType?: 'delivery' | 'pickup' | null;
 };
@@ -7,6 +8,7 @@ export type OrderDeliveryFeeAreaInput = {
   readonly feeAmount: string;
   readonly feeCents: number;
   readonly id: string;
+  readonly matchNormalizedKeys: readonly string[];
 };
 
 export type OrderDeliveryFeeResolution = {
@@ -53,6 +55,7 @@ export class OrderDeliveryFeePolicy {
     }
 
     this.assertValidFee(area);
+    this.assertAreaMatchesDeliveryAddress(area);
 
     return {
       feeAmount: area.feeAmount,
@@ -67,6 +70,16 @@ export class OrderDeliveryFeePolicy {
   private assertValidFee(area: OrderDeliveryFeeAreaInput): void {
     if (!Number.isFinite(area.feeCents) || area.feeCents < 0 || area.feeAmount.trim().length === 0) {
       throw new InvalidOrderDeliveryFeeError('Taxa de entrega inválida');
+    }
+  }
+
+  private assertAreaMatchesDeliveryAddress(area: OrderDeliveryFeeAreaInput): void {
+    if (!this.request.deliveryMatchKey) {
+      throw new InvalidOrderDeliveryFeeError('CEP de entrega é obrigatório para delivery');
+    }
+
+    if (!area.matchNormalizedKeys.includes(this.request.deliveryMatchKey)) {
+      throw new InvalidOrderDeliveryFeeError('Área de entrega não compatível com o CEP informado');
     }
   }
 }

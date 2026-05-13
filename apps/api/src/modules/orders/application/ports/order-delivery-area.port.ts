@@ -6,6 +6,7 @@ export type OrderDeliveryAreaModel = {
   readonly feeAmount: string;
   readonly feeCents: number;
   readonly id: string;
+  readonly matchNormalizedKeys: readonly string[];
 };
 
 export interface OrderDeliveryAreaRepository {
