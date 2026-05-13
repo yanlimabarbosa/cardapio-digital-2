@@ -1271,6 +1271,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "match_normalized_keys": {
+          "name": "match_normalized_keys",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'[]'",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
         }
       },
       "name": "delivery_areas",

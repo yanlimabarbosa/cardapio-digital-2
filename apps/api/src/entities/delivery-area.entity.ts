@@ -17,6 +17,9 @@ export class DeliveryArea {
   @Property({ unique: true })
   normalizedKey!: string;
 
+  @Property({ columnType: 'jsonb', defaultRaw: "'[]'::jsonb" })
+  matchNormalizedKeys: string[] = [];
+
   @Property({ default: true })
   isActive?: boolean = true;
 
