@@ -53,7 +53,6 @@ export function normalizeWeeklySchedule(schedule?: WeeklySchedule | null): Weekl
     const rawRanges = getRawRanges(schedule, day);
     const ranges = rawRanges
       .filter((range): range is TimeRange => !!range && isValidTime(range.start) && isValidTime(range.end))
-      .filter((range) => timeToMinutes(range.start) < timeToMinutes(range.end))
       .map((range) => ({ start: range.start, end: range.end }))
       .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
 

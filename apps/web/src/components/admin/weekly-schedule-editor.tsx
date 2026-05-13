@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import {
   WEEKDAYS,
@@ -26,7 +27,12 @@ export function WeeklyScheduleEditor({
   unrestrictedLabel = 'Sem restrição de horário',
 }: WeeklyScheduleEditorProps) {
   const configured = value !== null && value !== undefined;
-  const schedule = completeSchedule(value);
+  const [draft, setDraft] = useState<WeeklySchedule>(() => completeSchedule(value));
+  const schedule = draft;
+
+  useEffect(() => {
+    setDraft(completeSchedule(value));
+  }, [value]);
 
   if (allowUnrestricted && !configured) {
     return (
@@ -35,7 +41,11 @@ export function WeeklyScheduleEditor({
           <p className="text-sm font-semibold text-[#8B7355]">{unrestrictedLabel}</p>
           <button
             type="button"
-            onClick={() => onChange(emptySchedule())}
+            onClick={() => {
+              const next = emptySchedule();
+              setDraft(next);
+              onChange(next);
+            }}
             className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E8DDD0] px-3 py-2 text-xs font-bold text-[#A0603A] transition-colors hover:bg-[#FAF6F1]"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -48,10 +58,16 @@ export function WeeklyScheduleEditor({
 
   function commit(next: WeeklySchedule | null) {
     if (allowUnrestricted && next === null) {
+      setDraft(emptySchedule());
       onChange(null);
       return;
     }
-    onChange(normalizeWeeklySchedule(next) ?? emptySchedule());
+
+    const normalized = normalizeWeeklySchedule(next) ?? emptySchedule();
+    setDraft(normalized);
+    if (hasInvalidRanges(normalized)) return;
+
+    onChange(normalized);
   }
 
   function addRange(day: Weekday) {
@@ -98,31 +114,47 @@ export function WeeklyScheduleEditor({
                 {ranges.length === 0 ? (
                   <span className="text-xs font-semibold text-[#C4B5A0]">Fechado</span>
                 ) : (
-                  ranges.map((range, index) => (
-                    <div key={`${day}-${index}`} className="flex items-center gap-2">
-                      <input
-                        type="time"
-                        value={range.start}
-                        onChange={(event) => updateRange(day, index, { start: event.target.value })}
-                        className="h-9 w-28 rounded-lg border border-[#E8DDD0] bg-white px-2 text-sm font-semibold text-[#3D2B1F] outline-none focus:border-[#D4C8BA]"
-                      />
-                      <span className="text-xs font-semibold text-[#8B7355]">às</span>
-                      <input
-                        type="time"
-                        value={range.end}
-                        onChange={(event) => updateRange(day, index, { end: event.target.value })}
-                        className="h-9 w-28 rounded-lg border border-[#E8DDD0] bg-white px-2 text-sm font-semibold text-[#3D2B1F] outline-none focus:border-[#D4C8BA]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeRange(day, index)}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500"
-                        title="Remover intervalo"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))
+                  ranges.map((range, index) => {
+                    const invalid = isInvalidRange(range);
+                    return (
+                      <div key={`${day}-${index}`}>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="time"
+                            value={range.start}
+                            onChange={(event) => updateRange(day, index, { start: event.target.value })}
+                            aria-invalid={invalid}
+                            className={`h-9 w-28 rounded-lg border bg-white px-2 text-sm font-semibold text-[#3D2B1F] outline-none focus:ring-2 ${
+                              invalid ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-[#E8DDD0] focus:border-[#D4C8BA] focus:ring-[#E8DDD0]/50'
+                            }`}
+                          />
+                          <span className="text-xs font-semibold text-[#8B7355]">às</span>
+                          <input
+                            type="time"
+                            value={range.end}
+                            onChange={(event) => updateRange(day, index, { end: event.target.value })}
+                            aria-invalid={invalid}
+                            className={`h-9 w-28 rounded-lg border bg-white px-2 text-sm font-semibold text-[#3D2B1F] outline-none focus:ring-2 ${
+                              invalid ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-[#E8DDD0] focus:border-[#D4C8BA] focus:ring-[#E8DDD0]/50'
+                            }`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeRange(day, index)}
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500"
+                            title="Remover intervalo"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                        {invalid && (
+                          <p className="mt-1 text-[11px] font-semibold text-red-600">
+                            O horário final deve ser depois do inicial.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })
                 )}
               </div>
               <button
@@ -173,4 +205,12 @@ function getNextAvailableRange(ranges: TimeRange[]): TimeRange | null {
 
 function hasExactRange(candidate: TimeRange, ranges: TimeRange[]): boolean {
   return ranges.some((range) => range.start === candidate.start && range.end === candidate.end);
+}
+
+function hasInvalidRanges(schedule: WeeklySchedule): boolean {
+  return WEEKDAYS.some((day) => (schedule[day] ?? []).some(isInvalidRange));
+}
+
+function isInvalidRange(range: TimeRange): boolean {
+  return timeToMinutes(range.start) >= timeToMinutes(range.end);
 }
