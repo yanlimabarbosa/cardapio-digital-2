@@ -37,6 +37,7 @@ test('rejects missing active delivery areas with the existing message', (): void
       OrderDeliveryFeePolicy.for({
         deliveryType: 'delivery',
         deliveryAreaId: 'area-1',
+        deliveryMatchKey: 'recife boa viagem',
       }).resolve(null),
     'Área de entrega não encontrada ou indisponível',
   );
@@ -46,10 +47,12 @@ test('applies the active delivery area fee', (): void => {
   const result = OrderDeliveryFeePolicy.for({
     deliveryType: 'delivery',
     deliveryAreaId: 'area-1',
+    deliveryMatchKey: 'recife boa viagem',
   }).resolve({
     id: 'area-1',
     feeAmount: '7.50',
     feeCents: 750,
+    matchNormalizedKeys: ['recife boa viagem'],
   });
 
   assert.deepEqual(result, {
@@ -64,12 +67,31 @@ test('rejects invalid persisted delivery fees', (): void => {
       OrderDeliveryFeePolicy.for({
         deliveryType: 'delivery',
         deliveryAreaId: 'area-1',
+        deliveryMatchKey: 'recife boa viagem',
       }).resolve({
         id: 'area-1',
         feeAmount: '',
         feeCents: Number.NaN,
+        matchNormalizedKeys: ['recife boa viagem'],
       }),
     'Taxa de entrega inválida',
+  );
+});
+
+test('rejects delivery areas that do not match the CEP bairro', (): void => {
+  assertInvalidDeliveryFee(
+    () =>
+      OrderDeliveryFeePolicy.for({
+        deliveryType: 'delivery',
+        deliveryAreaId: 'area-1',
+        deliveryMatchKey: 'recife pina',
+      }).resolve({
+        id: 'area-1',
+        feeAmount: '7.50',
+        feeCents: 750,
+        matchNormalizedKeys: ['recife boa viagem'],
+      }),
+    'Área de entrega não compatível com o CEP informado',
   );
 });
 

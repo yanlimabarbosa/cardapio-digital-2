@@ -28,6 +28,10 @@ import type {
   OrderCustomerRepository,
 } from '../../../src/modules/orders/application/ports/order-customer.port';
 import type {
+  OrderDeliveryAddressResolution,
+  OrderDeliveryAddressResolver,
+} from '../../../src/modules/orders/application/ports/order-delivery-address-resolver.port';
+import type {
   OrderDeliveryAreaModel,
   OrderDeliveryAreaRepository,
 } from '../../../src/modules/orders/application/ports/order-delivery-area.port';
@@ -264,6 +268,7 @@ function createHarness(options: {
   const couponUsageRepository = new FakeOrderCouponUsageRepository(calls);
   const loyaltyRedemptionRepository = new FakeOrderLoyaltyRedemptionRepository(calls);
   const reporter = new FakeOrderCreationReporter(calls);
+  const deliveryAddressResolver = new FakeOrderDeliveryAddressResolver();
   const useCase = new CreateOrderUseCase(
     unitOfWork,
     clock,
@@ -277,6 +282,7 @@ function createHarness(options: {
     couponUsageRepository,
     loyaltyRedemptionRepository,
     reporter,
+    deliveryAddressResolver,
   );
 
   return {
@@ -373,7 +379,14 @@ class FakeOrderDeliveryAreaRepository implements OrderDeliveryAreaRepository {
       id,
       feeAmount: '3.00',
       feeCents: 300,
+      matchNormalizedKeys: ['recife boa viagem'],
     };
+  }
+}
+
+class FakeOrderDeliveryAddressResolver implements OrderDeliveryAddressResolver {
+  public async resolveByCep(_cep: string): Promise<OrderDeliveryAddressResolution | null> {
+    return { normalizedKey: 'recife boa viagem' };
   }
 }
 

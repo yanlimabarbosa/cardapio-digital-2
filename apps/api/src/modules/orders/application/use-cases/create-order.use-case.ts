@@ -34,6 +34,7 @@ import type {
 import type { OrderCouponValidationSuccess, OrderCouponValidator } from '../ports/order-coupon.port';
 import type { OrderCouponUsageRepository } from '../ports/order-coupon-usage.port';
 import type { OrderCreationReporter, OrderCreatedReport } from '../ports/order-creation-reporter.port';
+import type { OrderDeliveryAddressResolver } from '../ports/order-delivery-address-resolver.port';
 import type {
   OrderCustomerModel,
   OrderCustomerRepository,
@@ -130,10 +131,14 @@ export class CreateOrderUseCase {
     private readonly orderCouponUsageRepository: OrderCouponUsageRepository,
     private readonly orderLoyaltyRedemptionRepository: OrderLoyaltyRedemptionRepository,
     private readonly orderCreationReporter: OrderCreationReporter,
+    private readonly orderDeliveryAddressResolver: OrderDeliveryAddressResolver,
   ) {}
 
   public async execute(command: CreateOrderCommand): Promise<CreateOrderResult> {
-    const execution = await this.unitOfWork.run((context) => this.createInsideTransaction(command, context));
+    const deliveryMatchKey = await this.resolveDeliveryMatchKey(command);
+    const execution = await this.unitOfWork.run((context) =>
+      this.createInsideTransaction(command, deliveryMatchKey, context),
+    );
     await this.orderCreationReporter.orderCreated(execution.report);
 
     return execution.result;
@@ -141,6 +146,7 @@ export class CreateOrderUseCase {
 
   private async createInsideTransaction(
     command: CreateOrderCommand,
+    deliveryMatchKey: string | null,
     context: TransactionContext,
   ): Promise<CreateOrderExecution> {
     const scheduledOrder = this.resolveScheduledOrder(command.scheduledFor);
@@ -173,7 +179,7 @@ export class CreateOrderUseCase {
       draft = draft.addPaidItem(snapshot);
     }
 
-    const deliveryFee = await this.resolveDeliveryFee(command, context);
+    const deliveryFee = await this.resolveDeliveryFee(command, deliveryMatchKey, context);
     draft = draft.applyDeliveryFee(deliveryFee);
 
     const appliedCoupon = await this.validateCoupon(command);
@@ -390,11 +396,13 @@ export class CreateOrderUseCase {
 
   private async resolveDeliveryFee(
     command: CreateOrderCommand,
+    deliveryMatchKey: string | null,
     context: TransactionContext,
   ): Promise<OrderDeliveryFeeResolution> {
     const policy = OrderDeliveryFeePolicy.for({
       deliveryType: this.deliveryType(command),
       deliveryAreaId: command.deliveryAreaId ?? null,
+      deliveryMatchKey,
     });
 
     try {
@@ -420,6 +428,23 @@ export class CreateOrderUseCase {
     }
 
     return this.orderDeliveryAreaRepository.findActiveById(id, context);
+  }
+
+  private async resolveDeliveryMatchKey(command: CreateOrderCommand): Promise<string | null> {
+    if (this.deliveryType(command) !== 'delivery') {
+      return null;
+    }
+
+    if (!command.deliveryAddress?.cep) {
+      throw new CreateOrderValidationError('CEP de entrega é obrigatório para delivery');
+    }
+
+    const resolution = await this.orderDeliveryAddressResolver.resolveByCep(command.deliveryAddress.cep);
+    if (!resolution) {
+      throw new CreateOrderValidationError('CEP de entrega não encontrado');
+    }
+
+    return resolution.normalizedKey;
   }
 
   private resolveScheduledOrder(value?: string | null): ScheduledOrderResolution {
