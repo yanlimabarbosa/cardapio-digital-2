@@ -30,6 +30,7 @@ test('updates a delivery area inside a unit of work while omitting undefined fie
       city: 'João Pessoa',
       fee: 12,
       normalizedKey: 'joao pessoa bessa',
+      matchNormalizedKeys: ['joao pessoa bessa'],
       isActive: false,
     },
   });
@@ -49,6 +50,7 @@ test('updates a delivery area inside a unit of work while omitting undefined fie
     city: 'João Pessoa',
     fee: 12,
     normalizedKey: 'joao pessoa bessa',
+    matchNormalizedKeys: ['joao pessoa bessa'],
     isActive: false,
   });
   assert.equal(unitOfWork.runs, 1);

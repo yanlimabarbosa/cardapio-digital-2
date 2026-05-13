@@ -11,6 +11,7 @@ const activeArea: DeliveryAreaReadModel = {
   city: 'Recife',
   fee: 7.5,
   normalizedKey: 'recife-centro',
+  matchNormalizedKeys: ['recife-centro'],
   isActive: true,
 };
 
@@ -20,6 +21,7 @@ const inactiveArea: DeliveryAreaReadModel = {
   city: 'Recife',
   fee: 9,
   normalizedKey: 'recife-boa-viagem',
+  matchNormalizedKeys: ['recife-boa-viagem'],
   isActive: false,
 };
 

@@ -27,6 +27,7 @@ test('creates a delivery area inside a unit of work with a normalized key', asyn
       city: 'João Pessoa',
       fee: 10,
       normalizedKey: 'joao pessoa bessa',
+      matchNormalizedKeys: ['joao pessoa bessa'],
       isActive: true,
     },
   });
@@ -45,6 +46,7 @@ test('creates a delivery area inside a unit of work with a normalized key', asyn
     city: 'João Pessoa',
     fee: 10,
     normalizedKey: 'joao pessoa bessa',
+    matchNormalizedKeys: ['joao pessoa bessa'],
     isActive: true,
   });
   assert.equal(unitOfWork.runs, 1);
