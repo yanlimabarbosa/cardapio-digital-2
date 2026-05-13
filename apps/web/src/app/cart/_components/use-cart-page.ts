@@ -84,9 +84,10 @@ export function useCartPage() {
   const [loadingCep, setLoadingCep] = useState(false);
   const [couponInput, setCouponInput] = useState(couponCode ?? '');
   const [couponError, setCouponError] = useState<string | null>(null);
-  const [deliveryAreaError, setDeliveryAreaError] = useState<string | null>(null);
   const [cepAutoFilled, setCepAutoFilled] = useState(false);
-  const [showNeighborhoodSelect, setShowNeighborhoodSelect] = useState(false);
+  const [deliveryMatchKey, setDeliveryMatchKey] = useState<string | null>(null);
+  const [viaCepNeighborhood, setViaCepNeighborhood] = useState<string | null>(null);
+  const [deliveryAreaError, setDeliveryAreaError] = useState<string | null>(null);
 
   const subtotal = getTotalAmount(items);
   const effectiveFee = deliveryType === 'delivery' && deliveryAreaId ? deliveryFee : 0;
@@ -102,6 +103,11 @@ export function useCartPage() {
     () => getCartAvailabilityIssue(items, freshProducts, scheduledFor),
     [items, freshProducts, scheduledFor],
   );
+  const eligibleDeliveryAreas = useMemo(() => {
+    if (!deliveryMatchKey) return [];
+
+    return (deliveryAreas ?? []).filter((area) => area.matchNormalizedKeys.includes(deliveryMatchKey));
+  }, [deliveryAreas, deliveryMatchKey]);
 
   const form = useForm<CartFormData>({
     resolver: zodResolver(baseSchema),
@@ -122,6 +128,48 @@ export function useCartPage() {
   });
 
   const { register, handleSubmit, formState: { errors }, setValue, watch, trigger, reset } = form;
+
+  useEffect(() => {
+    if (deliveryType !== 'delivery' || !deliveryMatchKey || !deliveryAreas) return;
+
+    if (eligibleDeliveryAreas.length === 0) {
+      setDeliveryAreaError(
+        viaCepNeighborhood
+          ? `Não entregamos em ${viaCepNeighborhood}`
+          : 'Não entregamos no bairro desse CEP',
+      );
+      setDeliveryArea(null, 0);
+      return;
+    }
+
+    setDeliveryAreaError(null);
+    if (!deliveryAreaId && eligibleDeliveryAreas.length === 1) {
+      const [area] = eligibleDeliveryAreas;
+      setDeliveryArea(area.id, area.fee);
+      setValue('neighborhood', area.neighborhood);
+      setValue('city', area.city);
+      setDeliveryAddress({ neighborhood: area.neighborhood, city: area.city });
+      trigger('neighborhood');
+      return;
+    }
+
+    if (deliveryAreaId && !eligibleDeliveryAreas.some((area) => area.id === deliveryAreaId)) {
+      setDeliveryArea(null, 0);
+      setValue('neighborhood', '');
+      setDeliveryAddress({ neighborhood: '' });
+    }
+  }, [
+    deliveryAreaId,
+    deliveryAreas,
+    deliveryMatchKey,
+    deliveryType,
+    eligibleDeliveryAreas,
+    setDeliveryAddress,
+    setDeliveryArea,
+    setValue,
+    trigger,
+    viaCepNeighborhood,
+  ]);
 
   // Sync persisted store values into form after Zustand hydrates from localStorage
   const didSync = useRef(false);
@@ -150,32 +198,13 @@ export function useCartPage() {
       state: deliveryAddress.state,
     });
     const cep = deliveryAddress.cep.replace(/\D/g, '');
-    if (cep.length === 8 && !deliveryAddress.street) {
-      // CEP filled but street empty — fetch from ViaCEP
+    if (cep.length === 8) {
       fetchCep(deliveryAddress.cep);
-    } else if (deliveryAreaId && deliveryAddress.neighborhood) {
-      // Already had a delivery area selected — restore locked state
+    } else if (deliveryAddress.street) {
       setCepAutoFilled(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerName, customerPhone, deliveryAddress, deliveryType, notes]);
-
-  // When delivery areas load, match persisted address if no area is selected yet
-  const didMatchArea = useRef(false);
-  useEffect(() => {
-    if (didMatchArea.current || !deliveryAreas || deliveryAreaId) return;
-    if (deliveryType !== 'delivery' || !deliveryAddress.neighborhood || !deliveryAddress.city) return;
-    didMatchArea.current = true;
-    const matched = findDeliveryArea(deliveryAddress.city, deliveryAddress.neighborhood);
-    if (matched) {
-      setDeliveryArea(matched.id, matched.fee);
-      setCepAutoFilled(true);
-    } else if (deliveryAddress.cep.replace(/\D/g, '').length === 8) {
-      setDeliveryAreaError('Não entregamos nesse bairro');
-      setCepAutoFilled(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deliveryAreas, deliveryAreaId, deliveryType, deliveryAddress.neighborhood]);
 
   // Sync delivery type changes with form
   const watchDeliveryType = watch('deliveryType');
@@ -185,22 +214,17 @@ export function useCartPage() {
     }
   }, [watchDeliveryType, deliveryType, setDeliveryType]);
 
-  function findDeliveryArea(city: string, neighborhood: string): DeliveryAreaResponse | null {
-    if (!deliveryAreas) return null;
-    const key = normalizeNeighborhood(city + ' ' + neighborhood);
-    return deliveryAreas.find((area) => area.normalizedKey === key) ?? null;
-  }
-
   async function fetchCep(rawValue: string) {
     const cep = rawValue.replace(/\D/g, '');
     if (cep.length !== 8) return;
     const maskedCep = maskCep(rawValue);
 
     setLoadingCep(true);
-    setDeliveryAreaError(null);
     setDeliveryArea(null, 0);
+    setDeliveryMatchKey(null);
+    setViaCepNeighborhood(null);
+    setDeliveryAreaError(null);
     setCepAutoFilled(false);
-    setShowNeighborhoodSelect(false);
 
     try {
       const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
@@ -213,35 +237,29 @@ export function useCartPage() {
           city: data.localidade || '',
           state: data.uf || '',
         };
+        const matchKey = data.bairro && data.localidade
+          ? normalizeNeighborhood(`${data.localidade} ${data.bairro}`)
+          : null;
         setValue('street', fields.street);
         setValue('neighborhood', fields.neighborhood);
         setValue('city', fields.city);
         setValue('state', fields.state);
         setDeliveryAddress({ cep: maskedCep, ...fields });
 
-        if (fields.neighborhood && fields.city) {
-          const matched = findDeliveryArea(fields.city, fields.neighborhood);
-          if (matched) {
-            setDeliveryArea(matched.id, matched.fee);
-            setCepAutoFilled(true);
-          } else {
-            setDeliveryAreaError('Não entregamos nesse bairro');
-            setCepAutoFilled(true);
-          }
-        } else {
-          // ViaCEP returned no bairro — show combobox
-          setShowNeighborhoodSelect(true);
-        }
-
         if (fields.street) trigger('street');
-        if (fields.neighborhood) trigger('neighborhood');
+        setDeliveryMatchKey(matchKey);
+        setViaCepNeighborhood(data.bairro || null);
+        if (!matchKey) {
+          setDeliveryAreaError('Não encontramos área de entrega para esse CEP');
+        }
+        setCepAutoFilled(true);
       } else {
-        // CEP not found in ViaCEP — show combobox fallback
-        setShowNeighborhoodSelect(true);
+        setDeliveryAreaError('CEP não encontrado');
+        setCepAutoFilled(false);
       }
     } catch {
-      // Network failure — show combobox fallback
-      setShowNeighborhoodSelect(true);
+      setDeliveryAreaError('Erro ao buscar CEP');
+      setCepAutoFilled(false);
     }
     setLoadingCep(false);
   }
@@ -251,10 +269,11 @@ export function useCartPage() {
     setValue('cep', masked);
 
     // Reset delivery area state when CEP changes
-    if (cepAutoFilled || deliveryAreaError || showNeighborhoodSelect) {
+    if (cepAutoFilled || deliveryAreaId) {
       setCepAutoFilled(false);
+      setDeliveryMatchKey(null);
+      setViaCepNeighborhood(null);
       setDeliveryAreaError(null);
-      setShowNeighborhoodSelect(false);
       setDeliveryArea(null, 0);
       // Clear autofilled fields
       setValue('street', '');
@@ -273,8 +292,6 @@ export function useCartPage() {
     setValue('neighborhood', area.neighborhood);
     setValue('city', area.city);
     setDeliveryAddress({ neighborhood: area.neighborhood, city: area.city });
-    setDeliveryAreaError(null);
-    setShowNeighborhoodSelect(false);
     trigger('neighborhood');
   }
 
@@ -312,7 +329,6 @@ export function useCartPage() {
     setDeliveryType(type);
     if (type === 'pickup') {
       setDeliveryArea(null, 0);
-      setDeliveryAreaError(null);
     }
   }
 
@@ -358,7 +374,8 @@ export function useCartPage() {
   }
 
   const canSubmit =
-    (deliveryType === 'pickup' || (deliveryAreaId != null && !deliveryAreaError)) &&
+    (deliveryType === 'pickup' || deliveryAreaId != null) &&
+    !deliveryAreaError &&
     (canOrderNow || !!scheduledFor) &&
     !availabilityIssue;
 
@@ -412,10 +429,10 @@ export function useCartPage() {
     handleDeliveryAreaSelect,
     watch,
     // Delivery area state
-    deliveryAreaError,
     cepAutoFilled,
-    showNeighborhoodSelect,
-    deliveryAreas: deliveryAreas ?? [],
+    deliveryAreaError,
+    viaCepNeighborhood,
+    deliveryAreas: eligibleDeliveryAreas,
     canSubmit,
     // Coupon state
     couponCode,

@@ -8,7 +8,7 @@ import { getImageUrl } from '@/lib/admin-api';
 import { useCartPage } from '../use-cart-page';
 import { Field } from './field';
 import { useState, useMemo } from 'react';
-import type { DeliveryAreaResponse } from '@cardapio/shared';
+import { normalizeNeighborhood, type DeliveryAreaResponse } from '@cardapio/shared';
 import { SchedulePicker } from '@/components/schedule/schedule-picker';
 
 const inputBase = 'h-11 w-full rounded-xl border bg-white px-4 text-base font-medium text-[#3D2B1F] outline-none transition-colors placeholder:text-[#C4B5A0] focus:ring-2';
@@ -16,9 +16,25 @@ const inputOk = `${inputBase} border-[#E8DDD0] focus:border-[#D4C8BA] focus:ring
 const inputErr = `${inputBase} border-red-300 focus:border-red-400 focus:ring-red-100`;
 const inputReadOnly = `${inputBase} border-[#E8DDD0] bg-[#f9e8d8] text-[#8B7355] cursor-not-allowed`;
 
-function NeighborhoodSelect({ areas, onSelect }: { areas: DeliveryAreaResponse[]; onSelect: (area: DeliveryAreaResponse) => void }) {
+function NeighborhoodSelect({
+  areas,
+  onSelect,
+  selectedNeighborhood,
+  fallbackNeighborhood,
+}: {
+  areas: DeliveryAreaResponse[];
+  onSelect: (area: DeliveryAreaResponse) => void;
+  selectedNeighborhood: string;
+  fallbackNeighborhood?: string | null;
+}) {
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
+  const selectedArea = useMemo(
+    () => areas.find((area) => area.neighborhood === selectedNeighborhood) ?? null,
+    [areas, selectedNeighborhood],
+  );
+  const inputValue = open ? search : selectedArea?.neighborhood ?? '';
+  const displayValue = inputValue || fallbackNeighborhood || '';
 
   const grouped = useMemo(() => {
     const groups: Record<string, DeliveryAreaResponse[]> = {};
@@ -31,58 +47,87 @@ function NeighborhoodSelect({ areas, onSelect }: { areas: DeliveryAreaResponse[]
 
   const filtered = useMemo(() => {
     if (!search) return grouped;
-    const q = search.toLowerCase();
+    const q = normalizeNeighborhood(search);
     const result: Record<string, DeliveryAreaResponse[]> = {};
     for (const [city, cityAreas] of Object.entries(grouped)) {
       const matches = cityAreas.filter(
-        (a) => a.neighborhood.toLowerCase().includes(q) || a.city.toLowerCase().includes(q),
+        (a) =>
+          normalizeNeighborhood(a.neighborhood).includes(q) ||
+          normalizeNeighborhood(a.city).includes(q),
       );
       if (matches.length > 0) result[city] = matches;
     }
     return result;
   }, [grouped, search]);
 
+  function openDropdown() {
+    setSearch(selectedArea?.neighborhood ?? '');
+    setOpen(true);
+  }
+
   return (
     <div className="relative">
+      <input
+        type="text"
+        value={displayValue}
+        onFocus={(event) => {
+          openDropdown();
+          event.currentTarget.select();
+        }}
+        onClick={() => {
+          if (!open) openDropdown();
+        }}
+        onChange={(event) => {
+          setSearch(event.target.value);
+          setOpen(true);
+        }}
+        placeholder="Selecione seu bairro"
+        className={`${inputOk} pr-10 ${fallbackNeighborhood && !selectedArea ? 'text-[#8B7355]' : ''}`}
+      />
       <button
         type="button"
-        onClick={() => setOpen(!open)}
-        className={`${inputOk} flex items-center justify-between`}
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => {
+          if (open) {
+            setOpen(false);
+            setSearch('');
+          } else {
+            openDropdown();
+          }
+        }}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C4B5A0]"
+        aria-label={open ? 'Fechar bairros' : 'Abrir bairros'}
       >
-        <span className="text-[#C4B5A0]">Selecione seu bairro</span>
-        <ChevronDown className={`h-4 w-4 text-[#C4B5A0] transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-auto rounded-xl border border-[#E8DDD0] bg-white shadow-lg">
-          <div className="sticky top-0 bg-white p-2">
-            <input
-              type="text"
-              placeholder="Buscar bairro..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-9 w-full rounded-lg border border-[#E8DDD0] px-3 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA]"
-              autoFocus
-            />
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-[#E8DDD0] bg-white shadow-lg">
+          <div className="max-h-60 overflow-auto py-1">
+            {Object.entries(filtered).map(([city, cityAreas]) => (
+              <div key={city}>
+                <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#8B7355]">{city}</div>
+                {cityAreas.map((area) => (
+                  <button
+                    key={area.id}
+                    type="button"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => { onSelect(area); setOpen(false); setSearch(''); }}
+                    className={`flex w-full items-center justify-between px-3 py-2 text-sm transition-colors ${
+                      selectedArea?.id === area.id
+                        ? 'bg-[#FAF6F1] font-semibold text-[#3D2B1F]'
+                        : 'text-[#3D2B1F] hover:bg-[#FAF6F1]'
+                    }`}
+                  >
+                    <span>{area.neighborhood}</span>
+                    <span className="text-xs font-semibold text-terra-600">{formatCurrency(area.fee)}</span>
+                  </button>
+                ))}
+              </div>
+            ))}
+            {Object.keys(filtered).length === 0 && (
+              <div className="px-3 py-4 text-center text-sm text-[#C4B5A0]">Nenhum bairro encontrado</div>
+            )}
           </div>
-          {Object.entries(filtered).map(([city, cityAreas]) => (
-            <div key={city}>
-              <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#8B7355]">{city}</div>
-              {cityAreas.map((area) => (
-                <button
-                  key={area.id}
-                  type="button"
-                  onClick={() => { onSelect(area); setOpen(false); setSearch(''); }}
-                  className="flex w-full items-center justify-between px-3 py-2 text-sm text-[#3D2B1F] transition-colors hover:bg-[#FAF6F1]"
-                >
-                  <span>{area.neighborhood}</span>
-                  <span className="text-xs font-semibold text-terra-600">{formatCurrency(area.fee)}</span>
-                </button>
-              ))}
-            </div>
-          ))}
-          {Object.keys(filtered).length === 0 && (
-            <div className="px-3 py-4 text-center text-sm text-[#C4B5A0]">Nenhum bairro encontrado</div>
-          )}
         </div>
       )}
     </div>
@@ -109,9 +154,9 @@ export function CartClient() {
     handlePhoneChange,
     handleDeliveryTypeChange,
     handleDeliveryAreaSelect,
-    deliveryAreaError,
     cepAutoFilled,
-    showNeighborhoodSelect,
+    deliveryAreaError,
+    viaCepNeighborhood,
     deliveryAreas,
     canSubmit,
     couponCode,
@@ -310,10 +355,11 @@ export function CartClient() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mt-6 overflow-hidden"
+            className="relative z-20 mt-6 overflow-visible"
           >
             <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#8B7355]">Endereço de entrega</h2>
-            <div className="space-y-3 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4">
+            <div className="overflow-visible rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4">
+              <div className="space-y-3 overflow-visible">
               <Field label="CEP" error={errors.cep?.message}>
                 <div className="flex gap-2">
                   <input
@@ -352,16 +398,13 @@ export function CartClient() {
                 </Field>
               </div>
               <Field label="Bairro" error={errors.neighborhood?.message} required>
-                {showNeighborhoodSelect ? (
-                  <NeighborhoodSelect areas={deliveryAreas} onSelect={handleDeliveryAreaSelect} />
-                ) : (
-                  <input
-                    placeholder="Bairro"
-                    {...register('neighborhood')}
-                    readOnly={cepAutoFilled}
-                    className={cepAutoFilled ? inputReadOnly : errors.neighborhood ? inputErr : inputOk}
-                  />
-                )}
+                <NeighborhoodSelect
+                  areas={deliveryAreas}
+                  onSelect={handleDeliveryAreaSelect}
+                  selectedNeighborhood={deliveryAddress.neighborhood}
+                  fallbackNeighborhood={viaCepNeighborhood}
+                />
+                <input type="hidden" {...register('neighborhood')} />
               </Field>
 
               {deliveryAreaError && (
@@ -371,7 +414,7 @@ export function CartClient() {
                 </div>
               )}
 
-              {deliveryFee > 0 && !deliveryAreaError && (
+              {deliveryFee > 0 && (
                 <div className="flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2.5 text-sm font-medium text-green-700">
                   <Check className="h-4 w-4 shrink-0" />
                   Taxa de entrega: {formatCurrency(deliveryFee)}
@@ -380,6 +423,7 @@ export function CartClient() {
 
               <input type="hidden" {...register('city')} />
               <input type="hidden" {...register('state')} />
+              </div>
             </div>
           </motion.div>
         )}
