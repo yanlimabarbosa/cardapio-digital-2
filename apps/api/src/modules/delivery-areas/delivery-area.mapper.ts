@@ -8,6 +8,7 @@ export function toDeliveryAreaResponseDto(model: DeliveryAreaReadModel): Deliver
     model.city,
     model.fee,
     model.normalizedKey,
+    model.matchNormalizedKeys,
     model.isActive,
   );
 }
