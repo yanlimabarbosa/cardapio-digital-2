@@ -4,5 +4,6 @@ export interface DeliveryAreaResponse {
   city: string;
   fee: number;
   normalizedKey: string;
+  matchNormalizedKeys: string[];
   isActive: boolean;
 }

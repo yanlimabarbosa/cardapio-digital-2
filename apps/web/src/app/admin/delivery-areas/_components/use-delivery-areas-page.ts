@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
-import type { DeliveryAreaResponse } from '@cardapio/shared';
+import { normalizeNeighborhood, type DeliveryAreaResponse } from '@cardapio/shared';
 
 export function useDeliveryAreasPage() {
   const token = useAuthStore((s) => s.token);
@@ -56,8 +56,11 @@ export function useDeliveryAreasPage() {
 
   const filtered = (areas ?? []).filter((a) => {
     if (!search) return true;
-    const q = search.toLowerCase();
-    return a.neighborhood.toLowerCase().includes(q) || a.city.toLowerCase().includes(q);
+    const q = normalizeNeighborhood(search);
+    return (
+      normalizeNeighborhood(a.neighborhood).includes(q) ||
+      normalizeNeighborhood(a.city).includes(q)
+    );
   });
 
   function openCreate() {

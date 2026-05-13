@@ -41,7 +41,11 @@ function AreaDialog({
     e.preventDefault();
     const parsed = parseFloat(fee);
     if (!neighborhood.trim() || isNaN(parsed) || parsed < 0) return;
-    onSave({ neighborhood: neighborhood.trim(), city, fee: parsed });
+    onSave({
+      neighborhood: neighborhood.trim(),
+      city,
+      fee: parsed,
+    });
   }
 
   return (
@@ -56,11 +60,11 @@ function AreaDialog({
 
           <div className="space-y-4 px-6 py-5">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">Bairro</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">Chave ViaCEP</label>
               <input
                 value={neighborhood}
                 onChange={(e) => setNeighborhood(e.target.value)}
-                placeholder="Nome do bairro"
+                placeholder="Nome exato retornado pelo ViaCEP"
                 className="h-11 w-full rounded-xl border border-[#E8DDD0] px-3 text-sm text-[#3D2B1F] outline-none focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
                 required
               />
@@ -176,7 +180,7 @@ export function DeliveryAreasClient() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#E8DDD0] bg-[#FAF6F1]">
-                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-[#8B7355]">Bairro</th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-[#8B7355]">Bairro ViaCEP</th>
                 <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-[#8B7355] hidden sm:table-cell">Cidade</th>
                 <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-[#8B7355]">Taxa</th>
                 <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-[#8B7355]">Ações</th>
