@@ -2,7 +2,7 @@
 
 import { formatCurrency } from '@/lib/utils';
 import { getImageUrl } from '@/lib/admin-api';
-import { Plus, Pencil, Power, Loader2, ChevronDown, ImagePlus, Search } from 'lucide-react';
+import { Plus, Pencil, Loader2, ChevronDown, ImagePlus, Search, Eye, EyeOff, Trash2, CircleSlash } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useProductsPage } from '../use-products-page';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,6 +41,8 @@ export function ProductsClient() {
     saveMutation,
     uploading,
     toggleMutation,
+    updateProductStatusMutation,
+    deleteProductMutation,
     setProductDialogOpen,
     extraDialogOpen,
     isEditingExtra,
@@ -54,6 +56,7 @@ export function ProductsClient() {
     openEditExtra,
     handleSaveExtra,
     deleteExtraMutation,
+    updateExtraStatusMutation,
     saveExtraMutation,
     setExtraDialogOpen,
     searchQuery,
@@ -72,6 +75,7 @@ export function ProductsClient() {
     handleSaveOptionGroup,
     saveOptionGroupMutation,
     deleteOptionGroupMutation,
+    updateOptionGroupStatusMutation,
     setOptionGroupDialogOpen,
     // Group options
     groupOptionDialogOpen,
@@ -87,6 +91,7 @@ export function ProductsClient() {
     handleSaveGroupOption,
     saveGroupOptionMutation,
     deleteGroupOptionMutation,
+    updateGroupOptionStatusMutation,
     setGroupOptionDialogOpen,
   } = useProductsPage();
 
@@ -166,7 +171,7 @@ export function ProductsClient() {
             >
               <div className={cn(
                 'w-1 shrink-0',
-                product.isActive ? 'bg-emerald-400' : 'bg-red-300',
+                product.isActive ? (product.isSoldOut ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-slate-300',
               )} />
 
               <div className="flex-1 p-4">
@@ -194,9 +199,14 @@ export function ProductsClient() {
                             Composto
                           </span>
                         )}
+                        {product.isSoldOut && (
+                          <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                            Esgotado
+                          </span>
+                        )}
                         {!product.isActive && (
-                          <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-600">
-                            Inativo
+                          <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                            Oculto
                           </span>
                         )}
                       </div>
@@ -208,6 +218,7 @@ export function ProductsClient() {
                   <div className="flex shrink-0 gap-2 ml-2">
                     <button
                       onClick={() => toggleExpanded(product.id)}
+                      title={expandedProduct === product.id ? 'Recolher produto' : 'Expandir produto'}
                       className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-all hover:bg-[#FAF6F1]"
                     >
                       <motion.div
@@ -224,15 +235,35 @@ export function ProductsClient() {
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
+                      onClick={() => updateProductStatusMutation.mutate({ id: product.id, data: { isSoldOut: !product.isSoldOut } })}
+                      title={product.isSoldOut ? 'Marcar como disponível' : 'Marcar como esgotado'}
+                      className={cn(
+                        'rounded-lg border border-[#E8DDD0] p-2 transition-colors',
+                        product.isSoldOut
+                          ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                          : 'text-[#8B7355] hover:bg-amber-50 hover:text-amber-700',
+                      )}
+                    >
+                      <CircleSlash className="h-3.5 w-3.5" />
+                    </button>
+                    <button
                       onClick={() => toggleMutation.mutate(product.id)}
+                      title={product.isActive ? 'Ocultar do cardápio' : 'Mostrar no cardápio'}
                       className={cn(
                         'rounded-lg border border-[#E8DDD0] p-2 transition-colors',
                         product.isActive
-                          ? 'text-[#8B7355] hover:bg-red-50 hover:text-red-600'
-                          : 'text-emerald-500 hover:bg-emerald-50',
+                          ? 'text-[#8B7355] hover:bg-slate-100 hover:text-slate-700'
+                          : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100',
                       )}
                     >
-                      <Power className="h-3.5 w-3.5" />
+                      {product.isActive ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </button>
+                    <button
+                      onClick={() => deleteProductMutation.mutate(product.id)}
+                      title="Excluir"
+                      className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </div>
@@ -266,10 +297,11 @@ export function ProductsClient() {
                           ) : (
                             <div className="space-y-2">
                               {product.optionGroups.map((group) => (
-                                <div key={group.id} className={cn('rounded-xl border border-[#E8DDD0] bg-[#FAF6F1] overflow-hidden', !group.isActive && 'opacity-50')}>
+                                <div key={group.id} className={cn('rounded-xl border border-[#E8DDD0] bg-[#FAF6F1] overflow-hidden', !group.isActive && 'opacity-60')}>
                                   <div className="flex items-center justify-between px-3 py-2.5">
                                     <button
                                       onClick={() => toggleExpandedGroup(group.id)}
+                                      title={expandedGroup === group.id ? 'Recolher grupo' : 'Expandir grupo'}
                                       className="flex flex-1 items-center gap-2 text-left"
                                     >
                                       <motion.div animate={{ rotate: expandedGroup === group.id ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -280,6 +312,11 @@ export function ProductsClient() {
                                         {group.minSelections >= 1 ? 'Obrigatório' : 'Opcional'} · {group.maxSelections === 1 ? 'Única' : `Até ${group.maxSelections}`}
                                       </span>
                                       <span className="text-xs text-[#8B7355]">{group.options.length} opções</span>
+                                      {!group.isActive && (
+                                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                                          Oculto
+                                        </span>
+                                      )}
                                     </button>
                                     <div className="flex gap-1">
                                       <button
@@ -289,10 +326,18 @@ export function ProductsClient() {
                                         <Pencil className="h-3 w-3" />
                                       </button>
                                       <button
+                                        onClick={() => updateOptionGroupStatusMutation.mutate({ id: group.id, data: { isActive: !group.isActive } })}
+                                        title={group.isActive ? 'Ocultar grupo' : 'Mostrar grupo'}
+                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                      >
+                                        {group.isActive ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                                      </button>
+                                      <button
                                         onClick={() => deleteOptionGroupMutation.mutate(group.id)}
+                                        title="Excluir grupo"
                                         className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                       >
-                                        <Power className="h-3 w-3" />
+                                        <Trash2 className="h-3 w-3" />
                                       </button>
                                     </div>
                                   </div>
@@ -327,7 +372,7 @@ export function ProductsClient() {
                                                     key={opt.id}
                                                     className={cn(
                                                       'flex items-center justify-between rounded-lg border border-[#E8DDD0] bg-[#FFFCF8] px-2.5 py-1.5 text-xs',
-                                                      !opt.isActive && 'opacity-50',
+                                                      (!opt.isActive || opt.isSoldOut) && 'opacity-60',
                                                     )}
                                                   >
                                                     <div className="flex min-w-0 items-center gap-2">
@@ -341,6 +386,16 @@ export function ProductsClient() {
                                                       <span className="truncate text-[#3D2B1F]">
                                                         {opt.name} — {opt.price > 0 ? formatCurrency(opt.price) : 'Incluso'}
                                                       </span>
+                                                      {opt.isSoldOut && (
+                                                        <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                                                          Esgotado
+                                                        </span>
+                                                      )}
+                                                      {!opt.isActive && (
+                                                        <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">
+                                                          Oculto
+                                                        </span>
+                                                      )}
                                                     </div>
                                                     <div className="flex shrink-0 gap-1">
                                                       <button
@@ -350,10 +405,25 @@ export function ProductsClient() {
                                                         <Pencil className="h-2.5 w-2.5" />
                                                       </button>
                                                       <button
+                                                        onClick={() => updateGroupOptionStatusMutation.mutate({ id: opt.id, data: { isSoldOut: !opt.isSoldOut } })}
+                                                        title={opt.isSoldOut ? 'Marcar opção disponível' : 'Marcar opção esgotada'}
+                                                        className="rounded p-1 text-[#8B7355] transition-colors hover:bg-amber-50 hover:text-amber-700"
+                                                      >
+                                                        <CircleSlash className="h-2.5 w-2.5" />
+                                                      </button>
+                                                      <button
+                                                        onClick={() => updateGroupOptionStatusMutation.mutate({ id: opt.id, data: { isActive: !opt.isActive } })}
+                                                        title={opt.isActive ? 'Ocultar opção' : 'Mostrar opção'}
+                                                        className="rounded p-1 text-[#8B7355] transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                                      >
+                                                        {opt.isActive ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
+                                                      </button>
+                                                      <button
                                                         onClick={() => deleteGroupOptionMutation.mutate(opt.id)}
+                                                        title="Excluir opção"
                                                         className="rounded p-1 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                                       >
-                                                        <Power className="h-2.5 w-2.5" />
+                                                        <Trash2 className="h-2.5 w-2.5" />
                                                       </button>
                                                     </div>
                                                   </div>
@@ -396,7 +466,7 @@ export function ProductsClient() {
                                     key={extra.id}
                                     className={cn(
                                       'flex items-center justify-between rounded-xl border border-[#E8DDD0] bg-[#FAF6F1] px-3 py-2 text-sm',
-                                      !extra.isActive && 'opacity-50',
+                                      (!extra.isActive || extra.isSoldOut) && 'opacity-60',
                                     )}
                                   >
                                     <div className="flex min-w-0 items-center gap-2">
@@ -410,6 +480,16 @@ export function ProductsClient() {
                                       <span className="truncate text-[#3D2B1F]">
                                         {extra.name} — {formatCurrency(extra.price)}
                                       </span>
+                                      {extra.isSoldOut && (
+                                        <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                                          Esgotado
+                                        </span>
+                                      )}
+                                      {!extra.isActive && (
+                                        <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">
+                                          Oculto
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="flex shrink-0 gap-1">
                                       <button
@@ -419,10 +499,25 @@ export function ProductsClient() {
                                         <Pencil className="h-3 w-3" />
                                       </button>
                                       <button
+                                        onClick={() => updateExtraStatusMutation.mutate({ id: extra.id, data: { isSoldOut: !extra.isSoldOut } })}
+                                        title={extra.isSoldOut ? 'Marcar adicional disponível' : 'Marcar adicional esgotado'}
+                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-amber-50 hover:text-amber-700"
+                                      >
+                                        <CircleSlash className="h-3 w-3" />
+                                      </button>
+                                      <button
+                                        onClick={() => updateExtraStatusMutation.mutate({ id: extra.id, data: { isActive: !extra.isActive } })}
+                                        title={extra.isActive ? 'Ocultar adicional' : 'Mostrar adicional'}
+                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                      >
+                                        {extra.isActive ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                                      </button>
+                                      <button
                                         onClick={() => deleteExtraMutation.mutate(extra.id)}
+                                        title="Excluir adicional"
                                         className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                       >
-                                        <Power className="h-3 w-3" />
+                                        <Trash2 className="h-3 w-3" />
                                       </button>
                                     </div>
                                   </div>

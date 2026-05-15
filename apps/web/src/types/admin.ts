@@ -45,6 +45,7 @@ export interface AdminExtra {
   imageUrl?: string;
   sortOrder: number;
   isActive: boolean;
+  isSoldOut: boolean;
 }
 
 export interface AdminOptionGroupOption {
@@ -54,6 +55,7 @@ export interface AdminOptionGroupOption {
   imageUrl?: string;
   sortOrder: number;
   isActive: boolean;
+  isSoldOut: boolean;
 }
 
 export interface AdminOptionGroup {
@@ -73,6 +75,7 @@ export interface AdminProduct {
   price: number;
   imageUrl?: string;
   isActive: boolean;
+  isSoldOut: boolean;
   isCompound: boolean;
   categoryId: string;
   categoryName: string;

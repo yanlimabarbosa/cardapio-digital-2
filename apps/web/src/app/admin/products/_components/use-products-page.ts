@@ -116,6 +116,29 @@ export function useProductsPage() {
       adminFetch(`/api/admin/products/${id}/toggle`, token, { method: 'PATCH' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+    },
+  });
+
+  const updateProductStatusMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Pick<AdminProduct, 'isActive' | 'isSoldOut'>> }) =>
+      adminFetch(`/api/admin/products/${id}`, token, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+    },
+  });
+
+  const deleteProductMutation = useMutation({
+    mutationFn: (id: string) =>
+      adminFetch(`/api/admin/products/${id}`, token, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
     },
   });
 
@@ -146,6 +169,19 @@ export function useProductsPage() {
       adminFetch(`/api/admin/extras/${id}`, token, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+    },
+  });
+
+  const updateExtraStatusMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Pick<AdminExtra, 'isActive' | 'isSoldOut'>> }) =>
+      adminFetch(`/api/admin/extras/${id}`, token, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
     },
   });
 
@@ -178,6 +214,19 @@ export function useProductsPage() {
       adminFetch(`/api/admin/option-groups/${id}`, token, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+    },
+  });
+
+  const updateOptionGroupStatusMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Pick<AdminOptionGroup, 'isActive'>> }) =>
+      adminFetch(`/api/admin/option-groups/${id}`, token, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
     },
   });
 
@@ -208,6 +257,19 @@ export function useProductsPage() {
       adminFetch(`/api/admin/option-group-options/${id}`, token, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+    },
+  });
+
+  const updateGroupOptionStatusMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Pick<AdminOptionGroupOption, 'isActive' | 'isSoldOut'>> }) =>
+      adminFetch(`/api/admin/option-group-options/${id}`, token, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
     },
   });
 
@@ -422,6 +484,8 @@ export function useProductsPage() {
     saveMutation,
     uploading,
     toggleMutation,
+    updateProductStatusMutation,
+    deleteProductMutation,
     setProductDialogOpen: (open: boolean) => { if (!open) setProductDialog({ mode: 'closed' }); },
     extraDialogOpen,
     isEditingExtra,
@@ -435,6 +499,7 @@ export function useProductsPage() {
     openEditExtra,
     handleSaveExtra,
     deleteExtraMutation,
+    updateExtraStatusMutation,
     saveExtraMutation,
     setExtraDialogOpen: (open: boolean) => { if (!open) setExtraDialog({ mode: 'closed' }); },
     searchQuery,
@@ -453,6 +518,7 @@ export function useProductsPage() {
     handleSaveOptionGroup,
     saveOptionGroupMutation,
     deleteOptionGroupMutation,
+    updateOptionGroupStatusMutation,
     setOptionGroupDialogOpen: (open: boolean) => { if (!open) setOptionGroupDialog({ mode: 'closed' }); },
     // Group options
     groupOptionDialogOpen: groupOptionDialog.mode !== 'closed',
@@ -468,6 +534,7 @@ export function useProductsPage() {
     handleSaveGroupOption,
     saveGroupOptionMutation,
     deleteGroupOptionMutation,
+    updateGroupOptionStatusMutation,
     setGroupOptionDialogOpen: (open: boolean) => { if (!open) setGroupOptionDialog({ mode: 'closed' }); },
   };
 }
