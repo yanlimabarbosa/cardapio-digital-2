@@ -39,6 +39,7 @@ test('creates an admin product extra through the provided transaction context', 
       imageUrl: '/uploads/farofa.webp',
       sortOrder: 0,
       isActive: true,
+      isSoldOut: false,
     },
   });
 });
@@ -99,6 +100,7 @@ test('creates an admin group option through the provided transaction context', a
       imageUrl: '/uploads/carne.webp',
       sortOrder: 2,
       isActive: true,
+      isSoldOut: false,
     },
   });
 });
@@ -136,7 +138,8 @@ test('soft-deletes an admin product extra through the provided transaction conte
 
   assert.equal(result, true);
   assert.deepEqual(em.findOneCalls, [{ entity: ProductExtra, where: { id: 'extra-1' } }]);
-  assert.equal(extra.isActive, false);
+  assert.equal(extra.isActive, true);
+  assert.equal(extra.isArchived, true);
   assert.equal(em.flushCalls, 1);
 });
 
@@ -186,7 +189,7 @@ test('updates an admin product extra through the provided transaction context', 
 
   const result = await repository.update(
     'extra-1',
-    { name: 'Molho', price: 3, imageUrl: '/uploads/molho.webp', isActive: false },
+    { name: 'Molho', price: 3, imageUrl: '/uploads/molho.webp', isActive: false, isSoldOut: true },
     context,
   );
 
@@ -195,6 +198,7 @@ test('updates an admin product extra through the provided transaction context', 
   assert.equal(extra.price, '3.00');
   assert.equal(extra.imageUrl, '/uploads/molho.webp');
   assert.equal(extra.isActive, false);
+  assert.equal(extra.isSoldOut, true);
   assert.equal(em.flushCalls, 1);
   assert.deepEqual(result, {
     status: 'updated',
@@ -205,6 +209,7 @@ test('updates an admin product extra through the provided transaction context', 
       imageUrl: '/uploads/molho.webp',
       sortOrder: 0,
       isActive: false,
+      isSoldOut: true,
     },
   });
 });

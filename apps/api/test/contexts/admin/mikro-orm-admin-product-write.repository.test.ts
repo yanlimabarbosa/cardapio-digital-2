@@ -53,6 +53,7 @@ test('creates an admin product through the provided transaction context', async 
       imageUrl: '/uploads/product.webp',
       sortOrder: 0,
       isActive: true,
+      isSoldOut: false,
       isFeatured: false,
       featuredOrder: 0,
       isPromotional: false,
@@ -150,7 +151,9 @@ test('soft-deletes an admin product through the provided transaction context', a
 
   assert.equal(result, true);
   assert.deepEqual(em.findOneCalls, [{ entity: Product, where: { id: 'product-1' } }]);
-  assert.equal(product.isActive, false);
+  assert.equal(product.isActive, true);
+  assert.equal(product.isArchived, true);
+  assert.equal(product.isFeatured, false);
   assert.equal(em.flushCalls, 1);
 });
 
@@ -273,6 +276,7 @@ test('updates an admin product through the provided transaction context', async 
       imageUrl: '/uploads/new.webp',
       sortOrder: 0,
       isActive: false,
+      isSoldOut: false,
       isFeatured: false,
       featuredOrder: 0,
       isPromotional: true,

@@ -40,6 +40,7 @@ test('maps admin product read models to response DTOs', (): void => {
     price: 17.5,
     imageUrl: '/uploads/quentinha.webp',
     isActive: true,
+    isSoldOut: false,
     isCompound: true,
     categoryId: 'category-1',
     categoryName: 'Lunch',
@@ -51,6 +52,7 @@ test('maps admin product read models to response DTOs', (): void => {
         imageUrl: '/uploads/farofa.webp',
         sortOrder: 0,
         isActive: true,
+        isSoldOut: false,
       },
     ],
     optionGroups: [
@@ -69,6 +71,7 @@ test('maps admin product read models to response DTOs', (): void => {
             imageUrl: undefined,
             sortOrder: 0,
             isActive: true,
+            isSoldOut: false,
           },
         ],
       },
@@ -91,6 +94,7 @@ test('maps admin product read models to response DTOs', (): void => {
   assert.equal(result.price, 17.5);
   assert.equal(result.imageUrl, '/uploads/quentinha.webp');
   assert.equal(result.isActive, true);
+  assert.equal(result.isSoldOut, false);
   assert.equal(result.isCompound, true);
   assert.equal(result.categoryId, 'category-1');
   assert.equal(result.categoryName, 'Lunch');
@@ -116,6 +120,7 @@ test('maps admin product mutation models to response DTOs', (): void => {
     imageUrl: '/uploads/quentinha.webp',
     sortOrder: 1,
     isActive: true,
+    isSoldOut: false,
     isFeatured: true,
     featuredOrder: 2,
     isPromotional: true,
@@ -142,6 +147,7 @@ test('maps admin product mutation models to response DTOs', (): void => {
   assert.equal(result.imageUrl, '/uploads/quentinha.webp');
   assert.equal(result.sortOrder, 1);
   assert.equal(result.isActive, true);
+  assert.equal(result.isSoldOut, false);
   assert.equal(result.isFeatured, true);
   assert.equal(result.featuredOrder, 2);
   assert.equal(result.isPromotional, true);
@@ -183,6 +189,7 @@ test('maps admin product extra list read models to response DTOs', (): void => {
     price: 2.5,
     imageUrl: '/uploads/farofa.webp',
     isActive: true,
+    isSoldOut: false,
   };
 
   const result = toAdminProductExtraListResponseDto(readModel);
@@ -193,6 +200,7 @@ test('maps admin product extra list read models to response DTOs', (): void => {
   assert.equal(result.price, 2.5);
   assert.equal(result.imageUrl, '/uploads/farofa.webp');
   assert.equal(result.isActive, true);
+  assert.equal(result.isSoldOut, false);
 });
 
 test('maps admin option group read models to response DTOs', (): void => {
@@ -211,6 +219,7 @@ test('maps admin option group read models to response DTOs', (): void => {
         imageUrl: undefined,
         sortOrder: 0,
         isActive: true,
+        isSoldOut: false,
       },
     ],
   };
@@ -236,6 +245,7 @@ test('maps admin product extra mutation models to response DTOs', (): void => {
     imageUrl: '/uploads/farofa.webp',
     sortOrder: 0,
     isActive: true,
+    isSoldOut: false,
   };
 
   const result = toAdminProductExtraMutationResponseDto(mutationModel);
@@ -247,6 +257,7 @@ test('maps admin product extra mutation models to response DTOs', (): void => {
   assert.equal(result.imageUrl, '/uploads/farofa.webp');
   assert.equal(result.sortOrder, 0);
   assert.equal(result.isActive, true);
+  assert.equal(result.isSoldOut, false);
 });
 
 test('maps admin group option mutation models to numeric-price response DTOs', (): void => {
@@ -257,6 +268,7 @@ test('maps admin group option mutation models to numeric-price response DTOs', (
     imageUrl: '/uploads/bife.webp',
     sortOrder: 2,
     isActive: true,
+    isSoldOut: false,
   };
 
   const result = toAdminGroupOptionResponseDto(mutationModel);
@@ -268,6 +280,7 @@ test('maps admin group option mutation models to numeric-price response DTOs', (
   assert.equal(result.imageUrl, '/uploads/bife.webp');
   assert.equal(result.sortOrder, 2);
   assert.equal(result.isActive, true);
+  assert.equal(result.isSoldOut, false);
 });
 
 test('maps admin group option updates to mutation response DTOs with string prices', (): void => {
@@ -278,6 +291,7 @@ test('maps admin group option updates to mutation response DTOs with string pric
     imageUrl: '/uploads/bife.webp',
     sortOrder: 2,
     isActive: true,
+    isSoldOut: false,
   };
 
   const result = toAdminGroupOptionMutationResponseDto(mutationModel);
@@ -289,4 +303,5 @@ test('maps admin group option updates to mutation response DTOs with string pric
   assert.equal(result.imageUrl, '/uploads/bife.webp');
   assert.equal(result.sortOrder, 2);
   assert.equal(result.isActive, true);
+  assert.equal(result.isSoldOut, false);
 });
