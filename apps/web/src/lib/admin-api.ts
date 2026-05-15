@@ -1,5 +1,15 @@
 import { API_URL } from './api-url';
 
+export class AdminApiError extends Error {
+  public constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = 'AdminApiError';
+  }
+}
+
 export async function adminFetch<T>(
   path: string,
   token: string | null,
@@ -26,7 +36,7 @@ export async function adminFetch<T>(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(error.message || `HTTP ${res.status}`);
+    throw new AdminApiError(error.message || `HTTP ${res.status}`, res.status);
   }
 
   return res.json();
@@ -52,7 +62,7 @@ export async function adminUpload(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: 'Upload failed' }));
-    throw new Error(error.message || `HTTP ${res.status}`);
+    throw new AdminApiError(error.message || `HTTP ${res.status}`, res.status);
   }
 
   return res.json();

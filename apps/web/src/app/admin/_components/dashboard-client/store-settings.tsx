@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { cn, maskCnpj, maskPhone } from '@/lib/utils';
-import { ImagePlus, X } from 'lucide-react';
+import { ImagePlus, Loader2, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
-import { adminFetch } from '@/lib/admin-api';
+import { AdminApiError, adminUpload } from '@/lib/admin-api';
 import type { StoreSettingsData } from '@/types/admin';
 import { WeeklyScheduleEditor } from '@/components/admin/weekly-schedule-editor';
 import { legacyToWeeklySchedule } from '@cardapio/shared';
@@ -33,6 +33,8 @@ export function StoreSettings({
   const onUpdateSettingsRef = useRef(onUpdateSettings);
   const [receiptDraft, setReceiptDraft] = useState(() => normalizeReceiptSettings(storeSettings));
   const [savedReceiptSettings, setSavedReceiptSettings] = useState(() => normalizeReceiptSettings(storeSettings));
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const [bannerError, setBannerError] = useState<string | null>(null);
   const receiptDraftRef = useRef(receiptDraft);
 
   useEffect(() => {
@@ -92,13 +94,18 @@ export function StoreSettings({
   async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const formData = new FormData();
-    formData.append('file', file);
-    const { url } = await adminFetch<{ url: string }>('/api/admin/upload', token, {
-      method: 'POST',
-      body: formData,
-    });
-    onUpdateSettings({ bannerUrl: url });
+
+    setBannerError(null);
+    setBannerUploading(true);
+    try {
+      const { url } = await adminUpload(file, token);
+      onUpdateSettings({ bannerUrl: url });
+    } catch (error) {
+      setBannerError(getBannerUploadErrorMessage(error));
+    } finally {
+      setBannerUploading(false);
+      e.target.value = '';
+    }
   }
 
   return (
@@ -223,11 +230,13 @@ export function StoreSettings({
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => bannerInputRef.current?.click()}
-              className="flex h-24 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E8DDD0] text-sm text-[#8B7355] transition-colors hover:border-[#A0603A]/40 hover:text-[#A0603A]"
+              disabled={bannerUploading}
+              className="flex h-24 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E8DDD0] text-sm font-bold text-[#5A2D14] transition-colors hover:border-[#A0603A]/40 hover:text-[#A0603A] disabled:cursor-wait disabled:opacity-60"
             >
-              <ImagePlus className="h-5 w-5" />
-              Enviar banner
+              {bannerUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
+              {bannerUploading ? 'Enviando...' : 'Enviar banner'}
             </button>
           )}
           <input
@@ -237,6 +246,11 @@ export function StoreSettings({
             className="hidden"
             onChange={handleBannerUpload}
           />
+          {bannerError && (
+            <p className="mt-2 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700" role="alert">
+              {bannerError}
+            </p>
+          )}
           <p className="mt-1 text-[10px] text-[#8B7355]">Aparece abaixo do cabeçalho no cardápio. Recomendado: 1200×400px.</p>
         </div>
       </div>
@@ -360,4 +374,16 @@ function isSameReceiptSettings(
     a.receiptPhone === b.receiptPhone &&
     a.receiptFooter === b.receiptFooter
   );
+}
+
+function getBannerUploadErrorMessage(error: unknown): string {
+  if (error instanceof AdminApiError && error.status === 413) {
+    return 'Imagem muito grande. Envie um arquivo JPG, PNG ou WebP com ate 5 MB.';
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return 'Nao foi possivel enviar o banner. Tente novamente.';
 }
