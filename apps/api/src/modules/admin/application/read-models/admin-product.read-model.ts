@@ -2,6 +2,7 @@ export type AdminProductExtraReadModel = {
   readonly id: string;
   readonly imageUrl?: string;
   readonly isActive: boolean;
+  readonly isSoldOut: boolean;
   readonly name: string;
   readonly price: number;
   readonly sortOrder: number;
@@ -26,6 +27,7 @@ export type AdminProductReadModel = {
   readonly id: string;
   readonly imageUrl?: string;
   readonly isActive: boolean;
+  readonly isSoldOut: boolean;
   readonly isCompound: boolean;
   readonly isRedeemable: boolean;
   readonly name: string;

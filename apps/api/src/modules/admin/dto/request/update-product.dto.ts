@@ -27,6 +27,10 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsBoolean()
+  isSoldOut?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   isPromotional?: boolean;
 
   @IsOptional()

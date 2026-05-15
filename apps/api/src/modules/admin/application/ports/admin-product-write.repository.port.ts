@@ -27,6 +27,7 @@ export type AdminProductMutationModel = {
   readonly isActive: boolean;
   readonly isCompound: boolean;
   readonly isFeatured: boolean;
+  readonly isSoldOut: boolean;
   readonly isPromotional: boolean;
   readonly isRedeemable: boolean;
   readonly name: string;
@@ -62,6 +63,7 @@ export type UpdateAdminProductData = {
   readonly isCompound?: boolean;
   readonly isPromotional?: boolean;
   readonly isRedeemable?: boolean;
+  readonly isSoldOut?: boolean;
   readonly name?: string;
   readonly price?: number;
   readonly promotionalPrice?: number | null;
