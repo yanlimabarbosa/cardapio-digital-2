@@ -90,7 +90,7 @@ export const ProductCard = memo(function ProductCard({ product, onSelect }: Prod
         {unavailable && (
           <div className="absolute inset-0 flex items-center justify-center bg-terra-900/50 backdrop-blur-[1px]">
             <span className="rounded-full bg-terra-900/80 px-2.5 py-1 text-[0.65rem] font-bold text-white">
-              {canPreorder ? 'Agendar' : !product.isActive ? 'Esgotado' : 'Indisponível'}
+              {canPreorder ? 'Agendar' : unavailableLabel}
             </span>
           </div>
         )}
