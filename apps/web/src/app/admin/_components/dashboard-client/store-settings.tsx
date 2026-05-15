@@ -32,33 +32,36 @@ export function StoreSettings({
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const skipReceiptSaveRef = useRef(true);
   const onUpdateSettingsRef = useRef(onUpdateSettings);
-  const [receiptDraft, setReceiptDraft] = useState(() => ({
-    receiptCnpj: maskCnpj(storeSettings.receiptCnpj ?? ''),
-    receiptAddress: storeSettings.receiptAddress ?? '',
-    receiptPhone: maskPhone(storeSettings.receiptPhone ?? ''),
-    receiptFooter: storeSettings.receiptFooter ?? '',
-  }));
+  const receiptEditingRef = useRef(false);
+  const receiptSaveTimeoutRef = useRef<number | null>(null);
+  const [receiptDraft, setReceiptDraft] = useState(() => normalizeReceiptSettings(storeSettings));
+  const receiptDraftRef = useRef(receiptDraft);
 
   useEffect(() => {
     onUpdateSettingsRef.current = onUpdateSettings;
   }, [onUpdateSettings]);
 
   useEffect(() => {
-    const receiptCnpj = maskCnpj(storeSettings.receiptCnpj ?? '');
-    const receiptPhone = maskPhone(storeSettings.receiptPhone ?? '');
+    const nextReceiptSettings = normalizeReceiptSettings(storeSettings);
 
-    skipReceiptSaveRef.current = true;
-    setReceiptDraft({
-      receiptCnpj,
-      receiptAddress: storeSettings.receiptAddress ?? '',
-      receiptPhone,
-      receiptFooter: storeSettings.receiptFooter ?? '',
-    });
+    if (isSameReceiptSettings(nextReceiptSettings, receiptDraftRef.current)) {
+      receiptEditingRef.current = false;
+      return;
+    }
 
-    if ((storeSettings.receiptCnpj ?? '') !== receiptCnpj || (storeSettings.receiptPhone ?? '') !== receiptPhone) {
+    if (!receiptEditingRef.current) {
+      skipReceiptSaveRef.current = true;
+      receiptDraftRef.current = nextReceiptSettings;
+      setReceiptDraft(nextReceiptSettings);
+    }
+
+    if (
+      (storeSettings.receiptCnpj ?? '') !== nextReceiptSettings.receiptCnpj ||
+      (storeSettings.receiptPhone ?? '') !== nextReceiptSettings.receiptPhone
+    ) {
       onUpdateSettingsRef.current({
-        receiptCnpj,
-        receiptPhone,
+        receiptCnpj: nextReceiptSettings.receiptCnpj,
+        receiptPhone: nextReceiptSettings.receiptPhone,
       });
     }
   }, [
@@ -74,12 +77,38 @@ export function StoreSettings({
       return;
     }
 
-    const timeout = window.setTimeout(() => {
-      onUpdateSettingsRef.current(receiptDraft);
-    }, 500);
+    if (receiptSaveTimeoutRef.current) {
+      window.clearTimeout(receiptSaveTimeoutRef.current);
+    }
 
-    return () => window.clearTimeout(timeout);
+    receiptSaveTimeoutRef.current = window.setTimeout(() => {
+      onUpdateSettingsRef.current(receiptDraft);
+    }, 700);
+
+    return () => {
+      if (receiptSaveTimeoutRef.current) {
+        window.clearTimeout(receiptSaveTimeoutRef.current);
+      }
+    };
   }, [receiptDraft]);
+
+  function updateReceiptDraft(patch: Partial<typeof receiptDraft>) {
+    receiptEditingRef.current = true;
+    setReceiptDraft((current) => {
+      const next = { ...current, ...patch };
+      receiptDraftRef.current = next;
+      return next;
+    });
+  }
+
+  function flushReceiptDraft() {
+    if (receiptSaveTimeoutRef.current) {
+      window.clearTimeout(receiptSaveTimeoutRef.current);
+      receiptSaveTimeoutRef.current = null;
+    }
+
+    onUpdateSettingsRef.current(receiptDraftRef.current);
+  }
 
   async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -251,11 +280,11 @@ export function StoreSettings({
               maxLength={18}
               value={receiptDraft.receiptCnpj}
               onChange={(e) =>
-                setReceiptDraft((current) => ({
-                  ...current,
+                updateReceiptDraft({
                   receiptCnpj: maskCnpj(e.target.value),
-                }))
+                })
               }
+              onBlur={flushReceiptDraft}
               className="h-11 w-64 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
             />
           </div>
@@ -267,11 +296,11 @@ export function StoreSettings({
               placeholder="Endereco completo do restaurante"
               value={receiptDraft.receiptAddress}
               onChange={(e) =>
-                setReceiptDraft((current) => ({
-                  ...current,
+                updateReceiptDraft({
                   receiptAddress: e.target.value,
-                }))
+                })
               }
+              onBlur={flushReceiptDraft}
               rows={2}
               className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
             />
@@ -288,11 +317,11 @@ export function StoreSettings({
               maxLength={15}
               value={receiptDraft.receiptPhone}
               onChange={(e) =>
-                setReceiptDraft((current) => ({
-                  ...current,
+                updateReceiptDraft({
                   receiptPhone: maskPhone(e.target.value),
-                }))
+                })
               }
+              onBlur={flushReceiptDraft}
               className="h-11 w-52 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
             />
           </div>
@@ -304,11 +333,11 @@ export function StoreSettings({
               placeholder="Obrigado pela preferencia!"
               value={receiptDraft.receiptFooter}
               onChange={(e) =>
-                setReceiptDraft((current) => ({
-                  ...current,
+                updateReceiptDraft({
                   receiptFooter: e.target.value,
-                }))
+                })
               }
+              onBlur={flushReceiptDraft}
               rows={2}
               className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
             />
@@ -316,5 +345,26 @@ export function StoreSettings({
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function normalizeReceiptSettings(settings: StoreSettingsData) {
+  return {
+    receiptCnpj: maskCnpj(settings.receiptCnpj ?? ''),
+    receiptAddress: settings.receiptAddress ?? '',
+    receiptPhone: maskPhone(settings.receiptPhone ?? ''),
+    receiptFooter: settings.receiptFooter ?? '',
+  };
+}
+
+function isSameReceiptSettings(
+  a: ReturnType<typeof normalizeReceiptSettings>,
+  b: ReturnType<typeof normalizeReceiptSettings>,
+) {
+  return (
+    a.receiptCnpj === b.receiptCnpj &&
+    a.receiptAddress === b.receiptAddress &&
+    a.receiptPhone === b.receiptPhone &&
+    a.receiptFooter === b.receiptFooter
   );
 }
