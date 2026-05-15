@@ -10,5 +10,7 @@ export class AdminProductExtraListResponseDto {
     public readonly imageUrl: string | undefined,
     /** Whether this extra is active. */
     public readonly isActive: boolean,
+    /** Whether this extra is visible but sold out. */
+    public readonly isSoldOut: boolean,
   ) {}
 }

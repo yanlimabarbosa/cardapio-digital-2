@@ -12,5 +12,7 @@ export class AdminProductExtraMutationResponseDto {
     public readonly sortOrder: number,
     /** Whether this extra is active. */
     public readonly isActive: boolean,
+    /** Whether this extra is visible but sold out. */
+    public readonly isSoldOut: boolean,
   ) {}
 }

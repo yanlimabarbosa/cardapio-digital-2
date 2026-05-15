@@ -12,5 +12,7 @@ export class AdminGroupOptionMutationResponseDto {
     public readonly sortOrder: number,
     /** Whether this group option is active. */
     public readonly isActive: boolean,
+    /** Whether this group option is visible but sold out. */
+    public readonly isSoldOut: boolean,
   ) {}
 }
