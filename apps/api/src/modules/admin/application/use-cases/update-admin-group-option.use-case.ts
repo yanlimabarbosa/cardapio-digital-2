@@ -35,6 +35,7 @@ export class UpdateAdminGroupOptionUseCase {
     const data: {
       imageUrl?: string;
       isActive?: boolean;
+      isSoldOut?: boolean;
       name?: string;
       price?: number;
     } = {};
@@ -53,6 +54,10 @@ export class UpdateAdminGroupOptionUseCase {
 
     if (command.isActive !== undefined) {
       data.isActive = command.isActive;
+    }
+
+    if (command.isSoldOut !== undefined) {
+      data.isSoldOut = command.isSoldOut;
     }
 
     return data;

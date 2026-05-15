@@ -75,7 +75,7 @@ export class MikroOrmAdminProductExtraWriteRepository implements AdminProductExt
       return false;
     }
 
-    extra.isActive = false;
+    extra.isArchived = true;
 
     await em.flush();
 
@@ -127,6 +127,10 @@ export class MikroOrmAdminProductExtraWriteRepository implements AdminProductExt
       extra.isActive = data.isActive;
     }
 
+    if (data.isSoldOut !== undefined) {
+      extra.isSoldOut = data.isSoldOut;
+    }
+
     await em.flush();
 
     return { status: 'updated', extra: this.toMutationModel(extra) };
@@ -140,6 +144,7 @@ export class MikroOrmAdminProductExtraWriteRepository implements AdminProductExt
       imageUrl: extra.imageUrl,
       sortOrder: extra.sortOrder ?? 0,
       isActive: extra.isActive ?? true,
+      isSoldOut: extra.isSoldOut ?? false,
     };
   }
 }
