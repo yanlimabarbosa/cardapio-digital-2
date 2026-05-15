@@ -195,6 +195,7 @@ test('payment APIs reject malformed payer data before PagBank gateway calls', as
     body: JSON.stringify({
       orderId: validOrderId,
       encryptedCard: 'encrypted-card',
+      cardholderName: 'JOSE DA SILVA',
       installments: 0,
       payerEmail: 'sandbox.validacao@cardapiobemcomer.com.br',
       identificationType: 'CPF',
@@ -208,6 +209,7 @@ test('payment APIs reject malformed payer data before PagBank gateway calls', as
       orderId: validOrderId,
       encryptedCard: 'encrypted-card',
       authenticationId: 'invalid-auth-id',
+      cardholderName: 'JOSE DA SILVA',
       payerEmail: 'sandbox.validacao@cardapiobemcomer.com.br',
       identificationType: 'CPF',
       identificationNumber: '111',
@@ -282,6 +284,7 @@ test('debit card 3DS authentication uses the API order total as amount.value', a
     .toEqual(expect.objectContaining({
       encryptedCard: 'encrypted-card-for-total-test',
       authenticationId: '3DS_TOTAL_TEST',
+      cardholderName: approvedDebitCard3ds.holder,
     }));
 });
 
@@ -976,6 +979,7 @@ function expectEncryptedCardRequest(
   const body = parseJson(response.request().postData()) as Record<string, unknown>;
   expect(body).toEqual(expect.objectContaining({
     orderId: expected.orderId,
+    cardholderName: expected.plaintextCard.holder,
     payerEmail: expected.payerEmail,
     identificationType: 'CPF',
     identificationNumber: expected.identificationNumber,
@@ -984,7 +988,6 @@ function expectEncryptedCardRequest(
   expect(body.encryptedCard).toEqual(expect.any(String));
   expect(String(body.encryptedCard).length).toBeGreaterThan(100);
   expect(JSON.stringify(body)).not.toContain(expected.plaintextCard.number);
-  expect(JSON.stringify(body)).not.toContain(expected.plaintextCard.holder);
   expect(body).not.toHaveProperty('number');
   expect(body).not.toHaveProperty('securityCode');
   expect(body).not.toHaveProperty('cvv');
@@ -1004,6 +1007,7 @@ function expectDebitCardRequest(
   const body = parseJson(response.request().postData()) as Record<string, unknown>;
   expect(body).toEqual(expect.objectContaining({
     orderId: expected.orderId,
+    cardholderName: expected.plaintextCard.holder,
     payerEmail: expected.payerEmail,
     identificationType: 'CPF',
     identificationNumber: expected.identificationNumber,
@@ -1012,7 +1016,6 @@ function expectDebitCardRequest(
   expect(String(body.encryptedCard).length).toBeGreaterThan(100);
   expect(body.authenticationId).toEqual(expect.stringMatching(/^3DS_/));
   expect(JSON.stringify(body)).not.toContain(expected.plaintextCard.number);
-  expect(JSON.stringify(body)).not.toContain(expected.plaintextCard.holder);
   expect(body).not.toHaveProperty('number');
   expect(body).not.toHaveProperty('securityCode');
   expect(body).not.toHaveProperty('cvv');
