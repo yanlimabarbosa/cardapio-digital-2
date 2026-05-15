@@ -30,11 +30,9 @@ export function StoreSettings({
 }: StoreSettingsProps) {
   const token = useAuthStore((s) => s.token);
   const bannerInputRef = useRef<HTMLInputElement>(null);
-  const skipReceiptSaveRef = useRef(true);
   const onUpdateSettingsRef = useRef(onUpdateSettings);
-  const receiptEditingRef = useRef(false);
-  const receiptSaveTimeoutRef = useRef<number | null>(null);
   const [receiptDraft, setReceiptDraft] = useState(() => normalizeReceiptSettings(storeSettings));
+  const [savedReceiptSettings, setSavedReceiptSettings] = useState(() => normalizeReceiptSettings(storeSettings));
   const receiptDraftRef = useRef(receiptDraft);
 
   useEffect(() => {
@@ -44,13 +42,12 @@ export function StoreSettings({
   useEffect(() => {
     const nextReceiptSettings = normalizeReceiptSettings(storeSettings);
 
-    if (isSameReceiptSettings(nextReceiptSettings, receiptDraftRef.current)) {
-      receiptEditingRef.current = false;
+    if (isSameReceiptSettings(nextReceiptSettings, savedReceiptSettings)) {
       return;
     }
 
-    if (!receiptEditingRef.current) {
-      skipReceiptSaveRef.current = true;
+    setSavedReceiptSettings(nextReceiptSettings);
+    if (isSameReceiptSettings(receiptDraftRef.current, savedReceiptSettings)) {
       receiptDraftRef.current = nextReceiptSettings;
       setReceiptDraft(nextReceiptSettings);
     }
@@ -69,31 +66,10 @@ export function StoreSettings({
     storeSettings.receiptCnpj,
     storeSettings.receiptFooter,
     storeSettings.receiptPhone,
+    savedReceiptSettings,
   ]);
 
-  useEffect(() => {
-    if (skipReceiptSaveRef.current) {
-      skipReceiptSaveRef.current = false;
-      return;
-    }
-
-    if (receiptSaveTimeoutRef.current) {
-      window.clearTimeout(receiptSaveTimeoutRef.current);
-    }
-
-    receiptSaveTimeoutRef.current = window.setTimeout(() => {
-      onUpdateSettingsRef.current(receiptDraft);
-    }, 700);
-
-    return () => {
-      if (receiptSaveTimeoutRef.current) {
-        window.clearTimeout(receiptSaveTimeoutRef.current);
-      }
-    };
-  }, [receiptDraft]);
-
   function updateReceiptDraft(patch: Partial<typeof receiptDraft>) {
-    receiptEditingRef.current = true;
     setReceiptDraft((current) => {
       const next = { ...current, ...patch };
       receiptDraftRef.current = next;
@@ -101,14 +77,17 @@ export function StoreSettings({
     });
   }
 
-  function flushReceiptDraft() {
-    if (receiptSaveTimeoutRef.current) {
-      window.clearTimeout(receiptSaveTimeoutRef.current);
-      receiptSaveTimeoutRef.current = null;
-    }
-
+  function saveReceiptDraft() {
     onUpdateSettingsRef.current(receiptDraftRef.current);
+    setSavedReceiptSettings(receiptDraftRef.current);
   }
+
+  function resetReceiptDraft() {
+    receiptDraftRef.current = savedReceiptSettings;
+    setReceiptDraft(savedReceiptSettings);
+  }
+
+  const receiptHasChanges = !isSameReceiptSettings(receiptDraft, savedReceiptSettings);
 
   async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -284,7 +263,6 @@ export function StoreSettings({
                   receiptCnpj: maskCnpj(e.target.value),
                 })
               }
-              onBlur={flushReceiptDraft}
               className="h-11 w-64 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
             />
           </div>
@@ -300,7 +278,6 @@ export function StoreSettings({
                   receiptAddress: e.target.value,
                 })
               }
-              onBlur={flushReceiptDraft}
               rows={2}
               className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
             />
@@ -321,7 +298,6 @@ export function StoreSettings({
                   receiptPhone: maskPhone(e.target.value),
                 })
               }
-              onBlur={flushReceiptDraft}
               className="h-11 w-52 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
             />
           </div>
@@ -337,10 +313,27 @@ export function StoreSettings({
                   receiptFooter: e.target.value,
                 })
               }
-              onBlur={flushReceiptDraft}
               rows={2}
               className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
             />
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={saveReceiptDraft}
+              disabled={!receiptHasChanges}
+              className="rounded-xl bg-[#A0603A] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#8B4F2D] disabled:cursor-not-allowed disabled:bg-[#D4C8BA]"
+            >
+              Salvar
+            </button>
+            <button
+              type="button"
+              onClick={resetReceiptDraft}
+              disabled={!receiptHasChanges}
+              className="rounded-xl border border-[#E8DDD0] px-4 py-2 text-sm font-bold text-[#8B7355] transition-colors hover:bg-[#FAF6F1] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Cancelar
+            </button>
           </div>
         </div>
       </div>
