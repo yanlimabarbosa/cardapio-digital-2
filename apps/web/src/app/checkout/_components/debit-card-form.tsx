@@ -213,6 +213,7 @@ export function DebitCardForm({
         orderId,
         encryptedCard: encrypted.encryptedCard,
         authenticationId: authResult.id,
+        cardholderName: fullName,
         payerEmail: normalizedEmail,
         identificationType: 'CPF',
         identificationNumber: cpfDigits,
@@ -324,6 +325,7 @@ export function DebitCardForm({
             <input
               type="text"
               placeholder="Nome como está no cartão"
+              maxLength={30}
               value={cardholderName}
               onChange={(event) => setCardholderName(event.target.value.toUpperCase())}
               required

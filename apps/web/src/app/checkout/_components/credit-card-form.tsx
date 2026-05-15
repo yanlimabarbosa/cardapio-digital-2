@@ -53,6 +53,7 @@ export function CreditCardForm({ orderId, totalAmount, onSuccess, initialEmail =
       }
 
       const cpfDigits = cpf.replace(/\D/g, '');
+      const fullName = cardholderName.trim();
       const cardNumberDigits = cardNumber.replace(/\s/g, '');
 
       if (!window.PagSeguro) {
@@ -68,7 +69,7 @@ export function CreditCardForm({ orderId, totalAmount, onSuccess, initialEmail =
 
       const encrypted = window.PagSeguro.encryptCard({
         publicKey,
-        holder: cardholderName,
+        holder: fullName,
         number: cardNumberDigits,
         expMonth: expirationMonth.padStart(2, '0'),
         expYear: expirationYear,
@@ -83,6 +84,7 @@ export function CreditCardForm({ orderId, totalAmount, onSuccess, initialEmail =
       const result = await cardPayment.mutateAsync({
         orderId,
         encryptedCard: encrypted.encryptedCard,
+        cardholderName: fullName,
         installments,
         payerEmail: normalizedEmail,
         identificationType: 'CPF',
@@ -196,6 +198,7 @@ export function CreditCardForm({ orderId, totalAmount, onSuccess, initialEmail =
             <input
               type="text"
               placeholder="Nome como está no cartão"
+              maxLength={30}
               value={cardholderName}
               onChange={(e) => setCardholderName(e.target.value.toUpperCase())}
               required
