@@ -85,6 +85,7 @@ type PagBankShippingPayload = {
 
 type CardChargePaymentInput = {
   readonly authenticationId?: string;
+  readonly cardholderName: string;
   readonly encryptedCard: string;
   readonly installments: number;
   readonly order: PaymentOrder;
@@ -129,6 +130,7 @@ export class PagBankPaymentGateway implements PaymentGateway {
   public async createCreditCardPayment(input: CreateCreditCardPaymentInput): Promise<CardPaymentResult> {
     return this.createCardChargePayment({
       order: input.order,
+      cardholderName: input.cardholderName,
       encryptedCard: input.encryptedCard,
       installments: input.installments,
       payerEmail: input.payerEmail,
@@ -141,6 +143,7 @@ export class PagBankPaymentGateway implements PaymentGateway {
     return this.createCardChargePayment({
       order: input.order,
       authenticationId: input.authenticationId,
+      cardholderName: input.cardholderName,
       encryptedCard: input.encryptedCard,
       installments: 1,
       payerEmail: input.payerEmail,
@@ -224,7 +227,7 @@ export class PagBankPaymentGateway implements PaymentGateway {
                   store: false,
                 },
                 holder: {
-                  name: input.order.customerName,
+                  name: input.cardholderName,
                   tax_id: input.payerTaxId.replace(/\D/g, ''),
                 },
                 authentication_method: input.authenticationId
