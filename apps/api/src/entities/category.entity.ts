@@ -22,6 +22,9 @@ export class Category {
   @Property({ default: true })
   isActive?: boolean = true;
 
+  @Property({ default: false })
+  isArchived?: boolean = false;
+
   @Property({ type: 'jsonb', nullable: true })
   availabilitySchedule?: WeeklySchedule | null;
 

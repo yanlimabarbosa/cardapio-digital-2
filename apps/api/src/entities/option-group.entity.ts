@@ -25,6 +25,9 @@ export class OptionGroup {
   @Property({ default: true })
   isActive?: boolean = true;
 
+  @Property({ default: false })
+  isArchived?: boolean = false;
+
   @OneToMany(() => ProductExtra, (extra) => extra.optionGroup)
   options = new Collection<ProductExtra>(this);
 
