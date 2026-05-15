@@ -6,6 +6,7 @@ export type AdminProductExtraMutationModel = {
   readonly id: string;
   readonly imageUrl?: string;
   readonly isActive: boolean;
+  readonly isSoldOut: boolean;
   readonly name: string;
   readonly price: string;
   readonly sortOrder: number;
@@ -28,6 +29,7 @@ export type CreateAdminGroupOptionOutcome =
 export type UpdateAdminProductExtraData = {
   readonly imageUrl?: string;
   readonly isActive?: boolean;
+  readonly isSoldOut?: boolean;
   readonly name?: string;
   readonly price?: number;
 };
