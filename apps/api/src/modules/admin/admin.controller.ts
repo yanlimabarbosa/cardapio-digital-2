@@ -414,6 +414,7 @@ export class AdminController {
         description: dto.description,
         imageUrl: dto.imageUrl,
         isActive: dto.isActive,
+        isSoldOut: dto.isSoldOut,
         isPromotional: dto.isPromotional,
         promotionalPrice: dto.promotionalPrice,
         promotionStartDate: dto.promotionStartDate,
@@ -537,6 +538,7 @@ export class AdminController {
         price: dto.price,
         imageUrl: dto.imageUrl,
         isActive: dto.isActive,
+        isSoldOut: dto.isSoldOut,
       });
 
       return toAdminProductExtraMutationResponseDto(extra);
@@ -699,6 +701,7 @@ export class AdminController {
         price: dto.price,
         imageUrl: dto.imageUrl,
         isActive: dto.isActive,
+        isSoldOut: dto.isSoldOut,
       });
 
       return toAdminGroupOptionMutationResponseDto(option);

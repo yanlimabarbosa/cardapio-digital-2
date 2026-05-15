@@ -20,4 +20,9 @@ export class UpdateExtraDto {
   @IsOptional()
   @IsBoolean()
   public readonly isActive?: boolean;
+
+  /** Whether this extra is visible but sold out. */
+  @IsOptional()
+  @IsBoolean()
+  public readonly isSoldOut?: boolean;
 }
