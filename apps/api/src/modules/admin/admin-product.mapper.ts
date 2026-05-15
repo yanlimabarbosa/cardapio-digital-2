@@ -30,6 +30,7 @@ export function toAdminProductResponseDto(product: AdminProductReadModel): Admin
     product.price,
     product.imageUrl,
     product.isActive,
+    product.isSoldOut,
     product.isCompound,
     product.categoryId,
     product.categoryName,
@@ -64,6 +65,7 @@ export function toAdminProductExtraListResponseDto(
     extra.price,
     extra.imageUrl,
     extra.isActive,
+    extra.isSoldOut,
   );
 }
 
@@ -77,6 +79,7 @@ export function toAdminProductExtraMutationResponseDto(
     extra.imageUrl,
     extra.sortOrder,
     extra.isActive,
+    extra.isSoldOut,
   );
 }
 
@@ -90,6 +93,7 @@ export function toAdminGroupOptionResponseDto(
     extra.imageUrl,
     extra.sortOrder,
     extra.isActive,
+    extra.isSoldOut,
   );
 }
 
@@ -103,6 +107,7 @@ export function toAdminGroupOptionMutationResponseDto(
     extra.imageUrl,
     extra.sortOrder,
     extra.isActive,
+    extra.isSoldOut,
   );
 }
 
@@ -118,6 +123,7 @@ export function toAdminProductMutationResponseDto(
     product.imageUrl,
     product.sortOrder,
     product.isActive,
+    product.isSoldOut,
     product.isFeatured,
     product.featuredOrder,
     product.isPromotional,
@@ -154,5 +160,6 @@ function toAdminProductExtraResponseDto(extra: AdminProductExtraReadModel): Admi
     extra.imageUrl,
     extra.sortOrder,
     extra.isActive,
+    extra.isSoldOut,
   );
 }

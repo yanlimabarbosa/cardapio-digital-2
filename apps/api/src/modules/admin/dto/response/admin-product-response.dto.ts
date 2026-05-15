@@ -12,6 +12,8 @@ export class AdminProductExtraResponseDto {
     public readonly sortOrder: number,
     /** Whether this extra or option is active. */
     public readonly isActive: boolean,
+    /** Whether this extra or option is visible but sold out. */
+    public readonly isSoldOut: boolean,
   ) {}
 }
 
@@ -48,6 +50,8 @@ export class AdminProductResponseDto {
     public readonly imageUrl: string | undefined,
     /** Whether the product is currently active. */
     public readonly isActive: boolean,
+    /** Whether the product is visible but sold out. */
+    public readonly isSoldOut: boolean,
     /** Whether the product uses option groups. */
     public readonly isCompound: boolean,
     /** Product category identifier. */

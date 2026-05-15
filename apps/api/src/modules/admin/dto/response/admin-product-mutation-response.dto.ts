@@ -25,6 +25,8 @@ export class AdminProductMutationResponseDto {
     public readonly sortOrder: number,
     /** Whether the product is currently active. */
     public readonly isActive: boolean,
+    /** Whether the product is visible but sold out. */
+    public readonly isSoldOut: boolean,
     /** Whether the product is highlighted as featured. */
     public readonly isFeatured: boolean,
     /** Sort position inside featured products. */
