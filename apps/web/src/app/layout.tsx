@@ -6,6 +6,14 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Bem Comer Self-Service — Cardápio Digital',
   description: 'Bem Comer Self-Service — sem balança, com grelhados. Peça online com entrega ou retirada.',
+  icons: {
+    icon: [
+      { url: '/logo.png', type: 'image/png' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export const viewport: Viewport = {
