@@ -28,7 +28,7 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
     const context = await this.getAvailabilityContext(query.scheduledFor);
     const categories = await this.em.find(
       Category,
-      { isActive: true },
+      { isActive: true, isArchived: false },
       {
         populate: ['products', 'products.extras', 'products.optionGroups', 'products.optionGroups.options'],
         orderBy: { sortOrder: 'ASC', products: { sortOrder: 'ASC', name: 'ASC' } },
@@ -42,7 +42,7 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
     const context = await this.getAvailabilityContext(query.scheduledFor);
     const products = await this.em.find(
       Product,
-      { isFeatured: true, isActive: true },
+      { isFeatured: true, isActive: true, isArchived: false },
       { populate: ['extras', 'category', 'optionGroups', 'optionGroups.options'], orderBy: { featuredOrder: 'ASC' } },
     );
 
@@ -90,6 +90,7 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
       nextAvailableAt: availability.nextAvailableAt,
       products: category.products
         .getItems()
+        .filter((product) => this.isPublicProduct(product))
         .map((product) => this.toProductReadModel(product, category, context)),
     };
   }
@@ -99,16 +100,17 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
     category: Category,
     context: MenuAvailabilityContext,
   ): ProductReadModel {
+    const active = (product.isActive ?? true) && !(product.isArchived ?? false);
+    const soldOut = product.isSoldOut ?? false;
     const availability = MenuAvailabilityPolicy.create(context).productInCategoryAvailability({
-      isActive: product.isActive,
+      isActive: active && !soldOut,
       categoryAvailabilitySchedule: category.availabilitySchedule,
     });
     const pricePolicy = ProductPricePolicy.create(product);
     const priceEvaluationDate = new Date();
     const promotionActive = pricePolicy.isPromotionActive(priceEvaluationDate);
     const isCompound = product.isCompound ?? false;
-    const active = product.isActive ?? true;
-    const available = active && availability.available;
+    const available = active && !soldOut && availability.available;
 
     return {
       id: product.id,
@@ -118,8 +120,8 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
       imageUrl: product.imageUrl,
       isActive: active,
       isAvailable: available,
-      availabilityMessage: active ? availability.nextAvailableLabel : 'Esgotado',
-      nextAvailableAt: availability.nextAvailableAt,
+      availabilityMessage: soldOut ? 'Esgotado' : active ? availability.nextAvailableLabel : 'Indisponível',
+      nextAvailableAt: soldOut ? undefined : availability.nextAvailableAt,
       isCompound,
       isPromotional: product.isPromotional ?? false,
       promotionalPrice: product.promotionalPrice ? parseFloat(product.promotionalPrice) : null,
@@ -133,7 +135,7 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
   private toExtras(product: Product): readonly ProductExtraReadModel[] {
     return product.extras
       .getItems()
-      .filter((extra) => extra.isActive && !extra.optionGroup)
+      .filter((extra) => this.isPublicExtra(extra) && !extra.optionGroup)
       .map((extra) => ({
         id: extra.id,
         name: extra.name,
@@ -145,7 +147,7 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
   private toOptionGroups(product: Product): readonly ProductOptionGroupReadModel[] {
     return product.optionGroups
       .getItems()
-      .filter((group) => group.isActive)
+      .filter((group) => (group.isActive ?? true) && !(group.isArchived ?? false))
       .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))
       .map((group) => ({
         id: group.id,
@@ -156,7 +158,7 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
         sortOrder: group.sortOrder ?? 0,
         options: group.options
           .getItems()
-          .filter((option) => option.isActive)
+          .filter((option) => this.isPublicExtra(option))
           .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))
           .map((option) => ({
             id: option.id,
@@ -165,6 +167,14 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
             imageUrl: option.imageUrl,
           })),
       }));
+  }
+
+  private isPublicProduct(product: Product): boolean {
+    return (product.isActive ?? true) && !(product.isArchived ?? false);
+  }
+
+  private isPublicExtra(extra: { isActive?: boolean; isArchived?: boolean; isSoldOut?: boolean }): boolean {
+    return (extra.isActive ?? true) && !(extra.isArchived ?? false) && !(extra.isSoldOut ?? false);
   }
 
   private parseScheduledFor(value?: string): Date | null {

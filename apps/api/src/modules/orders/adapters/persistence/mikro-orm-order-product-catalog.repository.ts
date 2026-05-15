@@ -43,7 +43,7 @@ export class MikroOrmOrderProductCatalogRepository implements OrderProductCatalo
       id: product.id,
       name: product.name,
       price: product.price,
-      isActive: product.isActive,
+      isActive: (product.isActive ?? true) && !(product.isArchived ?? false) && !(product.isSoldOut ?? false),
       isCompound: product.isCompound,
       isPromotional: product.isPromotional,
       isRedeemable: product.isRedeemable,
@@ -59,7 +59,7 @@ export class MikroOrmOrderProductCatalogRepository implements OrderProductCatalo
           id: extra.id,
           name: extra.name,
           price: extra.price,
-          isActive: extra.isActive,
+          isActive: (extra.isActive ?? true) && !(extra.isArchived ?? false) && !(extra.isSoldOut ?? false),
         }))
         : [],
       optionGroups: includeComposition
@@ -68,12 +68,12 @@ export class MikroOrmOrderProductCatalogRepository implements OrderProductCatalo
           name: group.name,
           minSelections: group.minSelections,
           maxSelections: group.maxSelections,
-          isActive: group.isActive,
+          isActive: (group.isActive ?? true) && !(group.isArchived ?? false),
           options: group.options.getItems().map((option) => ({
             id: option.id,
             name: option.name,
             price: option.price,
-            isActive: option.isActive,
+            isActive: (option.isActive ?? true) && !(option.isArchived ?? false) && !(option.isSoldOut ?? false),
           })),
         }))
         : [],

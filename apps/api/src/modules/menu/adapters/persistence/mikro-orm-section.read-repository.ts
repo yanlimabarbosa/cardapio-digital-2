@@ -56,7 +56,7 @@ export class MikroOrmSectionReadRepository implements SectionReadRepository {
       nextAvailableAt: availability.nextAvailableAt,
       products: section.products
         .getItems()
-        .filter((sectionProduct) => sectionProduct.product.isActive)
+        .filter((sectionProduct) => this.isPublicProduct(sectionProduct.product))
         .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))
         .map((sectionProduct) => this.toSectionProductReadModel(sectionProduct.product, section, context)),
     };
@@ -67,14 +67,17 @@ export class MikroOrmSectionReadRepository implements SectionReadRepository {
     section: Section,
     context: MenuAvailabilityContext,
   ): SectionProductReadModel {
+    const soldOut = product.isSoldOut ?? false;
     const availability = MenuAvailabilityPolicy.create(context).productInSectionAvailability({
-      isActive: product.isActive,
+      isActive: (product.isActive ?? true) && !(product.isArchived ?? false) && !soldOut,
       categoryAvailabilitySchedule: product.category.availabilitySchedule,
       sectionAvailabilitySchedule: section.availabilitySchedule,
     });
     const pricePolicy = ProductPricePolicy.create(product);
     const priceEvaluationDate = new Date();
     const promotionActive = pricePolicy.isPromotionActive(priceEvaluationDate);
+
+    const available = !soldOut && availability.available;
 
     return {
       id: product.id,
@@ -83,9 +86,9 @@ export class MikroOrmSectionReadRepository implements SectionReadRepository {
       price: parseFloat(product.price),
       imageUrl: product.imageUrl,
       isActive: true,
-      isAvailable: availability.available,
-      availabilityMessage: availability.nextAvailableLabel,
-      nextAvailableAt: availability.nextAvailableAt,
+      isAvailable: available,
+      availabilityMessage: soldOut ? 'Esgotado' : availability.nextAvailableLabel,
+      nextAvailableAt: soldOut ? undefined : availability.nextAvailableAt,
       isCompound: product.isCompound ?? false,
       isPromotional: product.isPromotional ?? false,
       promotionalPrice: product.promotionalPrice ? parseFloat(product.promotionalPrice) : null,
@@ -98,13 +101,17 @@ export class MikroOrmSectionReadRepository implements SectionReadRepository {
   private toExtras(product: Product): readonly ProductExtraReadModel[] {
     return product.extras
       .getItems()
-      .filter((extra) => extra.isActive)
+      .filter((extra) => (extra.isActive ?? true) && !(extra.isArchived ?? false) && !(extra.isSoldOut ?? false))
       .map((extra) => ({
         id: extra.id,
         name: extra.name,
         price: parseFloat(extra.price),
         imageUrl: extra.imageUrl,
       }));
+  }
+
+  private isPublicProduct(product: Product): boolean {
+    return (product.isActive ?? true) && !(product.isArchived ?? false);
   }
 
   private parseScheduledFor(value?: string): Date | null {
