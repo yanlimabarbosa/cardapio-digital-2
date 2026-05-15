@@ -1,9 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn, maskCnpj, maskPhone } from '@/lib/utils';
 import { ImagePlus, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
@@ -30,6 +30,56 @@ export function StoreSettings({
 }: StoreSettingsProps) {
   const token = useAuthStore((s) => s.token);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  const skipReceiptSaveRef = useRef(true);
+  const onUpdateSettingsRef = useRef(onUpdateSettings);
+  const [receiptDraft, setReceiptDraft] = useState(() => ({
+    receiptCnpj: maskCnpj(storeSettings.receiptCnpj ?? ''),
+    receiptAddress: storeSettings.receiptAddress ?? '',
+    receiptPhone: maskPhone(storeSettings.receiptPhone ?? ''),
+    receiptFooter: storeSettings.receiptFooter ?? '',
+  }));
+
+  useEffect(() => {
+    onUpdateSettingsRef.current = onUpdateSettings;
+  }, [onUpdateSettings]);
+
+  useEffect(() => {
+    const receiptCnpj = maskCnpj(storeSettings.receiptCnpj ?? '');
+    const receiptPhone = maskPhone(storeSettings.receiptPhone ?? '');
+
+    skipReceiptSaveRef.current = true;
+    setReceiptDraft({
+      receiptCnpj,
+      receiptAddress: storeSettings.receiptAddress ?? '',
+      receiptPhone,
+      receiptFooter: storeSettings.receiptFooter ?? '',
+    });
+
+    if ((storeSettings.receiptCnpj ?? '') !== receiptCnpj || (storeSettings.receiptPhone ?? '') !== receiptPhone) {
+      onUpdateSettingsRef.current({
+        receiptCnpj,
+        receiptPhone,
+      });
+    }
+  }, [
+    storeSettings.receiptAddress,
+    storeSettings.receiptCnpj,
+    storeSettings.receiptFooter,
+    storeSettings.receiptPhone,
+  ]);
+
+  useEffect(() => {
+    if (skipReceiptSaveRef.current) {
+      skipReceiptSaveRef.current = false;
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      onUpdateSettingsRef.current(receiptDraft);
+    }, 500);
+
+    return () => window.clearTimeout(timeout);
+  }, [receiptDraft]);
 
   async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -195,9 +245,17 @@ export function StoreSettings({
             </label>
             <Input
               type="text"
+              inputMode="numeric"
+              autoComplete="off"
               placeholder="XX.XXX.XXX/XXXX-XX"
-              value={storeSettings.receiptCnpj ?? ''}
-              onChange={(e) => onUpdateSettings({ receiptCnpj: e.target.value })}
+              maxLength={18}
+              value={receiptDraft.receiptCnpj}
+              onChange={(e) =>
+                setReceiptDraft((current) => ({
+                  ...current,
+                  receiptCnpj: maskCnpj(e.target.value),
+                }))
+              }
               className="h-11 w-64 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
             />
           </div>
@@ -207,8 +265,13 @@ export function StoreSettings({
             </label>
             <textarea
               placeholder="Endereco completo do restaurante"
-              value={storeSettings.receiptAddress ?? ''}
-              onChange={(e) => onUpdateSettings({ receiptAddress: e.target.value })}
+              value={receiptDraft.receiptAddress}
+              onChange={(e) =>
+                setReceiptDraft((current) => ({
+                  ...current,
+                  receiptAddress: e.target.value,
+                }))
+              }
               rows={2}
               className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
             />
@@ -219,9 +282,17 @@ export function StoreSettings({
             </label>
             <Input
               type="text"
+              inputMode="tel"
+              autoComplete="off"
               placeholder="(XX) XXXXX-XXXX"
-              value={storeSettings.receiptPhone ?? ''}
-              onChange={(e) => onUpdateSettings({ receiptPhone: e.target.value })}
+              maxLength={15}
+              value={receiptDraft.receiptPhone}
+              onChange={(e) =>
+                setReceiptDraft((current) => ({
+                  ...current,
+                  receiptPhone: maskPhone(e.target.value),
+                }))
+              }
               className="h-11 w-52 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
             />
           </div>
@@ -231,8 +302,13 @@ export function StoreSettings({
             </label>
             <textarea
               placeholder="Obrigado pela preferencia!"
-              value={storeSettings.receiptFooter ?? ''}
-              onChange={(e) => onUpdateSettings({ receiptFooter: e.target.value })}
+              value={receiptDraft.receiptFooter}
+              onChange={(e) =>
+                setReceiptDraft((current) => ({
+                  ...current,
+                  receiptFooter: e.target.value,
+                }))
+              }
               rows={2}
               className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
             />
