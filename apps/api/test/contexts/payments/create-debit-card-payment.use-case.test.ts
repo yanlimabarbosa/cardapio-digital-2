@@ -56,6 +56,7 @@ test('creates debit card payment through the gateway and applies the returned st
     {
       order,
       authenticationId: '3DS_authentication',
+      cardholderName: 'JOSE DA SILVA',
       encryptedCard: 'encrypted-card',
       payerEmail: 'cliente@example.com',
       payerTaxId: '12345678901',
@@ -255,6 +256,7 @@ class FakePaymentRealtimeNotifier implements PaymentRealtimeNotifier {
 
 function createCommand(): {
   readonly authenticationId: string;
+  readonly cardholderName: string;
   readonly encryptedCard: string;
   readonly identificationNumber: string;
   readonly orderId: string;
@@ -264,6 +266,7 @@ function createCommand(): {
     orderId: 'order-1',
     encryptedCard: 'encrypted-card',
     authenticationId: '3DS_authentication',
+    cardholderName: 'JOSE DA SILVA',
     payerEmail: 'cliente@example.com',
     identificationNumber: '12345678901',
   };

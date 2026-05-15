@@ -219,6 +219,7 @@ test('creates credit card payments with the PagBank charge payload and maps stat
 
     const result = await gateway.createCreditCardPayment({
       order: createPaymentOrder(PaymentMethod.CREDIT_CARD),
+      cardholderName: 'JOSE DA SILVA',
       encryptedCard: 'encrypted-card-token',
       installments: 2,
       payerEmail: 'payer@example.com',
@@ -259,7 +260,7 @@ test('creates credit card payments with the PagBank charge payload and maps stat
     assert.equal(card.store, false);
 
     const holder = requireRecord(paymentMethod.holder);
-    assert.equal(holder.name, 'Cliente Teste');
+    assert.equal(holder.name, 'JOSE DA SILVA');
     assert.equal(holder.tax_id, '12345678901');
 
     const evidence = await readEvidenceLine(evidenceFile);
@@ -317,6 +318,7 @@ test('creates debit card payments with 3DS authentication payload and maps statu
     const result = await gateway.createDebitCardPayment({
       order: createPaymentOrder(PaymentMethod.DEBIT_CARD),
       authenticationId: '3DS_authentication',
+      cardholderName: 'JOSE DA SILVA',
       encryptedCard: 'encrypted-card-token',
       payerEmail: 'payer@example.com',
       payerTaxId: '12345678901',
@@ -345,6 +347,9 @@ test('creates debit card payments with 3DS authentication payload and maps statu
     const authenticationMethod = requireRecord(paymentMethod.authentication_method);
     assert.equal(authenticationMethod.type, 'THREEDS');
     assert.equal(authenticationMethod.id, '3DS_authentication');
+    const holder = requireRecord(paymentMethod.holder);
+    assert.equal(holder.name, 'JOSE DA SILVA');
+    assert.equal(holder.tax_id, '12345678901');
 
     const evidence = await readEvidenceLine(evidenceFile);
     const requestBody = requireRecord(evidence.requestBody);

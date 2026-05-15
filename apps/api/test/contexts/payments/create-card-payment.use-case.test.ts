@@ -55,6 +55,7 @@ test('creates credit card payment through the gateway and applies the returned s
   assert.deepEqual(gateway.cardInputs, [
     {
       order,
+      cardholderName: 'JOSE DA SILVA',
       encryptedCard: 'encrypted-card',
       installments: 2,
       payerEmail: 'cliente@example.com',
@@ -215,6 +216,7 @@ class FakePaymentRealtimeNotifier implements PaymentRealtimeNotifier {
 }
 
 function createCommand(): {
+  readonly cardholderName: string;
   readonly encryptedCard: string;
   readonly identificationNumber: string;
   readonly installments: number;
@@ -223,6 +225,7 @@ function createCommand(): {
 } {
   return {
     orderId: 'order-1',
+    cardholderName: 'JOSE DA SILVA',
     encryptedCard: 'encrypted-card',
     installments: 2,
     payerEmail: 'cliente@example.com',
