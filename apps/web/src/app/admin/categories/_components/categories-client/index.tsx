@@ -101,6 +101,7 @@ export function CategoriesClient() {
                   onToggleActive={() =>
                     toggleActiveMutation.mutate({ id: cat.id, isActive: !cat.isActive })
                   }
+                  onDelete={() => deleteMutation.mutate(cat.id)}
                   onReorderProducts={() =>
                     setReorderDialog({ categoryId: cat.id, categoryName: cat.name })
                   }

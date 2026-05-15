@@ -2,7 +2,7 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Pencil, ArrowUpDown, Power } from 'lucide-react';
+import { GripVertical, Pencil, ArrowUpDown, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AdminCategory } from '@/types/admin';
 
@@ -10,6 +10,7 @@ interface SortableCategoryCardProps {
   cat: AdminCategory;
   onEdit: () => void;
   onToggleActive: () => void;
+  onDelete: () => void;
   onReorderProducts: () => void;
 }
 
@@ -17,6 +18,7 @@ export function SortableCategoryCard({
   cat,
   onEdit,
   onToggleActive,
+  onDelete,
   onReorderProducts,
 }: SortableCategoryCardProps) {
   const {
@@ -48,7 +50,7 @@ export function SortableCategoryCard({
       {/* Active indicator bar */}
       <div className={cn(
         'w-1 shrink-0',
-        cat.isActive ? 'bg-emerald-400' : 'bg-red-300',
+        cat.isActive ? 'bg-emerald-400' : 'bg-slate-300',
       )} />
 
       <div className="flex flex-1 items-center justify-between p-4">
@@ -67,8 +69,8 @@ export function SortableCategoryCard({
                 {cat.productCount} produtos
               </span>
               {!cat.isActive && (
-                <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-600">
-                  Inativa
+                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                  Oculta
                 </span>
               )}
             </div>
@@ -90,15 +92,22 @@ export function SortableCategoryCard({
           </button>
           <button
             onClick={onToggleActive}
-            title={cat.isActive ? 'Desativar' : 'Ativar'}
+            title={cat.isActive ? 'Ocultar categoria' : 'Mostrar categoria'}
             className={cn(
               'rounded-lg border p-2 transition-colors',
               cat.isActive
-                ? 'border-[#E8DDD0] text-[#8B7355] hover:bg-red-50 hover:text-red-600'
+                ? 'border-[#E8DDD0] text-[#8B7355] hover:bg-slate-100 hover:text-slate-700'
                 : 'border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100',
             )}
           >
-            <Power className="h-3.5 w-3.5" />
+            {cat.isActive ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          </button>
+          <button
+            onClick={onDelete}
+            title="Excluir categoria"
+            className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
