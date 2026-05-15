@@ -9,7 +9,7 @@ export class MikroOrmAdminCategoryReadRepository implements AdminCategoryReadRep
   public async list(): Promise<readonly AdminCategoryReadModel[]> {
     const categories = await this.em.find(
       Category,
-      {},
+      { isArchived: false },
       { orderBy: { sortOrder: 'ASC' }, populate: ['products'] },
     );
 
@@ -25,7 +25,7 @@ export class MikroOrmAdminCategoryReadRepository implements AdminCategoryReadRep
       sortOrder: category.sortOrder ?? 0,
       isActive: category.isActive ?? true,
       availabilitySchedule: category.availabilitySchedule ?? null,
-      productCount: category.products.length,
+      productCount: category.products.getItems().filter((product) => !(product.isArchived ?? false)).length,
       createdAt: category.createdAt,
     };
   }

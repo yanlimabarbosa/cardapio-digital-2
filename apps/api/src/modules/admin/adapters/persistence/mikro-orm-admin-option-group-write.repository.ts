@@ -71,7 +71,7 @@ export class MikroOrmAdminOptionGroupWriteRepository implements AdminOptionGroup
       return false;
     }
 
-    optionGroup.isActive = false;
+    optionGroup.isArchived = true;
 
     await em.flush();
 

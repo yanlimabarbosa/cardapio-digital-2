@@ -54,7 +54,7 @@ export class MikroOrmAdminCategoryWriteRepository implements AdminCategoryWriteR
       return false;
     }
 
-    category.isActive = false;
+    category.isArchived = true;
     await em.flush();
 
     return true;
