@@ -27,4 +27,10 @@ export class ProductExtra {
 
   @Property({ default: true })
   isActive?: boolean = true;
+
+  @Property({ default: false })
+  isSoldOut?: boolean = false;
+
+  @Property({ default: false })
+  isArchived?: boolean = false;
 }

@@ -30,6 +30,12 @@ export class Product {
   isActive?: boolean = true;
 
   @Property({ default: false })
+  isSoldOut?: boolean = false;
+
+  @Property({ default: false })
+  isArchived?: boolean = false;
+
+  @Property({ default: false })
   isFeatured?: boolean = false;
 
   @Property({ default: 0 })
