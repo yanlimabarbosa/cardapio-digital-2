@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsInt, IsString, IsUUID, Matches, Max, Min } from 'class-validator';
+import { IsEmail, IsIn, IsInt, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
 
 export class CreateCardPaymentDto {
   @IsUUID()
@@ -6,6 +6,11 @@ export class CreateCardPaymentDto {
 
   @IsString()
   encryptedCard!: string;
+
+  @IsString()
+  @MinLength(2)
+  @MaxLength(30)
+  cardholderName!: string;
 
   @IsInt()
   @Min(1)

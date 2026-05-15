@@ -15,6 +15,7 @@ export interface PixPaymentResponse {
 export interface CreateCardPaymentDto {
   orderId: string;
   encryptedCard: string;
+  cardholderName: string;
   installments: number;
   payerEmail: string;
   identificationType: string;
@@ -36,6 +37,7 @@ export interface CreateDebitCardPaymentDto {
   orderId: string;
   encryptedCard: string;
   authenticationId: string;
+  cardholderName: string;
   payerEmail: string;
   identificationType: string;
   identificationNumber: string;

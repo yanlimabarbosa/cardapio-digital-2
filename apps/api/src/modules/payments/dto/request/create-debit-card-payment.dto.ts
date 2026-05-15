@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsString, IsUUID, Matches } from 'class-validator';
+import { IsEmail, IsIn, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateDebitCardPaymentDto {
   @IsUUID()
@@ -10,6 +10,11 @@ export class CreateDebitCardPaymentDto {
   @IsString()
   @Matches(/^3DS_/)
   authenticationId!: string;
+
+  @IsString()
+  @MinLength(2)
+  @MaxLength(30)
+  cardholderName!: string;
 
   @IsEmail()
   payerEmail!: string;
