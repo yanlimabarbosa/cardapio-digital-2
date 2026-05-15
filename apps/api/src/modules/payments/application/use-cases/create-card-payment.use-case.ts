@@ -6,6 +6,7 @@ import type {
 import type { PaymentRealtimeNotifier } from '../ports/payment-realtime-notifier.port';
 
 export type CreateCardPaymentCommand = {
+  readonly cardholderName: string;
   readonly encryptedCard: string;
   readonly identificationNumber: string;
   readonly installments: number;
@@ -38,6 +39,9 @@ export class CreateCardPaymentUseCase {
     if (!command.encryptedCard) {
       throw new CardPaymentInputError('PagBank encrypted card is required');
     }
+    if (!command.cardholderName.trim()) {
+      throw new CardPaymentInputError('PagBank cardholder name is required');
+    }
 
     const order = await this.paymentOrders.findById({ orderId: command.orderId });
 
@@ -47,6 +51,7 @@ export class CreateCardPaymentUseCase {
 
     const payment = await this.paymentGateway.createCreditCardPayment({
       order,
+      cardholderName: command.cardholderName.trim(),
       encryptedCard: command.encryptedCard,
       installments: command.installments,
       payerEmail: command.payerEmail,

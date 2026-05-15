@@ -10,6 +10,7 @@ export type CreatePixPaymentInput = {
 };
 
 export type CreateCreditCardPaymentInput = {
+  readonly cardholderName: string;
   readonly encryptedCard: string;
   readonly installments: number;
   readonly order: PaymentOrder;
@@ -19,6 +20,7 @@ export type CreateCreditCardPaymentInput = {
 
 export type CreateDebitCardPaymentInput = {
   readonly authenticationId: string;
+  readonly cardholderName: string;
   readonly encryptedCard: string;
   readonly order: PaymentOrder;
   readonly payerEmail: string;

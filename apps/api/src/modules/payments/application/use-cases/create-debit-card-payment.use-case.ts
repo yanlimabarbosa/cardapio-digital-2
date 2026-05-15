@@ -8,6 +8,7 @@ import type { PaymentRealtimeNotifier } from '../ports/payment-realtime-notifier
 
 export type CreateDebitCardPaymentCommand = {
   readonly authenticationId: string;
+  readonly cardholderName: string;
   readonly encryptedCard: string;
   readonly identificationNumber: string;
   readonly orderId: string;
@@ -42,6 +43,9 @@ export class CreateDebitCardPaymentUseCase {
     if (!command.authenticationId) {
       throw new DebitCardPaymentInputError('PagBank 3DS authentication id is required');
     }
+    if (!command.cardholderName.trim()) {
+      throw new DebitCardPaymentInputError('PagBank cardholder name is required');
+    }
 
     const order = await this.paymentOrders.findById({ orderId: command.orderId });
 
@@ -56,6 +60,7 @@ export class CreateDebitCardPaymentUseCase {
     const payment = await this.paymentGateway.createDebitCardPayment({
       order,
       authenticationId: command.authenticationId,
+      cardholderName: command.cardholderName.trim(),
       encryptedCard: command.encryptedCard,
       payerEmail: command.payerEmail,
       payerTaxId: command.identificationNumber,
