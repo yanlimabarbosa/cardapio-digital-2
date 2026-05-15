@@ -86,7 +86,8 @@ export class MikroOrmAdminProductWriteRepository implements AdminProductWriteRep
       return false;
     }
 
-    product.isActive = false;
+    product.isArchived = true;
+    product.isFeatured = false;
     await em.flush();
 
     return true;
@@ -152,6 +153,10 @@ export class MikroOrmAdminProductWriteRepository implements AdminProductWriteRep
       product.isActive = data.isActive;
     }
 
+    if (data.isSoldOut !== undefined) {
+      product.isSoldOut = data.isSoldOut;
+    }
+
     if (data.isPromotional !== undefined) {
       product.isPromotional = data.isPromotional;
     }
@@ -209,6 +214,7 @@ export class MikroOrmAdminProductWriteRepository implements AdminProductWriteRep
       imageUrl: product.imageUrl,
       sortOrder: product.sortOrder ?? 0,
       isActive: product.isActive ?? true,
+      isSoldOut: product.isSoldOut ?? false,
       isFeatured: product.isFeatured ?? false,
       featuredOrder: product.featuredOrder ?? 0,
       isPromotional: product.isPromotional ?? false,

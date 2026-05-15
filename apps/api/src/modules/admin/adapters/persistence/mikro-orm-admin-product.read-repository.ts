@@ -16,7 +16,7 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
   public async list(): Promise<readonly AdminProductReadModel[]> {
     const products = await this.em.find(
       Product,
-      {},
+      { isArchived: false },
       {
         populate: ['category', 'extras', 'optionGroups', 'optionGroups.options'],
         orderBy: { category: { sortOrder: 'ASC' }, sortOrder: 'ASC', name: 'ASC' },
@@ -41,6 +41,7 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
       .getItems()
       .slice()
       .sort(this.compareOptionGroups)
+      .filter((group: OptionGroup): boolean => !(group.isArchived ?? false))
       .map((group: OptionGroup): AdminOptionGroupReadModel => this.toOptionGroupReadModel(group));
   }
 
@@ -53,19 +54,23 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
       return null;
     }
 
-    return product.extras.getItems().map((extra: ProductExtra): AdminProductExtraListReadModel => ({
-      id: extra.id,
-      name: extra.name,
-      price: Number.parseFloat(extra.price),
-      imageUrl: extra.imageUrl,
-      isActive: extra.isActive ?? true,
-    }));
+    return product.extras
+      .getItems()
+      .filter((extra: ProductExtra): boolean => !(extra.isArchived ?? false))
+      .map((extra: ProductExtra): AdminProductExtraListReadModel => ({
+        id: extra.id,
+        name: extra.name,
+        price: Number.parseFloat(extra.price),
+        imageUrl: extra.imageUrl,
+        isActive: extra.isActive ?? true,
+        isSoldOut: extra.isSoldOut ?? false,
+      }));
   }
 
   public async listFeatured(): Promise<readonly AdminFeaturedProductReadModel[]> {
     const products = await this.em.find(
       Product,
-      { isFeatured: true },
+      { isFeatured: true, isArchived: false },
       { populate: ['category'], orderBy: { featuredOrder: 'ASC' } },
     );
 
@@ -87,16 +92,18 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
       price: Number.parseFloat(product.price),
       imageUrl: product.imageUrl,
       isActive: product.isActive ?? true,
+      isSoldOut: product.isSoldOut ?? false,
       isCompound: product.isCompound ?? false,
       categoryId: product.category.id,
       categoryName: product.category.name,
       extras: product.extras
         .getItems()
-        .filter((extra: ProductExtra): boolean => !extra.optionGroup)
+        .filter((extra: ProductExtra): boolean => !extra.optionGroup && !(extra.isArchived ?? false))
         .map((extra: ProductExtra): AdminProductExtraReadModel => this.toExtraReadModel(extra)),
       optionGroups: product.optionGroups
         .getItems()
         .slice()
+        .filter((group: OptionGroup): boolean => !(group.isArchived ?? false))
         .sort(this.compareOptionGroups)
         .map((group: OptionGroup): AdminProductOptionGroupReadModel => this.toOptionGroupReadModel(group)),
       sortOrder: product.sortOrder ?? 0,
@@ -114,6 +121,7 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
       imageUrl: extra.imageUrl,
       sortOrder: extra.sortOrder ?? 0,
       isActive: extra.isActive ?? true,
+      isSoldOut: extra.isSoldOut ?? false,
     };
   }
 
@@ -128,6 +136,7 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
       options: group.options
         .getItems()
         .slice()
+        .filter((option: ProductExtra): boolean => !(option.isArchived ?? false))
         .sort(this.compareExtras)
         .map((option: ProductExtra): AdminProductExtraReadModel => this.toExtraReadModel(option)),
     };
