@@ -177,7 +177,7 @@ export function CartClient() {
 
   if (items.length === 0) {
     return (
-      <main className="order-flow-brown flex min-h-dvh flex-col items-center justify-center bg-terra-50 px-4">
+      <main className="order-flow-brown flex min-h-dvh flex-col items-center justify-center bg-cream-warm px-4">
         <motion.div
           className="text-center"
           initial={{ opacity: 0, y: 20 }}
@@ -203,7 +203,7 @@ export function CartClient() {
   }
 
   return (
-    <main className="order-flow-brown min-h-dvh bg-terra-50 pb-36">
+    <main className="order-flow-brown min-h-dvh bg-cream-warm pb-36">
       <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
         <div className="absolute inset-0 tapioca-grain opacity-40" />
         <div className="container relative flex items-center gap-3">
@@ -274,11 +274,11 @@ export function CartClient() {
                     <div className="mt-2 flex items-center justify-between">
                       <span className="font-display text-base font-semibold text-terra-600">{formatCurrency(lineTotal)}</span>
                       <div className="flex items-center rounded-lg border border-terra-200">
-                        <button type="button" onClick={() => updateQuantity(item.key, item.quantity - 1)} className="flex h-8 w-8 items-center justify-center text-terra-500 transition-colors active:bg-terra-50">
+                        <button type="button" onClick={() => updateQuantity(item.key, item.quantity - 1)} className="flex h-8 w-8 items-center justify-center text-terra-500 transition-colors active:bg-cream-warm">
                           <Minus className="h-3.5 w-3.5" />
                         </button>
                         <span className="w-7 text-center text-sm font-bold text-terra-900">{item.quantity}</span>
-                        <button type="button" onClick={() => updateQuantity(item.key, item.quantity + 1)} className="flex h-8 w-8 items-center justify-center text-terra-500 transition-colors active:bg-terra-50">
+                        <button type="button" onClick={() => updateQuantity(item.key, item.quantity + 1)} className="flex h-8 w-8 items-center justify-center text-terra-500 transition-colors active:bg-cream-warm">
                           <Plus className="h-3.5 w-3.5" />
                         </button>
                       </div>

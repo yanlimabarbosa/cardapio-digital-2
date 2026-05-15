@@ -6,7 +6,8 @@ import { useCustomerStore } from '@/stores/customer-store';
 import { useCustomerOrders } from '@/hooks/customer/use-customer-orders';
 import { SetPasswordDialog } from '@/components/auth/set-password-dialog';
 import { AuthDialog } from '@/components/auth/auth-dialog';
-import { ArrowLeft, Lock, PackageCheck, Clock, ChevronRight } from 'lucide-react';
+import { CustomerHeader, CustomerPage } from '@/components/customer/customer-page-shell';
+import { Lock, PackageCheck, Clock, ChevronRight } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { formatScheduledFor } from '@cardapio/shared';
 
@@ -45,15 +46,8 @@ export function MyOrdersClient() {
   // Not logged in
   if (!token) {
     return (
-      <main className="min-h-dvh bg-terra-50">
-        <header className="bg-terra-600 px-4 py-4 text-white">
-          <div className="container flex items-center gap-3">
-            <Link href="/" className="rounded-full p-1 hover:bg-white/10">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            <h1 className="font-display text-lg font-semibold">Meus Pedidos</h1>
-          </div>
-        </header>
+      <CustomerPage>
+        <CustomerHeader title="Meus Pedidos" backHref="/" />
         <div className="container px-4 py-12 text-center">
           <PackageCheck className="mx-auto h-12 w-12 text-terra-300" />
           <h2 className="mt-4 font-display text-lg font-semibold text-terra-900">
@@ -70,7 +64,7 @@ export function MyOrdersClient() {
           </button>
           <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
         </div>
-      </main>
+      </CustomerPage>
     );
   }
 
@@ -79,15 +73,8 @@ export function MyOrdersClient() {
   const finishedOrders = orders.filter((o) => !ACTIVE_STATUSES.includes(o.status));
 
   return (
-    <main className="min-h-dvh bg-terra-50">
-      <header className="bg-terra-600 px-4 py-4 text-white">
-        <div className="container flex items-center gap-3">
-          <Link href="/" className="rounded-full p-1 hover:bg-white/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <h1 className="font-display text-lg font-semibold">Meus Pedidos</h1>
-        </div>
-      </header>
+    <CustomerPage>
+      <CustomerHeader title="Meus Pedidos" backHref="/" />
 
       <div className="container px-4 py-6 space-y-6">
         {isLoading && (
@@ -219,6 +206,6 @@ export function MyOrdersClient() {
       </div>
 
       <SetPasswordDialog open={setPasswordOpen} onOpenChange={setSetPasswordOpen} />
-    </main>
+    </CustomerPage>
   );
 }

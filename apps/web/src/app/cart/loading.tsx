@@ -1,10 +1,10 @@
 export default function CartLoading() {
   return (
-    <main className="order-flow-brown min-h-dvh bg-terra-50 pb-32">
+    <main className="order-flow-brown min-h-dvh bg-cream-warm pb-32">
       <header className="bg-cocoa-noise px-4 py-4">
         <div className="container flex items-center gap-4">
-          <div className="h-10 w-10 animate-pulse rounded bg-terra-500" />
-          <div className="h-6 w-32 animate-pulse rounded bg-terra-500" />
+          <div className="h-10 w-10 animate-pulse rounded bg-cream-warm0" />
+          <div className="h-6 w-32 animate-pulse rounded bg-cream-warm0" />
         </div>
       </header>
       <div className="container space-y-4 px-4 py-4">

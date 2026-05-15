@@ -1,21 +1,9 @@
+import { CustomerHeaderSkeleton, CustomerPage } from '@/components/customer/customer-page-shell';
+
 export default function HomeLoading() {
   return (
-    <main className="min-h-dvh bg-terra-50 pb-24">
-      <header className="relative overflow-hidden bg-terra-600 px-4 pb-6 pt-8">
-        <div className="container">
-          <div className="flex items-center gap-3">
-            <div className="h-14 w-14 animate-pulse rounded-full bg-terra-500" />
-            <div className="space-y-2">
-              <div className="h-6 w-40 animate-pulse rounded bg-terra-500" />
-              <div className="h-4 w-32 animate-pulse rounded bg-terra-500/60" />
-            </div>
-          </div>
-          <div className="mt-3 flex gap-4">
-            <div className="h-4 w-48 animate-pulse rounded bg-terra-500/40" />
-            <div className="h-6 w-28 animate-pulse rounded-full bg-terra-500/40" />
-          </div>
-        </div>
-      </header>
+    <CustomerPage className="pb-24">
+      <CustomerHeaderSkeleton />
       <div className="container px-4 py-4">
         <div className="flex gap-2 py-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -38,6 +26,6 @@ export default function HomeLoading() {
           ))}
         </div>
       </div>
-    </main>
+    </CustomerPage>
   );
 }

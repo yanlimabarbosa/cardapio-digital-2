@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Award, CheckCircle2, Gift, History, Lock, Loader2, MinusCircle, PlusCircle, ShoppingBag, User } from 'lucide-react';
+import { Award, CheckCircle2, Gift, History, Lock, Loader2, MinusCircle, PlusCircle, ShoppingBag, User } from 'lucide-react';
 import { AuthDialog } from '@/components/auth/auth-dialog';
 import { SetPasswordDialog } from '@/components/auth/set-password-dialog';
+import { CustomerHeader, CustomerPage } from '@/components/customer/customer-page-shell';
 import { useLoyalty } from '@/hooks/customer/use-loyalty';
 import { useRedeemableProducts } from '@/hooks/customer/use-redeemable-products';
 import { useCustomerStore } from '@/stores/customer-store';
@@ -38,17 +38,8 @@ export function LoyaltyClient() {
   const isLoading = loyalty.isLoading || redeemable.isLoading;
 
   return (
-    <main className="min-h-dvh bg-terra-50 pb-10">
-      <header className="relative overflow-hidden bg-terra-600 px-4 py-4 text-white">
-        <div className="absolute inset-0 tapioca-grain opacity-40" />
-        <div className="container relative flex items-center gap-3">
-          <Link href="/" className="rounded-full p-1 transition-colors hover:bg-white/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <img src="/logo.png" alt="Bem Comer Self-Service" className="h-9 w-9 rounded-full object-cover" />
-          <h1 className="font-display text-xl font-semibold">Programa de fidelidade</h1>
-        </div>
-      </header>
+    <CustomerPage className="pb-10">
+      <CustomerHeader title="Programa de fidelidade" backHref="/" />
 
       <div className="container space-y-5 px-4 py-5">
         {!customer.token ? (
@@ -193,7 +184,7 @@ export function LoyaltyClient() {
 
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
       <SetPasswordDialog open={setPasswordOpen} onOpenChange={setSetPasswordOpen} />
-    </main>
+    </CustomerPage>
   );
 }
 

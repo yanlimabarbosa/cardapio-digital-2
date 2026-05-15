@@ -50,7 +50,7 @@ export function CheckoutClient() {
 
   if (step === 'processing') {
     return (
-      <main className="order-flow-brown flex min-h-dvh flex-col items-center justify-center bg-terra-50 px-4">
+      <main className="order-flow-brown flex min-h-dvh flex-col items-center justify-center bg-cream-warm px-4">
         <motion.div
           className="text-center"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -69,7 +69,7 @@ export function CheckoutClient() {
 
   if (step === 'paying' && pixData && orderId) {
     return (
-      <main className="order-flow-brown min-h-dvh bg-terra-50">
+      <main className="order-flow-brown min-h-dvh bg-cream-warm">
         <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
           <div className="absolute inset-0 tapioca-grain opacity-40" />
           <div className="container relative flex items-center gap-3">
@@ -91,7 +91,7 @@ export function CheckoutClient() {
     const isDebit = paymentMethod === 'debit_card';
 
     return (
-      <main className="order-flow-brown min-h-dvh bg-terra-50">
+      <main className="order-flow-brown min-h-dvh bg-cream-warm">
         <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
           <div className="absolute inset-0 tapioca-grain opacity-40" />
           <div className="container relative flex items-center gap-3">
@@ -129,7 +129,7 @@ export function CheckoutClient() {
               type="button"
               onClick={handleSwitchToPix}
               disabled={pixPaymentPending}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-terra-200 font-semibold text-terra-700 transition-all hover:bg-terra-50 disabled:opacity-50"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-terra-200 font-semibold text-terra-700 transition-all hover:bg-cream-warm disabled:opacity-50"
             >
               {pixPaymentPending && <Loader2 className="h-4 w-4 animate-spin" />}
               <QrCode className="h-4 w-4" />
@@ -147,7 +147,7 @@ export function CheckoutClient() {
   }
 
   return (
-    <main className="order-flow-brown min-h-dvh bg-terra-50 pb-36">
+    <main className="order-flow-brown min-h-dvh bg-cream-warm pb-36">
       <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
         <div className="absolute inset-0 tapioca-grain opacity-40" />
         <div className="container relative flex items-center gap-3">
@@ -266,7 +266,7 @@ export function CheckoutClient() {
                     onClick={() => toggleRedeemItem(product.id)}
                     className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all ${
                       isSelected
-                        ? 'border-terra-600 bg-terra-50'
+                        ? 'border-terra-600 bg-cream-warm'
                         : product.canRedeem
                           ? 'border-[#E8DDD0] hover:border-terra-300'
                           : 'border-[#E8DDD0] opacity-50 cursor-not-allowed'

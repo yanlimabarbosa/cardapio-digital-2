@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { CustomerHeader, CustomerPage } from '@/components/customer/customer-page-shell';
 import { formatCurrency } from '@/lib/utils';
 import { formatScheduledFor } from '@cardapio/shared';
 import { CheckCircle, Clock, ChefHat, PackageCheck, Home, Truck } from 'lucide-react';
@@ -24,20 +25,23 @@ export function OrderClient() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-dvh items-center justify-center bg-terra-50">
+      <CustomerPage className="flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-terra-600 border-t-transparent" />
-      </main>
+      </CustomerPage>
     );
   }
 
   if (!order) {
     return (
-      <main className="min-h-dvh bg-terra-50 p-4 text-center">
-        <p className="text-terra-700">Pedido não encontrado.</p>
-        <Link href="/">
-          <Button className="mt-4 bg-terra-600 text-white hover:bg-terra-700">Voltar ao cardápio</Button>
-        </Link>
-      </main>
+      <CustomerPage>
+        <CustomerHeader title="Pedido" backHref="/" />
+        <div className="container px-4 py-12 text-center">
+          <p className="text-terra-700">Pedido não encontrado.</p>
+          <Link href="/">
+            <Button className="mt-4 bg-terra-600 text-white hover:bg-terra-700">Voltar ao cardápio</Button>
+          </Link>
+        </div>
+      </CustomerPage>
     );
   }
 
@@ -45,13 +49,8 @@ export function OrderClient() {
   const scheduledLabel = formatScheduledFor(order.scheduledFor);
 
   return (
-    <main className="min-h-dvh bg-terra-50 pb-8">
-      <header className="bg-terra-600 px-4 py-4 text-white">
-        <div className="container flex items-center gap-3">
-          <Link href="/"><img src="/logo.png" alt="Bem Comer Self-Service" className="h-8 w-8 rounded-full object-cover" /></Link>
-          <h1 className="font-display text-xl font-semibold">Pedido #{order.orderNumber}</h1>
-        </div>
-      </header>
+    <CustomerPage className="pb-8">
+      <CustomerHeader title={`Pedido #${order.orderNumber}`} backHref="/" />
 
       <div className="container px-4 py-6 space-y-6">
         <Card className="border-terra-200 overflow-hidden">
@@ -155,6 +154,6 @@ export function OrderClient() {
           </Button>
         </Link>
       </div>
-    </main>
+    </CustomerPage>
   );
 }

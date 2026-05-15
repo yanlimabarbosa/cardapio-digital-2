@@ -1,12 +1,9 @@
+import { CustomerHeaderSkeleton, CustomerPage } from '@/components/customer/customer-page-shell';
+
 export default function OrderLoading() {
   return (
-    <main className="min-h-dvh bg-terra-50 pb-8">
-      <header className="bg-terra-600 px-4 py-4">
-        <div className="container flex items-center gap-3">
-          <div className="h-8 w-8 animate-pulse rounded-full bg-terra-500" />
-          <div className="h-6 w-36 animate-pulse rounded bg-terra-500" />
-        </div>
-      </header>
+    <CustomerPage className="pb-8">
+      <CustomerHeaderSkeleton />
       <div className="container space-y-6 px-4 py-6">
         <div className="rounded-lg border border-terra-200 bg-white p-8">
           <div className="flex flex-col items-center">
@@ -33,6 +30,6 @@ export default function OrderLoading() {
           ))}
         </div>
       </div>
-    </main>
+    </CustomerPage>
   );
 }
