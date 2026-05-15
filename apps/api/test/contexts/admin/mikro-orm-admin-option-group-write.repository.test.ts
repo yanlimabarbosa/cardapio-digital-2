@@ -115,7 +115,8 @@ test('soft-deletes an admin option group through the provided transaction contex
 
   assert.equal(result, true);
   assert.deepEqual(em.findOneCalls, [{ entity: OptionGroup, where: { id: 'group-1' } }]);
-  assert.equal(optionGroup.isActive, false);
+  assert.equal(optionGroup.isActive, true);
+  assert.equal(optionGroup.isArchived, true);
   assert.equal(em.flushCalls, 1);
 });
 

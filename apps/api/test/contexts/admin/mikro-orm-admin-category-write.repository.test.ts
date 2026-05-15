@@ -96,7 +96,8 @@ test('soft-deletes an admin category through the provided transaction context', 
 
   assert.equal(result, true);
   assert.deepEqual(em.findOneCalls, [{ entity: Category, where: { id: 'category-1' } }]);
-  assert.equal(category.isActive, false);
+  assert.equal(category.isActive, true);
+  assert.equal(category.isArchived, true);
   assert.equal(em.flushCalls, 1);
 });
 
