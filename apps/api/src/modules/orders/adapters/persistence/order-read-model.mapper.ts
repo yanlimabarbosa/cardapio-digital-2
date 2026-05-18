@@ -23,6 +23,7 @@ export function toOrderReadModel(order: Order): OrderReadModel {
     scheduledFor: order.scheduledFor?.toISOString() ?? null,
     items: order.items.getItems().map((item): OrderItemReadModel => ({
       id: item.id,
+      productId: item.productId,
       productName: item.productName,
       unitPrice: parseFloat(item.unitPrice),
       quantity: item.quantity,

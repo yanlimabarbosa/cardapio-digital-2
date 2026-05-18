@@ -25,6 +25,7 @@ export type OrderItemReadModel = {
   readonly extras?: readonly OrderItemExtraReadModel[];
   readonly groupedExtras: readonly OrderItemGroupedExtraReadModel[] | null;
   readonly id: string;
+  readonly productId: string;
   readonly productName: string;
   readonly quantity: number;
   readonly subtotal: number;

@@ -66,6 +66,7 @@ export interface CreateOrderDto {
 
 export interface OrderItemResponse {
   id: string;
+  productId: string;
   productName: string;
   unitPrice: number;
   quantity: number;
