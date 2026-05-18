@@ -13,6 +13,7 @@ import { useCartHydration } from '@/hooks/menu/use-cart-hydration';
 import { getCartAvailabilityIssue } from '@/hooks/menu/cart-availability';
 import { isValidCpf, isValidEmail, normalizeEmail } from '@/lib/utils';
 import { getPagBankPaymentErrorMessage } from '@/lib/payment-provider';
+import { toMetaContents, trackMetaPixel } from '@/lib/meta-pixel';
 import { formatScheduledFor, type PaymentMethod, type PixPaymentResponse } from '@cardapio/shared';
 
 export function useCheckoutPage() {
@@ -85,6 +86,18 @@ export function useCheckoutPage() {
     try {
       const normalizedEmail = normalizeEmail(payerEmail);
       const cpfDigits = payerCpf.replace(/\D/g, '');
+      trackMetaPixel('AddPaymentInfo', {
+        content_ids: items.map((item) => item.productId),
+        content_type: 'product',
+        contents: toMetaContents(items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        }))),
+        currency: 'BRL',
+        payment_method: paymentMethod,
+        value: totalAmount,
+      });
 
       const order = await createOrder.mutateAsync({
         customerName: effectiveName,

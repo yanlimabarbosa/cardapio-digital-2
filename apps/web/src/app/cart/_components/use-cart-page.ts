@@ -13,6 +13,7 @@ import { useStoreStatus } from '@/hooks/menu/use-store-status';
 import { usePruneExpiredScheduledFor } from '@/hooks/menu/use-prune-expired-scheduled-for';
 import { useValidateCoupon } from '@/hooks/customer/use-validate-coupon';
 import { maskPhone, maskCep } from '@/lib/utils';
+import { toMetaContents, trackMetaPixel } from '@/lib/meta-pixel';
 import { buildScheduleOptions, formatScheduledFor, normalizeNeighborhood } from '@cardapio/shared';
 import type { DeliveryAreaResponse } from '@cardapio/shared';
 import { getCartAvailabilityIssue } from '@/hooks/menu/cart-availability';
@@ -398,6 +399,18 @@ export function useCartPage() {
   function onSubmit(data: CartFormData) {
     if (!canSubmit) return;
     syncFormToCart(data);
+    trackMetaPixel('InitiateCheckout', {
+      content_ids: items.map((item) => item.productId),
+      content_type: 'product',
+      contents: toMetaContents(items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+      }))),
+      currency: 'BRL',
+      num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+      value: totalAmount,
+    });
     router.push('/checkout');
   }
 

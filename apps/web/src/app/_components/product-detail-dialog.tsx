@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatScheduledFor, type Product, type OptionGroup } from '@cardapio/shared';
 import { Modal } from '@/components/ui/modal';
 import { formatCurrency } from '@/lib/utils';
 import { getImageUrl } from '@/lib/admin-api';
 import { useCartStore, type CartExtra, type CartOptionSelection } from '@/stores/cart-store';
+import { trackMetaPixel } from '@/lib/meta-pixel';
 import { Minus, Plus, Check, X, ChevronLeft } from 'lucide-react';
 
 interface ProductDetailDialogProps {
@@ -25,6 +26,17 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
   const addItem = useCartStore((s) => s.addItem);
   const setScheduledFor = useCartStore((s) => s.setScheduledFor);
   const scheduledFor = useCartStore((s) => s.scheduledFor);
+
+  useEffect(() => {
+    if (!open || !product) return;
+    trackMetaPixel('ViewContent', {
+      content_ids: [product.id],
+      content_name: product.name,
+      content_type: 'product',
+      currency: 'BRL',
+      value: product.effectivePrice ?? product.price,
+    });
+  }, [open, product]);
 
   const close = useCallback(() => {
     setQuantity(1);
@@ -131,6 +143,14 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
         quantity,
       );
     }
+    trackMetaPixel('AddToCart', {
+      content_ids: [product.id],
+      content_name: product.name,
+      content_type: 'product',
+      contents: [{ id: product.id, quantity, item_price: displayPrice + optionsTotal }],
+      currency: 'BRL',
+      value: itemTotal,
+    });
     setQuantity(1);
     setSelectedExtras([]);
     setGroupSelections({});
