@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import { getImageUrl } from '@/lib/admin-api';
 import { Plus, Pencil, Loader2, ChevronDown, ImagePlus, Search, Eye, EyeOff, Trash2, CircleSlash } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useProductsPage } from '../use-products-page';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -20,6 +22,13 @@ const itemVariants = {
   hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { type: 'spring' as const, damping: 24, stiffness: 300 } },
 };
+
+type DeleteTarget =
+  | { type: 'product'; id: string; name: string }
+  | { type: 'optionGroup'; id: string; name: string }
+  | { type: 'groupOption'; id: string; name: string }
+  | { type: 'extra'; id: string; name: string }
+  | null;
 
 export function ProductsClient() {
   const {
@@ -94,6 +103,28 @@ export function ProductsClient() {
     updateGroupOptionStatusMutation,
     setGroupOptionDialogOpen,
   } = useProductsPage();
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
+
+  const deletePending =
+    deleteProductMutation.isPending ||
+    deleteOptionGroupMutation.isPending ||
+    deleteGroupOptionMutation.isPending ||
+    deleteExtraMutation.isPending;
+
+  function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    const options = { onSuccess: () => setDeleteTarget(null) };
+
+    if (deleteTarget.type === 'product') {
+      deleteProductMutation.mutate(deleteTarget.id, options);
+    } else if (deleteTarget.type === 'optionGroup') {
+      deleteOptionGroupMutation.mutate(deleteTarget.id, options);
+    } else if (deleteTarget.type === 'groupOption') {
+      deleteGroupOptionMutation.mutate(deleteTarget.id, options);
+    } else {
+      deleteExtraMutation.mutate(deleteTarget.id, options);
+    }
+  }
 
   return (
     <div>
@@ -252,14 +283,14 @@ export function ProductsClient() {
                       className={cn(
                         'rounded-lg border border-[#E8DDD0] p-2 transition-colors',
                         product.isActive
-                          ? 'text-[#8B7355] hover:bg-slate-100 hover:text-slate-700'
-                          : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100',
+                          ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
                       )}
                     >
-                      {product.isActive ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      {product.isActive ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                     </button>
                     <button
-                      onClick={() => deleteProductMutation.mutate(product.id)}
+                      onClick={() => setDeleteTarget({ type: 'product', id: product.id, name: product.name })}
                       title="Excluir"
                       className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                     >
@@ -328,12 +359,17 @@ export function ProductsClient() {
                                       <button
                                         onClick={() => updateOptionGroupStatusMutation.mutate({ id: group.id, data: { isActive: !group.isActive } })}
                                         title={group.isActive ? 'Ocultar grupo' : 'Mostrar grupo'}
-                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                        className={cn(
+                                          'rounded-md p-1.5 transition-colors',
+                                          group.isActive
+                                            ? 'text-emerald-700 hover:bg-emerald-50'
+                                            : 'text-slate-500 hover:bg-slate-100',
+                                        )}
                                       >
-                                        {group.isActive ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                                        {group.isActive ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                                       </button>
                                       <button
-                                        onClick={() => deleteOptionGroupMutation.mutate(group.id)}
+                                        onClick={() => setDeleteTarget({ type: 'optionGroup', id: group.id, name: group.name })}
                                         title="Excluir grupo"
                                         className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                       >
@@ -407,19 +443,29 @@ export function ProductsClient() {
                                                       <button
                                                         onClick={() => updateGroupOptionStatusMutation.mutate({ id: opt.id, data: { isSoldOut: !opt.isSoldOut } })}
                                                         title={opt.isSoldOut ? 'Marcar opção disponível' : 'Marcar opção esgotada'}
-                                                        className="rounded p-1 text-[#8B7355] transition-colors hover:bg-amber-50 hover:text-amber-700"
+                                                        className={cn(
+                                                          'rounded p-1 transition-colors',
+                                                          opt.isSoldOut
+                                                            ? 'text-amber-700 hover:bg-amber-50'
+                                                            : 'text-[#8B7355] hover:bg-amber-50 hover:text-amber-700',
+                                                        )}
                                                       >
                                                         <CircleSlash className="h-2.5 w-2.5" />
                                                       </button>
                                                       <button
                                                         onClick={() => updateGroupOptionStatusMutation.mutate({ id: opt.id, data: { isActive: !opt.isActive } })}
                                                         title={opt.isActive ? 'Ocultar opção' : 'Mostrar opção'}
-                                                        className="rounded p-1 text-[#8B7355] transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                                        className={cn(
+                                                          'rounded p-1 transition-colors',
+                                                          opt.isActive
+                                                            ? 'text-emerald-700 hover:bg-emerald-50'
+                                                            : 'text-slate-500 hover:bg-slate-100',
+                                                        )}
                                                       >
-                                                        {opt.isActive ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
+                                                        {opt.isActive ? <Eye className="h-2.5 w-2.5" /> : <EyeOff className="h-2.5 w-2.5" />}
                                                       </button>
                                                       <button
-                                                        onClick={() => deleteGroupOptionMutation.mutate(opt.id)}
+                                                        onClick={() => setDeleteTarget({ type: 'groupOption', id: opt.id, name: opt.name })}
                                                         title="Excluir opção"
                                                         className="rounded p-1 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                                       >
@@ -501,19 +547,29 @@ export function ProductsClient() {
                                       <button
                                         onClick={() => updateExtraStatusMutation.mutate({ id: extra.id, data: { isSoldOut: !extra.isSoldOut } })}
                                         title={extra.isSoldOut ? 'Marcar adicional disponível' : 'Marcar adicional esgotado'}
-                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-amber-50 hover:text-amber-700"
+                                        className={cn(
+                                          'rounded-md p-1.5 transition-colors',
+                                          extra.isSoldOut
+                                            ? 'text-amber-700 hover:bg-amber-50'
+                                            : 'text-[#8B7355] hover:bg-amber-50 hover:text-amber-700',
+                                        )}
                                       >
                                         <CircleSlash className="h-3 w-3" />
                                       </button>
                                       <button
                                         onClick={() => updateExtraStatusMutation.mutate({ id: extra.id, data: { isActive: !extra.isActive } })}
                                         title={extra.isActive ? 'Ocultar adicional' : 'Mostrar adicional'}
-                                        className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                        className={cn(
+                                          'rounded-md p-1.5 transition-colors',
+                                          extra.isActive
+                                            ? 'text-emerald-700 hover:bg-emerald-50'
+                                            : 'text-slate-500 hover:bg-slate-100',
+                                        )}
                                       >
-                                        {extra.isActive ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                                        {extra.isActive ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                                       </button>
                                       <button
-                                        onClick={() => deleteExtraMutation.mutate(extra.id)}
+                                        onClick={() => setDeleteTarget({ type: 'extra', id: extra.id, name: extra.name })}
                                         title="Excluir adicional"
                                         className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                       >
@@ -588,6 +644,19 @@ export function ProductsClient() {
         onSave={handleSaveGroupOption}
         isPending={saveGroupOptionMutation.isPending}
         uploading={groupOptionUploading}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open && !deletePending) setDeleteTarget(null); }}
+        title="Excluir item?"
+        description={
+          deleteTarget
+            ? `Voce esta prestes a excluir "${deleteTarget.name}". Essa acao nao pode ser desfeita.`
+            : ''
+        }
+        isPending={deletePending}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );
