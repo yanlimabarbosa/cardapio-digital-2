@@ -8,6 +8,7 @@ import { useFeaturedPage } from './use-featured-page';
 import type { AdminProduct } from '@/types/admin';
 import { WeeklyScheduleEditor } from '@/components/admin/weekly-schedule-editor';
 import type { WeeklySchedule } from '@cardapio/shared';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Dialog,
   DialogContent,
@@ -265,6 +266,7 @@ export function FeaturedClient() {
     reorderMutation,
     setProductsMutation,
   } = useFeaturedPage();
+  const [deleteSection, setDeleteSection] = useState<{ id: string; label: string } | null>(null);
 
   function handleSaveSection(data: { label: string; emoji: string; availabilitySchedule: WeeklySchedule | null }) {
     if (editingSection) {
@@ -361,13 +363,13 @@ export function FeaturedClient() {
                   </button>
                   <button
                     onClick={() => updateMutation.mutate({ id: section.id, isActive: !section.isActive })}
-                    className={`rounded-lg p-1.5 transition-colors ${section.isActive ? 'text-green-600 hover:bg-green-50' : 'text-[#C4B5A0] hover:bg-[#FAF6F1]'}`}
+                    className={`rounded-lg p-1.5 transition-colors ${section.isActive ? 'text-emerald-700 hover:bg-emerald-50' : 'text-slate-500 hover:bg-slate-100'}`}
                     title={section.isActive ? 'Desativar' : 'Ativar'}
                   >
                     <Power className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => { if (confirm('Excluir seção?')) deleteMutation.mutate(section.id); }}
+                    onClick={() => setDeleteSection({ id: section.id, label: section.label })}
                     className="rounded-lg p-1.5 text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500"
                     title="Excluir"
                   >
@@ -416,6 +418,24 @@ export function FeaturedClient() {
           isPending={setProductsMutation.isPending}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteSection !== null}
+        onOpenChange={(open) => { if (!open && !deleteMutation.isPending) setDeleteSection(null); }}
+        title="Excluir secao?"
+        description={
+          deleteSection
+            ? `Voce esta prestes a excluir "${deleteSection.label}". Essa acao nao pode ser desfeita.`
+            : ''
+        }
+        isPending={deleteMutation.isPending}
+        onConfirm={() => {
+          if (!deleteSection) return;
+          deleteMutation.mutate(deleteSection.id, {
+            onSuccess: () => setDeleteSection(null),
+          });
+        }}
+      />
     </div>
   );
 }

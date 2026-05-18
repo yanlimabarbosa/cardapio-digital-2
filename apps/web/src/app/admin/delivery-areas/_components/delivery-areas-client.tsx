@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Power, Search, MapPin, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Power, Search, MapPin, Loader2, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { CustomSelect } from '@/components/ui/custom-select';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Dialog,
   DialogContent,
@@ -132,7 +133,9 @@ export function DeliveryAreasClient() {
     toggleActive,
     createMutation,
     updateMutation,
+    deleteMutation,
   } = useDeliveryAreasPage();
+  const [deleteArea, setDeleteArea] = useState<DeliveryAreaResponse | null>(null);
 
   function handleSave(data: { neighborhood: string; city: string; fee: number }) {
     if (editingArea) {
@@ -216,12 +219,19 @@ export function DeliveryAreasClient() {
                         onClick={() => toggleActive(area)}
                         className={`rounded-lg p-1.5 transition-colors ${
                           area.isActive
-                            ? 'text-green-600 hover:bg-green-50'
-                            : 'text-[#C4B5A0] hover:bg-[#FAF6F1]'
+                            ? 'text-emerald-700 hover:bg-emerald-50'
+                            : 'text-slate-500 hover:bg-slate-100'
                         }`}
                         title={area.isActive ? 'Desativar' : 'Ativar'}
                       >
                         <Power className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteArea(area)}
+                        className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
+                        title="Excluir"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
@@ -247,6 +257,24 @@ export function DeliveryAreasClient() {
           isPending={createMutation.isPending || updateMutation.isPending}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteArea !== null}
+        onOpenChange={(open) => { if (!open && !deleteMutation.isPending) setDeleteArea(null); }}
+        title="Excluir area?"
+        description={
+          deleteArea
+            ? `Voce esta prestes a excluir "${deleteArea.neighborhood}". Essa acao nao pode ser desfeita.`
+            : ''
+        }
+        isPending={deleteMutation.isPending}
+        onConfirm={() => {
+          if (!deleteArea) return;
+          deleteMutation.mutate(deleteArea.id, {
+            onSuccess: () => setDeleteArea(null),
+          });
+        }}
+      />
     </div>
   );
 }
