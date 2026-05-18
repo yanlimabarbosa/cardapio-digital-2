@@ -19,6 +19,8 @@ export interface StoreSettingsData {
   weeklySchedule?: WeeklySchedule | null;
   forceClose: boolean;
   forceOpen: boolean;
+  metaPixelEnabled: boolean;
+  metaPixelIds: string[];
   pointsPerReal: number;
   receiptCnpj?: string;
   receiptAddress?: string;

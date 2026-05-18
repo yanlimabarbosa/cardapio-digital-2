@@ -38,6 +38,8 @@ export function StoreSettings({
   const onUpdateSettingsRef = useRef(onUpdateSettings);
   const [receiptDraft, setReceiptDraft] = useState(() => normalizeReceiptSettings(storeSettings));
   const [savedReceiptSettings, setSavedReceiptSettings] = useState(() => normalizeReceiptSettings(storeSettings));
+  const [pixelDraft, setPixelDraft] = useState(() => normalizePixelSettings(storeSettings));
+  const [savedPixelSettings, setSavedPixelSettings] = useState(() => normalizePixelSettings(storeSettings));
   const [bannerUploading, setBannerUploading] = useState(false);
   const [bannerError, setBannerError] = useState<string | null>(null);
   const receiptDraftRef = useRef(receiptDraft);
@@ -76,6 +78,20 @@ export function StoreSettings({
     savedReceiptSettings,
   ]);
 
+  useEffect(() => {
+    const nextPixelSettings = normalizePixelSettings(storeSettings);
+    if (isSamePixelSettings(nextPixelSettings, savedPixelSettings)) {
+      return;
+    }
+
+    setSavedPixelSettings(nextPixelSettings);
+    setPixelDraft(nextPixelSettings);
+  }, [
+    storeSettings.metaPixelEnabled,
+    storeSettings.metaPixelIds,
+    savedPixelSettings,
+  ]);
+
   function updateReceiptDraft(patch: Partial<typeof receiptDraft>) {
     setReceiptDraft((current) => {
       const next = { ...current, ...patch };
@@ -94,7 +110,34 @@ export function StoreSettings({
     setReceiptDraft(savedReceiptSettings);
   }
 
+  function savePixelDraft() {
+    const metaPixelIds = parsePixelIds(pixelDraft.metaPixelIdsText);
+    onUpdateSettingsRef.current({
+      metaPixelEnabled: pixelDraft.metaPixelEnabled && metaPixelIds.length > 0,
+      metaPixelIds,
+    });
+    setSavedPixelSettings({
+      metaPixelEnabled: pixelDraft.metaPixelEnabled && metaPixelIds.length > 0,
+      metaPixelIdsText: metaPixelIds.join('\n'),
+    });
+    setPixelDraft({
+      metaPixelEnabled: pixelDraft.metaPixelEnabled && metaPixelIds.length > 0,
+      metaPixelIdsText: metaPixelIds.join('\n'),
+    });
+  }
+
+  function resetPixelDraft() {
+    setPixelDraft(savedPixelSettings);
+  }
+
   const receiptHasChanges = !isSameReceiptSettings(receiptDraft, savedReceiptSettings);
+  const pixelHasChanges = !isSamePixelSettings(
+    {
+      metaPixelEnabled: pixelDraft.metaPixelEnabled,
+      metaPixelIdsText: parsePixelIds(pixelDraft.metaPixelIdsText).join('\n'),
+    },
+    savedPixelSettings,
+  );
 
   async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -260,6 +303,57 @@ export function StoreSettings({
         </div>
       </div>
 
+      {/* Marketing pixels */}
+      <div className="mt-8 border-t border-[#E8DDD0] pt-6">
+        <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
+          Marketing
+        </h3>
+        <div className="space-y-4">
+          <label className="flex cursor-pointer items-center gap-2.5">
+            <input
+              type="checkbox"
+              checked={pixelDraft.metaPixelEnabled}
+              onChange={(event) => setPixelDraft((current) => ({ ...current, metaPixelEnabled: event.target.checked }))}
+              className="h-4 w-4 rounded border-[#D8C5B2] text-[#A0603A] focus:ring-[#A0603A]"
+            />
+            <span className="text-sm font-bold text-[#3D2B1F]">Ativar Meta Pixel no cardápio</span>
+          </label>
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
+              IDs do Pixel
+            </label>
+            <textarea
+              placeholder="123456789012345"
+              value={pixelDraft.metaPixelIdsText}
+              onChange={(event) => setPixelDraft((current) => ({ ...current, metaPixelIdsText: event.target.value }))}
+              rows={3}
+              className={settingsTextareaClass}
+            />
+            <p className="mt-1 text-[10px] font-semibold text-[#8B7355]">
+              Um ID por linha ou separados por vírgula. Cole só o número do Pixel, não o script.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={savePixelDraft}
+              disabled={!pixelHasChanges}
+              className="rounded-xl bg-[#A0603A] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#8B4F2D] disabled:cursor-not-allowed disabled:bg-[#D4C8BA]"
+            >
+              Salvar Pixel
+            </button>
+            <button
+              type="button"
+              onClick={resetPixelDraft}
+              disabled={!pixelHasChanges}
+              className="rounded-xl border border-[#E8DDD0] px-4 py-2 text-sm font-bold text-[#8B7355] transition-colors hover:bg-[#FAF6F1] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Receipt settings */}
       <div className="mt-8 border-t border-[#E8DDD0] pt-6">
         <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
@@ -378,6 +472,34 @@ function isSameReceiptSettings(
     a.receiptAddress === b.receiptAddress &&
     a.receiptPhone === b.receiptPhone &&
     a.receiptFooter === b.receiptFooter
+  );
+}
+
+function normalizePixelSettings(settings: StoreSettingsData) {
+  return {
+    metaPixelEnabled: !!settings.metaPixelEnabled,
+    metaPixelIdsText: parsePixelIds((settings.metaPixelIds ?? []).join('\n')).join('\n'),
+  };
+}
+
+function parsePixelIds(value: string): string[] {
+  return Array.from(
+    new Set(
+      value
+        .split(/[\s,;]+/)
+        .map((id) => id.trim())
+        .filter((id) => /^\d{5,32}$/.test(id)),
+    ),
+  );
+}
+
+function isSamePixelSettings(
+  a: ReturnType<typeof normalizePixelSettings>,
+  b: ReturnType<typeof normalizePixelSettings>,
+) {
+  return (
+    a.metaPixelEnabled === b.metaPixelEnabled &&
+    a.metaPixelIdsText === b.metaPixelIdsText
   );
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { QueryProvider } from '@/providers/query-provider';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { MarketingPixels } from '@/components/marketing/marketing-pixels';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -37,7 +38,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body className="font-body">
         <QueryProvider>
-          <ErrorBoundary>{children}</ErrorBoundary>
+          <ErrorBoundary>
+            <MarketingPixels />
+            {children}
+          </ErrorBoundary>
         </QueryProvider>
       </body>
     </html>
