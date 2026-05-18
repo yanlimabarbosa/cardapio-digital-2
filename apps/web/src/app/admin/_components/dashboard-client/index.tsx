@@ -21,7 +21,6 @@ import {
 } from 'recharts';
 import { ChartTooltip } from './chart-tooltip';
 import { SectionCard } from './section-card';
-import { StoreSettings } from './store-settings';
 
 const SHORT_DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -48,11 +47,6 @@ export function DashboardClient() {
   const {
     data,
     stats,
-    storeSettings,
-    storeStatus,
-    storeMode,
-    setStoreModeMutation,
-    updateSettingsMutation,
     range,
     setRange,
     resetRange,
@@ -358,15 +352,6 @@ export function DashboardClient() {
         </SectionCard>
       </div>
 
-      {storeSettings && (
-        <StoreSettings
-          storeSettings={storeSettings}
-          storeStatus={storeStatus}
-          storeMode={storeMode}
-          onSetMode={(mode) => setStoreModeMutation.mutate(mode)}
-          onUpdateSettings={(data) => updateSettingsMutation.mutate(data)}
-        />
-      )}
     </div>
   );
 }

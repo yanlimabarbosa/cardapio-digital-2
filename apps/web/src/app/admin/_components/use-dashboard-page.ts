@@ -1,19 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
 import { formatCurrency } from '@/lib/utils';
 import { ShoppingCart, DollarSign, ChefHat, Receipt } from 'lucide-react';
-import type { Dashboard, StoreSettingsData } from '@/types/admin';
+import type { Dashboard } from '@/types/admin';
 
-interface StoreStatus {
-  open: boolean;
-  reason?: string;
-}
-
-export type StoreMode = 'schedule' | 'force_open' | 'force_close';
 export type DashboardRange = {
   from: string;
   to: string;
@@ -21,7 +15,6 @@ export type DashboardRange = {
 
 export function useDashboardPage() {
   const token = useAuthStore((s) => s.token);
-  const queryClient = useQueryClient();
   const [range, setRange] = useState<DashboardRange>(() => createDefaultRange());
 
   const { data } = useQuery<Dashboard>({
@@ -29,60 +22,6 @@ export function useDashboardPage() {
     queryFn: () => adminFetch(`/api/admin/dashboard?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`, token),
     refetchInterval: 30000,
   });
-
-  const { data: storeSettings } = useQuery<StoreSettingsData>({
-    queryKey: ['admin-store-settings'],
-    queryFn: () => adminFetch('/api/admin/store-settings', token),
-  });
-
-  const { data: storeStatus } = useQuery<StoreStatus>({
-    queryKey: ['store-status'],
-    queryFn: () => adminFetch('/api/store/status', token),
-    refetchInterval: 30000,
-  });
-
-  const invalidateStore = () => {
-    queryClient.invalidateQueries({ queryKey: ['admin-store-settings'] });
-    queryClient.invalidateQueries({ queryKey: ['store-status'] });
-    queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-    queryClient.invalidateQueries({ queryKey: ['menu'] });
-    queryClient.invalidateQueries({ queryKey: ['sections'] });
-  };
-
-  const setStoreModeMutation = useMutation({
-    mutationFn: (mode: StoreMode) => {
-      const payload = {
-        forceClose: mode === 'force_close',
-        forceOpen: mode === 'force_open',
-      };
-      return adminFetch('/api/admin/store-settings', token, {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-      });
-    },
-    onSuccess: invalidateStore,
-  });
-
-  const updateSettingsMutation = useMutation({
-    mutationFn: (data: Partial<StoreSettingsData>) =>
-      adminFetch('/api/admin/store-settings', token, { method: 'PUT', body: JSON.stringify(data) }),
-    onSuccess: invalidateStore,
-  });
-
-  function toggleDay(day: number) {
-    if (!storeSettings) return;
-    const newDays = storeSettings.openDays.includes(day)
-      ? storeSettings.openDays.filter((d) => d !== day)
-      : [...storeSettings.openDays, day].sort();
-    updateSettingsMutation.mutate({ openDays: newDays });
-  }
-
-  // Derive current mode from settings
-  const storeMode: StoreMode = storeSettings?.forceClose
-    ? 'force_close'
-    : storeSettings?.forceOpen
-      ? 'force_open'
-      : 'schedule';
 
   const stats = [
     {
@@ -118,12 +57,6 @@ export function useDashboardPage() {
   return {
     data,
     stats,
-    storeSettings,
-    storeStatus,
-    storeMode,
-    setStoreModeMutation,
-    updateSettingsMutation,
-    toggleDay,
     range,
     setRange,
     resetRange: () => setRange(createDefaultRange()),

@@ -225,8 +225,18 @@
   .admin-shell textarea,
   .admin-shell select {
     background-color: var(--admin-raised) !important;
-    border-color: var(--admin-border-strong) !important;
+    border-color: var(--admin-border) !important;
     color: var(--admin-text) !important;
+  }
+
+  .admin-shell input:focus,
+  .admin-shell input:focus-visible,
+  .admin-shell textarea:focus,
+  .admin-shell textarea:focus-visible,
+  .admin-shell select:focus,
+  .admin-shell select:focus-visible {
+    border-color: var(--admin-border-strong) !important;
+    outline: none !important;
   }
 
   .admin-shell [class*='hover:bg-[#FAF6F1]']:hover,
