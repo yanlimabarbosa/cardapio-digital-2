@@ -11,6 +11,8 @@ export type UpdateStoreSettingsData = Partial<{
   readonly closingTime: string;
   readonly forceClose: boolean;
   readonly forceOpen: boolean;
+  readonly metaPixelEnabled: boolean;
+  readonly metaPixelIds: readonly string[];
   readonly openDays: readonly number[];
   readonly openingTime: string;
   readonly pointsPerReal: number | string;
@@ -77,6 +79,14 @@ export class UpdateStoreSettingsUseCase {
       next = { ...next, pointsPerReal: String(data.pointsPerReal) };
     }
 
+    if (data.metaPixelEnabled !== undefined) {
+      next = { ...next, metaPixelEnabled: data.metaPixelEnabled };
+    }
+
+    if (data.metaPixelIds !== undefined) {
+      next = { ...next, metaPixelIds: this.normalizePixelIds(data.metaPixelIds) };
+    }
+
     if (data.receiptCnpj !== undefined) {
       next = { ...next, receiptCnpj: data.receiptCnpj };
     }
@@ -119,12 +129,24 @@ export class UpdateStoreSettingsUseCase {
       || data.weeklySchedule !== undefined
       || data.forceClose !== undefined
       || data.forceOpen !== undefined
+      || data.metaPixelEnabled !== undefined
+      || data.metaPixelIds !== undefined
       || data.pointsPerReal !== undefined
       || data.receiptCnpj !== undefined
       || data.receiptAddress !== undefined
       || data.receiptPhone !== undefined
       || data.receiptFooter !== undefined
       || data.bannerUrl !== undefined
+    );
+  }
+
+  private normalizePixelIds(ids: readonly string[]): readonly string[] {
+    return Array.from(
+      new Set(
+        ids
+          .map((id) => id.trim())
+          .filter((id) => /^\d{5,32}$/.test(id)),
+      ),
     );
   }
 }

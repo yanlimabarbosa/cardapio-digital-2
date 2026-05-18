@@ -8,6 +8,8 @@ export type StoreSettingsModel = {
   readonly forceClose: boolean;
   readonly forceOpen: boolean;
   readonly id: number;
+  readonly metaPixelEnabled: boolean;
+  readonly metaPixelIds: readonly string[];
   readonly openDays: readonly number[];
   readonly openingTime: string;
   readonly pointsPerReal: string;

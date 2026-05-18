@@ -30,6 +30,8 @@ export class MikroOrmStoreSettingsRepository implements StoreSettingsRepository 
         openDays: [0, 1, 2, 3, 4, 5, 6],
         weeklySchedule: this.defaultSchedule,
         forceClose: false,
+        metaPixelEnabled: false,
+        metaPixelIds: [],
       });
       await this.em.flush();
     }
@@ -66,6 +68,8 @@ export class MikroOrmStoreSettingsRepository implements StoreSettingsRepository 
         : settings.weeklySchedule,
       forceClose: !!settings.forceClose,
       forceOpen: !!settings.forceOpen,
+      metaPixelEnabled: !!settings.metaPixelEnabled,
+      metaPixelIds: [...(settings.metaPixelIds ?? [])],
       pointsPerReal: settings.pointsPerReal ?? '0',
       receiptCnpj: settings.receiptCnpj,
       receiptAddress: settings.receiptAddress,
@@ -85,6 +89,8 @@ export class MikroOrmStoreSettingsRepository implements StoreSettingsRepository 
       : settings.weeklySchedule;
     entity.forceClose = settings.forceClose;
     entity.forceOpen = settings.forceOpen;
+    entity.metaPixelEnabled = settings.metaPixelEnabled;
+    entity.metaPixelIds = [...settings.metaPixelIds];
     entity.pointsPerReal = settings.pointsPerReal;
     entity.receiptCnpj = settings.receiptCnpj;
     entity.receiptAddress = settings.receiptAddress;
