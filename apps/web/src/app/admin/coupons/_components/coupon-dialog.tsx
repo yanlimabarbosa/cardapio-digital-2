@@ -94,7 +94,9 @@ function toPayload(f: CouponForm) {
 }
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-[#E8DDD0] bg-white px-3 text-sm text-[#3D2B1F] outline-none focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50';
+  'h-10 w-full rounded-lg border border-[#D8C5B2] bg-white px-3 text-sm text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] outline-none placeholder:text-[#8B7355]/50 focus:border-[#A0603A]/45 focus:ring-2 focus:ring-[#A0603A]/20';
+const selectCls =
+  'border-[#D8C5B2] bg-white text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] focus:ring-[#A0603A]/20';
 const labelCls = 'mb-1 block text-xs font-semibold text-[#8B7355]';
 
 interface Props {
@@ -129,7 +131,7 @@ export function CouponDialog({ open, coupon, onSave, onClose, isPending }: Props
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent open={open} className="max-w-lg p-0">
+      <DialogContent open={open} className="max-w-lg border-[#E8DDD0] bg-[#FFFCF8] p-0">
         <DialogTitle className="sr-only">{coupon ? 'Editar Cupom' : 'Novo Cupom'}</DialogTitle>
         <form onSubmit={handleSubmit} className="flex max-h-[85vh] flex-col">
           <div className="border-b border-[#E8DDD0] px-6 pb-4 pt-6">
@@ -160,6 +162,7 @@ export function CouponDialog({ open, coupon, onSave, onClose, isPending }: Props
                     { value: 'percentage', label: 'Porcentagem (%)' },
                     { value: 'fixed', label: 'Valor fixo (R$)' },
                   ]}
+                  className={selectCls}
                 />
               </div>
             </div>
@@ -231,6 +234,7 @@ export function CouponDialog({ open, coupon, onSave, onClose, isPending }: Props
                   value={form.validFrom}
                   onChange={(v) => setForm({ ...form, validFrom: v })}
                   placeholder="Sem limite"
+                  className={selectCls}
                 />
               </div>
               <div>
@@ -239,6 +243,7 @@ export function CouponDialog({ open, coupon, onSave, onClose, isPending }: Props
                   value={form.validUntil}
                   onChange={(v) => setForm({ ...form, validUntil: v })}
                   placeholder="Sem limite"
+                  className={selectCls}
                 />
               </div>
             </div>
@@ -329,6 +334,7 @@ export function CouponDialog({ open, coupon, onSave, onClose, isPending }: Props
                   { value: 'pickup', label: 'Apenas retirada' },
                 ]}
                 placeholder="Sem restricao"
+                className={selectCls}
               />
             </div>
 

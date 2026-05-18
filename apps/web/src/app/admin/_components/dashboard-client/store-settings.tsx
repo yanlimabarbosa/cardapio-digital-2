@@ -21,6 +21,11 @@ interface StoreSettingsProps {
   onUpdateSettings: (data: Partial<StoreSettingsData>) => void;
 }
 
+const settingsControlClass =
+  'rounded-xl border-[#D8C5B2] bg-white text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] placeholder:text-[#8B7355]/50 focus-visible:ring-[#A0603A]/20 focus-visible:ring-offset-0';
+const settingsTextareaClass =
+  'w-full rounded-xl border border-[#D8C5B2] bg-white px-3 py-2 text-sm text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] outline-none placeholder:text-[#8B7355]/50 focus:border-[#A0603A]/45 focus:ring-2 focus:ring-[#A0603A]/20';
+
 export function StoreSettings({
   storeSettings,
   storeStatus,
@@ -198,7 +203,7 @@ export function StoreSettings({
           min="0"
           value={storeSettings.pointsPerReal ?? 0}
           onChange={(e) => onUpdateSettings({ pointsPerReal: parseFloat(e.target.value) || 0 })}
-          className="h-11 w-32 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+          className={cn(settingsControlClass, 'h-11 w-32')}
         />
         <p className="mt-1 text-[10px] text-[#8B7355]">
           Ex: 1.00 = 1 ponto a cada R$1 gasto. 0 = desativado.
@@ -233,7 +238,7 @@ export function StoreSettings({
               type="button"
               onClick={() => bannerInputRef.current?.click()}
               disabled={bannerUploading}
-              className="flex h-24 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E8DDD0] text-sm font-bold text-[#5A2D14] transition-colors hover:border-[#A0603A]/40 hover:text-[#A0603A] disabled:cursor-wait disabled:opacity-60"
+              className="flex h-24 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#D8C5B2] bg-white text-sm font-bold text-[#5A2D14] shadow-[0_1px_2px_rgba(61,43,31,0.04)] transition-colors hover:border-[#A0603A]/45 hover:bg-[#FFFCF8] hover:text-[#A0603A] disabled:cursor-wait disabled:opacity-60"
             >
               {bannerUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
               {bannerUploading ? 'Enviando...' : 'Enviar banner'}
@@ -277,7 +282,7 @@ export function StoreSettings({
                   receiptCnpj: maskCnpj(e.target.value),
                 })
               }
-              className="h-11 w-64 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+              className={cn(settingsControlClass, 'h-11 w-64')}
             />
           </div>
           <div>
@@ -293,7 +298,7 @@ export function StoreSettings({
                 })
               }
               rows={2}
-              className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
+              className={settingsTextareaClass}
             />
           </div>
           <div>
@@ -312,7 +317,7 @@ export function StoreSettings({
                   receiptPhone: maskPhone(e.target.value),
                 })
               }
-              className="h-11 w-52 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+              className={cn(settingsControlClass, 'h-11 w-52')}
             />
           </div>
           <div>
@@ -328,7 +333,7 @@ export function StoreSettings({
                 })
               }
               rows={2}
-              className="w-full rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm text-[#3D2B1F] outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
+              className={settingsTextareaClass}
             />
           </div>
           <div className="flex items-center gap-2 pt-1">

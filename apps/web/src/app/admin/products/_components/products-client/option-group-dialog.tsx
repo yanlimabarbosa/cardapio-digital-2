@@ -26,6 +26,9 @@ interface OptionGroupDialogProps {
   isPending: boolean;
 }
 
+const dialogInputClass =
+  'h-11 rounded-xl border-[#D8C5B2] bg-white text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] placeholder:text-[#8B7355]/50 focus-visible:ring-[#A0603A]/20 focus-visible:ring-offset-0';
+
 export function OptionGroupDialog({
   open,
   onOpenChange,
@@ -54,7 +57,7 @@ export function OptionGroupDialog({
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Ex: Proteínas, Acompanhamentos..."
-              className="h-11 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+              className={dialogInputClass}
             />
           </div>
           <div className="flex gap-4">
@@ -65,7 +68,7 @@ export function OptionGroupDialog({
                 min="0"
                 value={form.minSelections}
                 onChange={(e) => setForm({ ...form, minSelections: e.target.value })}
-                className="h-11 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+                className={dialogInputClass}
               />
               <p className="mt-1 text-xs text-[#8B7355]">{min >= 1 ? 'Obrigatório' : 'Opcional'}</p>
             </div>
@@ -76,7 +79,7 @@ export function OptionGroupDialog({
                 min="1"
                 value={form.maxSelections}
                 onChange={(e) => setForm({ ...form, maxSelections: e.target.value })}
-                className="h-11 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+                className={dialogInputClass}
               />
               <p className="mt-1 text-xs text-[#8B7355]">{max === 1 ? 'Escolha única' : `Até ${max} opções`}</p>
             </div>

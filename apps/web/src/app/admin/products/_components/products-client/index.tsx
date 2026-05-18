@@ -31,24 +31,29 @@ type DeleteTarget =
   | { type: 'extra'; id: string; name: string }
   | null;
 
-type ChipTone = 'neutral' | 'required' | 'optional' | 'hidden' | 'soldOut';
+type ChipTone = 'neutral' | 'required' | 'optional' | 'choice' | 'count' | 'hidden' | 'soldOut';
 
 function DetailChip({ tone = 'neutral', children }: { tone?: ChipTone; children: ReactNode }) {
   return (
     <span
       className={cn(
         'inline-flex h-6 shrink-0 items-center rounded-full px-2.5 text-[11px] font-bold leading-none',
-        tone === 'required' && 'bg-amber-50 text-amber-800 ring-1 ring-amber-200',
-        tone === 'optional' && 'bg-[#FAF6F1] text-[#8B7355] ring-1 ring-[#E8DDD0]',
+        tone === 'required' && 'bg-[#FFF7ED] text-[#A0603A] ring-1 ring-[#E3D1BF]',
+        tone === 'optional' && 'bg-white text-[#7A624C] ring-1 ring-[#E3D1BF]',
+        tone === 'choice' && 'bg-white text-[#7A624C] ring-1 ring-[#E3D1BF]',
+        tone === 'count' && 'bg-[#F8F1EA] text-[#7A624C] ring-1 ring-[#E3D1BF]',
         tone === 'hidden' && 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',
         tone === 'soldOut' && 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
-        tone === 'neutral' && 'bg-white text-[#8B7355] ring-1 ring-[#E8DDD0]',
+        tone === 'neutral' && 'bg-white text-slate-600 ring-1 ring-slate-200',
       )}
     >
       {children}
     </span>
   );
 }
+
+const actionIconButtonBaseClass =
+  'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-transparent bg-transparent text-[#7A624C] transition-colors hover:border-[#E8DDD0] hover:bg-[#FFFCF8] hover:text-[#3D2B1F]';
 
 function ActionIconButton({
   label,
@@ -68,7 +73,7 @@ function ActionIconButton({
         onClick={onClick}
         aria-label={label}
         className={cn(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E8DDD0] bg-white text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]',
+          actionIconButtonBaseClass,
           className,
         )}
       >
@@ -249,8 +254,8 @@ export function ProductsClient() {
               )}
             >
               <div className={cn(
-                'w-1 shrink-0',
-                product.isActive ? (product.isSoldOut ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-slate-300',
+                'w-0.5 shrink-0',
+                product.isActive ? (product.isSoldOut ? 'bg-amber-300' : 'bg-emerald-300') : 'bg-slate-300',
               )} />
 
               <div className="flex-1 p-4">
@@ -274,7 +279,7 @@ export function ProductsClient() {
                           {product.categoryName}
                         </span>
                         {product.isCompound && (
-                          <span className="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600">
+                          <span className="shrink-0 rounded-full bg-[#FAF6F1] px-2 py-0.5 text-xs font-semibold text-[#8B7355] ring-1 ring-[#E8DDD0]">
                             Composto
                           </span>
                         )}
@@ -299,7 +304,7 @@ export function ProductsClient() {
                       <button
                         onClick={() => toggleExpanded(product.id)}
                         aria-label={expandedProduct === product.id ? 'Recolher produto' : 'Expandir produto'}
-                        className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-all hover:bg-[#FAF6F1]"
+                        className={actionIconButtonBaseClass}
                       >
                         <motion.div
                           animate={{ rotate: expandedProduct === product.id ? 180 : 0 }}
@@ -313,7 +318,7 @@ export function ProductsClient() {
                       <button
                         onClick={() => openEdit(product)}
                         aria-label="Editar produto"
-                        className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
+                        className={cn(actionIconButtonBaseClass, 'hover:text-[#A0603A]')}
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
@@ -323,10 +328,10 @@ export function ProductsClient() {
                         onClick={() => updateProductStatusMutation.mutate({ id: product.id, data: { isSoldOut: !product.isSoldOut } })}
                         aria-label={product.isSoldOut ? 'Marcar como disponível' : 'Marcar como esgotado'}
                         className={cn(
-                          'rounded-lg border border-[#E8DDD0] p-2 transition-colors',
+                          actionIconButtonBaseClass,
                           product.isSoldOut
-                            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                            : 'text-[#8B7355] hover:bg-amber-50 hover:text-amber-700',
+                            ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+                            : 'hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700',
                         )}
                       >
                         <CircleSlash className="h-3.5 w-3.5" />
@@ -337,10 +342,10 @@ export function ProductsClient() {
                         onClick={() => toggleMutation.mutate(product.id)}
                         aria-label={product.isActive ? 'Ocultar do cardápio' : 'Mostrar no cardápio'}
                         className={cn(
-                          'rounded-lg border border-[#E8DDD0] p-2 transition-colors',
+                          actionIconButtonBaseClass,
                           product.isActive
-                            ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                            ? 'text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50'
+                            : 'border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200',
                         )}
                       >
                         {product.isActive ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
@@ -350,7 +355,7 @@ export function ProductsClient() {
                       <button
                         onClick={() => setDeleteTarget({ type: 'product', id: product.id, name: product.name })}
                         aria-label="Excluir"
-                        className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
+                        className={cn(actionIconButtonBaseClass, 'hover:border-red-200 hover:bg-red-50 hover:text-red-600')}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -369,14 +374,14 @@ export function ProductsClient() {
                     >
                       {product.isCompound ? (
                         /* ─── Option Groups (compound product) ─── */
-                        <div className="mt-4 border-t border-[#E8DDD0] pt-4">
+                        <div className="mt-4 rounded-2xl border border-[#E3D1BF] bg-[#F8F1EA] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                           <div className="mb-3 flex items-center justify-between gap-3">
                             <span className="text-xs font-bold uppercase tracking-widest text-[#8B7355]">
                               Grupos de Opções
                             </span>
                             <button
                               onClick={() => openCreateOptionGroup(product.id)}
-                              className="flex h-9 items-center gap-1.5 rounded-lg border border-[#E8DDD0] bg-white px-3 text-xs font-bold text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
+                              className="flex h-9 items-center gap-1.5 rounded-lg border border-[#E8DDD0] bg-white px-3 text-xs font-bold text-[#6F5A43] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
                             >
                               <Plus className="h-3 w-3" />
                               Novo grupo
@@ -390,51 +395,65 @@ export function ProductsClient() {
                                 <div
                                   key={group.id}
                                   className={cn(
-                                    'overflow-hidden rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] shadow-[0_1px_2px_rgba(61,43,31,0.04)] transition-colors',
-                                    expandedGroup === group.id && 'bg-white ring-1 ring-[#E8DDD0]',
+                                    'group overflow-hidden rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] shadow-[0_3px_10px_rgba(61,43,31,0.04)] transition-colors',
+                                    expandedGroup === group.id && 'border-[#D9C8B7] bg-[#FFF9F2]',
                                     !group.isActive && 'opacity-70',
                                   )}
                                 >
-                                  <div className="flex items-center justify-between gap-3 px-3 py-3">
+                                  <div className={cn('flex items-center justify-between gap-3 px-3', expandedGroup === group.id ? 'py-2.5' : 'py-2')}>
                                     <Tooltip label={expandedGroup === group.id ? 'Recolher grupo' : 'Expandir grupo'} className="min-w-0 flex flex-1">
                                       <button
                                         onClick={() => toggleExpandedGroup(group.id)}
                                         aria-label={expandedGroup === group.id ? 'Recolher grupo' : 'Expandir grupo'}
                                         className="flex min-w-0 flex-1 items-center gap-3 text-left"
                                       >
-                                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E8DDD0] bg-white text-[#8B7355]">
+                                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#E8DDD0] bg-[#FFFCF8] text-[#8B7355]">
                                           <motion.span animate={{ rotate: expandedGroup === group.id ? 180 : 0 }} transition={{ duration: 0.2 }}>
                                             <ChevronDown className="h-4 w-4" />
                                           </motion.span>
                                         </span>
                                         <span className="min-w-0 flex-1">
-                                          <span className="block truncate text-sm font-bold text-[#3D2B1F]">{group.name}</span>
-                                          <span className="mt-1 flex flex-wrap items-center gap-1.5">
+                                          <span className="flex flex-wrap items-center gap-2">
+                                            <span className="truncate text-sm font-bold text-[#3D2B1F]">{group.name}</span>
                                             <DetailChip tone={group.minSelections >= 1 ? 'required' : 'optional'}>
                                               {group.minSelections >= 1 ? 'Obrigatório' : 'Opcional'}
                                             </DetailChip>
-                                            <DetailChip>{group.maxSelections === 1 ? 'Única escolha' : `Até ${group.maxSelections}`}</DetailChip>
-                                            <DetailChip>{group.options.length} opções</DetailChip>
+                                            <DetailChip tone="choice">{group.maxSelections === 1 ? 'Única escolha' : `Até ${group.maxSelections}`}</DetailChip>
+                                            <DetailChip tone="count">{group.options.length} opções</DetailChip>
                                             {!group.isActive && <DetailChip tone="hidden">Oculto</DetailChip>}
                                           </span>
                                         </span>
                                       </button>
                                     </Tooltip>
-                                    <div className="flex shrink-0 items-center gap-1.5">
+                                    <div
+                                      className={cn(
+                                        'flex shrink-0 items-center gap-1.5 transition-opacity',
+                                        expandedGroup !== group.id && 'opacity-60 group-hover:opacity-100 group-focus-within:opacity-100',
+                                      )}
+                                    >
+                                      {expandedGroup === group.id && (
+                                        <button
+                                          onClick={() => openCreateGroupOption(group.id)}
+                                          className="mr-1 flex h-8 items-center gap-1.5 rounded-lg border border-[#E8DDD0] bg-[#FFFCF8] px-3 text-[11px] font-bold text-[#6F5A43] transition-colors hover:bg-white hover:text-[#A0603A]"
+                                        >
+                                          <Plus className="h-3 w-3" />
+                                          Adicionar opção
+                                        </button>
+                                      )}
                                       <ActionIconButton label="Editar grupo" onClick={() => openEditOptionGroup(group)}>
                                         <Pencil className="h-3.5 w-3.5" />
                                       </ActionIconButton>
                                       <ActionIconButton
                                         label={group.isActive ? 'Ocultar grupo' : 'Mostrar grupo'}
                                         onClick={() => updateOptionGroupStatusMutation.mutate({ id: group.id, data: { isActive: !group.isActive } })}
-                                        className={group.isActive ? 'text-emerald-700 hover:bg-emerald-50' : 'text-slate-500 hover:bg-slate-100'}
+                                        className={group.isActive ? 'text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50' : 'border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200'}
                                       >
                                         {group.isActive ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                                       </ActionIconButton>
                                       <ActionIconButton
                                         label="Excluir grupo"
                                         onClick={() => setDeleteTarget({ type: 'optionGroup', id: group.id, name: group.name })}
-                                        className="hover:bg-red-50 hover:text-red-600"
+                                        className="hover:border-red-200 hover:bg-red-50 hover:text-red-600"
                                       >
                                         <Trash2 className="h-3.5 w-3.5" />
                                       </ActionIconButton>
@@ -449,29 +468,19 @@ export function ProductsClient() {
                                         transition={{ duration: 0.15 }}
                                         className="overflow-hidden"
                                       >
-                                        <div className="border-t border-[#E8DDD0] bg-[#FAF6F1]/60 px-3 pb-3 pt-3">
-                                          <div className="mb-2.5 flex items-center justify-between gap-3">
-                                            <span className="text-[11px] font-bold uppercase tracking-widest text-[#8B7355]">Opções deste grupo</span>
-                                            <button
-                                              onClick={() => openCreateGroupOption(group.id)}
-                                              className="flex h-8 items-center gap-1.5 rounded-lg border border-[#E8DDD0] bg-white px-3 text-[11px] font-bold text-[#8B7355] transition-colors hover:bg-[#FFFCF8] hover:text-[#A0603A]"
-                                            >
-                                              <Plus className="h-3 w-3" />
-                                              Adicionar opção
-                                            </button>
-                                          </div>
+                                        <div className="border-t border-[#E8DDD0] bg-[#F6EEE5] p-3">
                                           {group.options.length === 0 ? (
                                             <p className="text-xs text-[#8B7355]">Nenhuma opção</p>
                                           ) : (
-                                            <div className="space-y-2">
+                                            <div className="grid gap-2 xl:grid-cols-2">
                                               {group.options.map((opt) => {
                                                 const optImageSrc = getImageUrl(opt.imageUrl);
                                                 return (
                                                   <div
                                                     key={opt.id}
                                                     className={cn(
-                                                      'flex items-center justify-between gap-3 rounded-lg border border-[#E8DDD0] bg-white px-3 py-2.5 text-sm shadow-[0_1px_2px_rgba(61,43,31,0.04)] transition-colors hover:border-[#D4C8BA]',
-                                                      (!opt.isActive || opt.isSoldOut) && 'bg-white/80',
+                                                      'group/option flex min-h-[54px] items-center justify-between gap-3 rounded-lg border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2 text-sm shadow-[0_2px_8px_rgba(61,43,31,0.04)] transition-colors hover:border-[#D9C8B7] hover:bg-white',
+                                                      (!opt.isActive || opt.isSoldOut) && 'bg-[#FFFCF8]/75',
                                                     )}
                                                   >
                                                     <div className="flex min-w-0 items-center gap-3">
@@ -493,28 +502,28 @@ export function ProductsClient() {
                                                         </div>
                                                       </div>
                                                     </div>
-                                                    <div className="flex shrink-0 items-center gap-1.5">
+                                                    <div className="flex shrink-0 items-center gap-1 transition-opacity lg:opacity-65 lg:group-hover/option:opacity-100 lg:group-focus-within/option:opacity-100">
                                                       <ActionIconButton label="Editar opção" onClick={() => openEditGroupOption(opt)}>
                                                         <Pencil className="h-3.5 w-3.5" />
                                                       </ActionIconButton>
                                                       <ActionIconButton
                                                         label={opt.isSoldOut ? 'Marcar opção disponível' : 'Marcar opção esgotada'}
                                                         onClick={() => updateGroupOptionStatusMutation.mutate({ id: opt.id, data: { isSoldOut: !opt.isSoldOut } })}
-                                                        className={opt.isSoldOut ? 'text-amber-700 hover:bg-amber-50' : 'hover:bg-amber-50 hover:text-amber-700'}
+                                                        className={opt.isSoldOut ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700'}
                                                       >
                                                         <CircleSlash className="h-3.5 w-3.5" />
                                                       </ActionIconButton>
                                                       <ActionIconButton
                                                         label={opt.isActive ? 'Ocultar opção' : 'Mostrar opção'}
                                                         onClick={() => updateGroupOptionStatusMutation.mutate({ id: opt.id, data: { isActive: !opt.isActive } })}
-                                                        className={opt.isActive ? 'text-emerald-700 hover:bg-emerald-50' : 'text-slate-500 hover:bg-slate-100'}
+                                                        className={opt.isActive ? 'text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50' : 'border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200'}
                                                       >
                                                         {opt.isActive ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                                                       </ActionIconButton>
                                                       <ActionIconButton
                                                         label="Excluir opção"
                                                         onClick={() => setDeleteTarget({ type: 'groupOption', id: opt.id, name: opt.name })}
-                                                        className="hover:bg-red-50 hover:text-red-600"
+                                                        className="hover:border-red-200 hover:bg-red-50 hover:text-red-600"
                                                       >
                                                         <Trash2 className="h-3.5 w-3.5" />
                                                       </ActionIconButton>
@@ -535,14 +544,14 @@ export function ProductsClient() {
                         </div>
                       ) : (
                         /* ─── Flat Extras (non-compound) ─── */
-                        <div className="mt-4 border-t border-[#E8DDD0] pt-4">
+                        <div className="mt-4 rounded-2xl border border-[#E3D1BF] bg-[#F8F1EA] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
                           <div className="mb-3 flex items-center justify-between gap-3">
                             <span className="text-xs font-bold uppercase tracking-widest text-[#8B7355]">
                               Adicionais
                             </span>
                             <button
                               onClick={() => openCreateExtra(product.id)}
-                              className="flex h-9 items-center gap-1.5 rounded-lg border border-[#E8DDD0] bg-white px-3 text-xs font-bold text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
+                              className="flex h-9 items-center gap-1.5 rounded-lg border border-[#E8DDD0] bg-white px-3 text-xs font-bold text-[#6F5A43] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
                             >
                               <Plus className="h-3 w-3" />
                               Novo adicional
@@ -558,8 +567,8 @@ export function ProductsClient() {
                                   <div
                                     key={extra.id}
                                     className={cn(
-                                      'flex items-center justify-between gap-3 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2.5 text-sm shadow-[0_1px_2px_rgba(61,43,31,0.04)] transition-colors hover:border-[#D4C8BA]',
-                                      (!extra.isActive || extra.isSoldOut) && 'bg-white/80',
+                                      'flex items-center justify-between gap-3 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-3 py-2.5 text-sm shadow-[0_2px_8px_rgba(61,43,31,0.04)] transition-colors hover:border-[#D9C8B7] hover:bg-white',
+                                      (!extra.isActive || extra.isSoldOut) && 'bg-[#FFFCF8]/75',
                                     )}
                                   >
                                     <div className="flex min-w-0 items-center gap-3">
@@ -586,21 +595,21 @@ export function ProductsClient() {
                                       <ActionIconButton
                                         label={extra.isSoldOut ? 'Marcar adicional disponível' : 'Marcar adicional esgotado'}
                                         onClick={() => updateExtraStatusMutation.mutate({ id: extra.id, data: { isSoldOut: !extra.isSoldOut } })}
-                                        className={extra.isSoldOut ? 'text-amber-700 hover:bg-amber-50' : 'hover:bg-amber-50 hover:text-amber-700'}
+                                        className={extra.isSoldOut ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700'}
                                       >
                                         <CircleSlash className="h-3.5 w-3.5" />
                                       </ActionIconButton>
                                       <ActionIconButton
                                         label={extra.isActive ? 'Ocultar adicional' : 'Mostrar adicional'}
                                         onClick={() => updateExtraStatusMutation.mutate({ id: extra.id, data: { isActive: !extra.isActive } })}
-                                        className={extra.isActive ? 'text-emerald-700 hover:bg-emerald-50' : 'text-slate-500 hover:bg-slate-100'}
+                                        className={extra.isActive ? 'text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50' : 'border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200'}
                                       >
                                         {extra.isActive ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                                       </ActionIconButton>
                                       <ActionIconButton
                                         label="Excluir adicional"
                                         onClick={() => setDeleteTarget({ type: 'extra', id: extra.id, name: extra.name })}
-                                        className="hover:bg-red-50 hover:text-red-600"
+                                        className="hover:border-red-200 hover:bg-red-50 hover:text-red-600"
                                       >
                                         <Trash2 className="h-3.5 w-3.5" />
                                       </ActionIconButton>

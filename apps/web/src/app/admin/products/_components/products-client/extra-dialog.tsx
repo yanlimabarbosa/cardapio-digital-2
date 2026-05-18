@@ -31,6 +31,11 @@ interface ExtraDialogProps {
   uploading: boolean;
 }
 
+const dialogInputClass =
+  'h-11 rounded-xl border-[#D8C5B2] bg-white text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] placeholder:text-[#8B7355]/50 focus-visible:ring-[#A0603A]/20 focus-visible:ring-offset-0';
+const uploadDropzoneClass =
+  'mt-2 flex h-32 w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-[#D8C5B2] bg-white shadow-[0_1px_2px_rgba(61,43,31,0.04)] transition-colors hover:border-[#A0603A]/45 hover:bg-[#FFFCF8]';
+
 export function ExtraDialog({
   open,
   onOpenChange,
@@ -59,7 +64,7 @@ export function ExtraDialog({
             <Input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="h-11 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+              className={dialogInputClass}
             />
           </div>
           <div>
@@ -69,7 +74,7 @@ export function ExtraDialog({
               step="0.01"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
-              className="h-11 w-32 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+              className={`${dialogInputClass} w-32`}
             />
           </div>
           <div>
@@ -90,7 +95,7 @@ export function ExtraDialog({
                 </button>
               </div>
             ) : (
-              <label className="mt-2 flex h-32 w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-[#E8DDD0] bg-[#FAF6F1] transition-colors hover:border-[#A0603A]/40 hover:bg-[#A0603A]/5">
+              <label className={uploadDropzoneClass}>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"

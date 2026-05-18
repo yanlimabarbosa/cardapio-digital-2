@@ -35,6 +35,9 @@ import { SortableCategoryCard } from './sortable-category-card';
 import { ProductReorderDialog } from './product-reorder-dialog';
 import { WeeklyScheduleEditor } from '@/components/admin/weekly-schedule-editor';
 
+const dialogInputClass =
+  'h-11 rounded-xl border-[#D8C5B2] bg-white text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] placeholder:text-[#8B7355]/50 focus-visible:ring-[#A0603A]/20 focus-visible:ring-offset-0';
+
 export function CategoriesClient() {
   const {
     categories,
@@ -133,7 +136,7 @@ export function CategoriesClient() {
               <Input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="h-11 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+                className={dialogInputClass}
               />
             </div>
             <div>
@@ -143,7 +146,7 @@ export function CategoriesClient() {
               <Input
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="h-11 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+                className={dialogInputClass}
               />
             </div>
             <div>
@@ -154,7 +157,7 @@ export function CategoriesClient() {
                 type="number"
                 value={form.sortOrder}
                 onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })}
-                className="h-11 w-24 rounded-xl border-[#E8DDD0] bg-[#FFFCF8]"
+                className={`${dialogInputClass} w-24`}
               />
             </div>
             <div>

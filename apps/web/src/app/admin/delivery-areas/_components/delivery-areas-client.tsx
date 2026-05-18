@@ -17,6 +17,8 @@ import { useDeliveryAreasPage } from './use-delivery-areas-page';
 import type { DeliveryAreaResponse } from '@cardapio/shared';
 
 const CITIES = ['João Pessoa', 'Cabedelo', 'Santa Rita'];
+const dialogControlClass =
+  'h-11 w-full rounded-xl border border-[#D8C5B2] bg-white px-3 text-sm text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] outline-none placeholder:text-[#8B7355]/50 focus:border-[#A0603A]/45 focus:ring-2 focus:ring-[#A0603A]/20';
 
 function AreaDialog({
   area,
@@ -52,7 +54,7 @@ function AreaDialog({
 
   return (
     <Dialog open onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
-      <DialogContent open className="max-w-md border-[#E8DDD0] bg-white p-0">
+      <DialogContent open className="max-w-md border-[#E8DDD0] bg-[#FFFCF8] p-0">
         <form onSubmit={handleSubmit}>
           <DialogHeader className="border-b border-[#E8DDD0] px-6 pb-4 pt-6">
             <DialogTitle className="font-display text-lg font-semibold text-[#3D2B1F]">
@@ -67,7 +69,7 @@ function AreaDialog({
                 value={neighborhood}
                 onChange={(e) => setNeighborhood(e.target.value)}
                 placeholder="Nome exato retornado pelo ViaCEP"
-                className="h-11 w-full rounded-xl border border-[#E8DDD0] px-3 text-sm text-[#3D2B1F] outline-none focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
+                className={dialogControlClass}
                 required
               />
             </div>
@@ -79,6 +81,7 @@ function AreaDialog({
                 onChange={setCity}
                 options={CITIES.map((c) => ({ value: c, label: c }))}
                 placeholder="Selecionar cidade"
+                className="h-11 rounded-xl border-[#D8C5B2] bg-white text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] focus:ring-[#A0603A]/20"
               />
             </div>
 
@@ -91,7 +94,7 @@ function AreaDialog({
                 value={fee}
                 onChange={(e) => setFee(e.target.value)}
                 placeholder="0.00"
-                className="h-11 w-full rounded-xl border border-[#E8DDD0] px-3 text-sm text-[#3D2B1F] outline-none focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
+                className={dialogControlClass}
                 required
               />
             </div>

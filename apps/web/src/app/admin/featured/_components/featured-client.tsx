@@ -18,6 +18,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+const dialogControlClass =
+  'h-11 w-full rounded-xl border border-[#D8C5B2] bg-white px-3 text-sm text-[#3D2B1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] outline-none placeholder:text-[#8B7355]/50 focus:border-[#A0603A]/45 focus:ring-2 focus:ring-[#A0603A]/20';
+
 function SectionDialog({
   section,
   onSave,
@@ -41,7 +44,7 @@ function SectionDialog({
 
   return (
     <Dialog open onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
-      <DialogContent open className="max-w-2xl border-[#E8DDD0] bg-white p-0">
+      <DialogContent open className="max-w-2xl border-[#E8DDD0] bg-[#FFFCF8] p-0">
         <form
           onSubmit={(e) => { e.preventDefault(); if (label.trim()) onSave({ label: label.trim(), emoji, availabilitySchedule }); }}
           className="flex min-h-0 flex-1 flex-col"
@@ -59,7 +62,7 @@ function SectionDialog({
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
                 placeholder="Ex: Destaques, Mais Pedidos..."
-                className="h-11 w-full rounded-xl border border-[#E8DDD0] px-3 text-sm text-[#3D2B1F] outline-none focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
+                className={dialogControlClass}
                 required
                 autoFocus
               />
@@ -70,7 +73,7 @@ function SectionDialog({
                 value={emoji}
                 onChange={(e) => setEmoji(e.target.value)}
                 placeholder="✨ 🔥 🆕 ⭐"
-                className="h-11 w-full rounded-xl border border-[#E8DDD0] px-3 text-sm text-[#3D2B1F] outline-none focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50"
+                className={dialogControlClass}
               />
             </div>
             <div>
@@ -144,7 +147,7 @@ function ProductsManager({
 
   return (
     <Dialog open onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
-      <DialogContent open className="max-w-2xl border-[#E8DDD0] bg-white p-0">
+      <DialogContent open className="max-w-2xl border-[#E8DDD0] bg-[#FFFCF8] p-0">
         <DialogHeader className="shrink-0 border-b border-[#E8DDD0] px-6 pb-4 pt-6">
           <DialogTitle className="font-display text-lg font-semibold text-[#3D2B1F]">Gerenciar produtos</DialogTitle>
         </DialogHeader>
@@ -194,7 +197,7 @@ function ProductsManager({
                 placeholder="Buscar produto..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-9 w-full rounded-lg border border-[#E8DDD0] bg-white pl-9 pr-4 text-sm outline-none placeholder:text-[#C4B5A0] focus:border-[#D4C8BA]"
+                className="h-9 w-full rounded-lg border border-[#D8C5B2] bg-white pl-9 pr-4 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(61,43,31,0.04)] outline-none placeholder:text-[#8B7355]/50 focus:border-[#A0603A]/45"
               />
             </div>
             <div className="max-h-48 overflow-auto space-y-1">
