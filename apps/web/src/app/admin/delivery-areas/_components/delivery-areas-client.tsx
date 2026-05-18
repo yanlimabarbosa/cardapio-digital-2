@@ -5,6 +5,7 @@ import { Plus, Pencil, Power, Search, MapPin, Loader2, Trash2 } from 'lucide-rea
 import { formatCurrency } from '@/lib/utils';
 import { CustomSelect } from '@/components/ui/custom-select';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Tooltip } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -208,31 +209,37 @@ export function DeliveryAreasClient() {
                   <td className="px-4 py-3 text-right font-semibold text-terra-600">{formatCurrency(area.fee)}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1.5">
-                      <button
-                        onClick={() => openEdit(area)}
-                        className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#3D2B1F]"
-                        aria-label="Editar"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => toggleActive(area)}
-                        className={`rounded-lg p-1.5 transition-colors ${
-                          area.isActive
-                            ? 'text-emerald-700 hover:bg-emerald-50'
-                            : 'text-slate-500 hover:bg-slate-100'
-                        }`}
-                        aria-label={area.isActive ? 'Desativar' : 'Ativar'}
-                      >
-                        <Power className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setDeleteArea(area)}
-                        className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
-                        aria-label="Excluir"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <Tooltip label="Editar area">
+                        <button
+                          onClick={() => openEdit(area)}
+                          className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#3D2B1F]"
+                          aria-label="Editar area"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                      <Tooltip label={area.isActive ? 'Desativar area' : 'Ativar area'}>
+                        <button
+                          onClick={() => toggleActive(area)}
+                          className={`rounded-lg p-1.5 transition-colors ${
+                            area.isActive
+                              ? 'text-emerald-700 hover:bg-emerald-50'
+                              : 'text-slate-500 hover:bg-slate-100'
+                          }`}
+                          aria-label={area.isActive ? 'Desativar area' : 'Ativar area'}
+                        >
+                          <Power className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                      <Tooltip label="Excluir area">
+                        <button
+                          onClick={() => setDeleteArea(area)}
+                          className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
+                          aria-label="Excluir area"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
                     </div>
                   </td>
                 </tr>

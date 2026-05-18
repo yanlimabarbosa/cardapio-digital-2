@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Pencil, ArrowUpDown, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip } from '@/components/ui/tooltip';
 import type { AdminCategory } from '@/types/admin';
 
 interface SortableCategoryCardProps {
@@ -77,38 +78,47 @@ export function SortableCategoryCard({
           </div>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={onReorderProducts}
-            aria-label="Reordenar produtos"
-            className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
-          >
-            <ArrowUpDown className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={onEdit}
-            className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={onToggleActive}
-            aria-label={cat.isActive ? 'Ocultar categoria' : 'Mostrar categoria'}
-            className={cn(
-              'rounded-lg border p-2 transition-colors',
-              cat.isActive
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                : 'border-[#E8DDD0] bg-slate-100 text-slate-600 hover:bg-slate-200',
-            )}
-          >
-            {cat.isActive ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-          </button>
-          <button
-            onClick={onDelete}
-            aria-label="Excluir categoria"
-            className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          <Tooltip label="Reordenar produtos">
+            <button
+              onClick={onReorderProducts}
+              aria-label="Reordenar produtos"
+              className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
+            >
+              <ArrowUpDown className="h-3.5 w-3.5" />
+            </button>
+          </Tooltip>
+          <Tooltip label="Editar categoria">
+            <button
+              onClick={onEdit}
+              aria-label="Editar categoria"
+              className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          </Tooltip>
+          <Tooltip label={cat.isActive ? 'Ocultar categoria' : 'Mostrar categoria'}>
+            <button
+              onClick={onToggleActive}
+              aria-label={cat.isActive ? 'Ocultar categoria' : 'Mostrar categoria'}
+              className={cn(
+                'rounded-lg border p-2 transition-colors',
+                cat.isActive
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  : 'border-[#E8DDD0] bg-slate-100 text-slate-600 hover:bg-slate-200',
+              )}
+            >
+              {cat.isActive ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            </button>
+          </Tooltip>
+          <Tooltip label="Excluir categoria">
+            <button
+              onClick={onDelete}
+              aria-label="Excluir categoria"
+              className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </Tooltip>
         </div>
       </div>
     </div>

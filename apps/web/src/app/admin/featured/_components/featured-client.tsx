@@ -9,6 +9,7 @@ import type { AdminProduct } from '@/types/admin';
 import { WeeklyScheduleEditor } from '@/components/admin/weekly-schedule-editor';
 import type { WeeklySchedule } from '@cardapio/shared';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Tooltip } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -354,27 +355,33 @@ export function FeaturedClient() {
                   >
                     Produtos
                   </button>
-                  <button
-                    onClick={() => openEditSection(section)}
-                    className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1]"
-                    aria-label="Editar"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => updateMutation.mutate({ id: section.id, isActive: !section.isActive })}
-                    className={`rounded-lg p-1.5 transition-colors ${section.isActive ? 'text-emerald-700 hover:bg-emerald-50' : 'text-slate-500 hover:bg-slate-100'}`}
-                    aria-label={section.isActive ? 'Desativar' : 'Ativar'}
-                  >
-                    <Power className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setDeleteSection({ id: section.id, label: section.label })}
-                    className="rounded-lg p-1.5 text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500"
-                    aria-label="Excluir"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <Tooltip label="Editar seção">
+                    <button
+                      onClick={() => openEditSection(section)}
+                      className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1]"
+                      aria-label="Editar seção"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                  </Tooltip>
+                  <Tooltip label={section.isActive ? 'Desativar seção' : 'Ativar seção'}>
+                    <button
+                      onClick={() => updateMutation.mutate({ id: section.id, isActive: !section.isActive })}
+                      className={`rounded-lg p-1.5 transition-colors ${section.isActive ? 'text-emerald-700 hover:bg-emerald-50' : 'text-slate-500 hover:bg-slate-100'}`}
+                      aria-label={section.isActive ? 'Desativar seção' : 'Ativar seção'}
+                    >
+                      <Power className="h-4 w-4" />
+                    </button>
+                  </Tooltip>
+                  <Tooltip label="Excluir seção">
+                    <button
+                      onClick={() => setDeleteSection({ id: section.id, label: section.label })}
+                      className="rounded-lg p-1.5 text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500"
+                      aria-label="Excluir seção"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
 

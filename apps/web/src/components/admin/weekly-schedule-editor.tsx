@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import { Tooltip } from '@/components/ui/tooltip';
 import {
   WEEKDAYS,
   getShortDayName,
@@ -138,14 +139,16 @@ export function WeeklyScheduleEditor({
                               invalid ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-[#E8DDD0] focus:border-[#D4C8BA] focus:ring-[#E8DDD0]/50'
                             }`}
                           />
-                          <button
-                            type="button"
-                            onClick={() => removeRange(day, index)}
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500"
-                            aria-label="Remover intervalo"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          <Tooltip label="Remover intervalo">
+                            <button
+                              type="button"
+                              onClick={() => removeRange(day, index)}
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500"
+                              aria-label="Remover intervalo"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </Tooltip>
                         </div>
                         {invalid && (
                           <p className="mt-1 text-[11px] font-semibold text-red-600">
@@ -157,14 +160,16 @@ export function WeeklyScheduleEditor({
                   })
                 )}
               </div>
-              <button
-                type="button"
-                onClick={() => addRange(day)}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E8DDD0] text-[#A0603A] transition-colors hover:bg-[#FAF6F1]"
-                aria-label="Adicionar intervalo"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
+              <Tooltip label="Adicionar intervalo">
+                <button
+                  type="button"
+                  onClick={() => addRange(day)}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E8DDD0] text-[#A0603A] transition-colors hover:bg-[#FAF6F1]"
+                  aria-label="Adicionar intervalo"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </Tooltip>
             </div>
           </div>
         );

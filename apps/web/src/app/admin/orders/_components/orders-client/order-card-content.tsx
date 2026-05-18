@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/utils';
 import { formatScheduledFor } from '@cardapio/shared';
+import { Tooltip } from '@/components/ui/tooltip';
 import { Loader2, Clock, ChevronDown, ChevronUp, X, Check, Receipt } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { OrderSummary } from '@/types/admin';
@@ -57,14 +58,16 @@ export function OrderCardContent({
             {formatCurrency(order.totalAmount)}
           </span>
           {onCancel && order.status !== 'delivered' && order.status !== 'cancelled' && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onCancel(); }}
-              disabled={isPending}
-              aria-label="Cancelar pedido"
-              className="rounded p-0.5 text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500 disabled:opacity-60"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip label="Cancelar pedido">
+              <button
+                onClick={(e) => { e.stopPropagation(); onCancel(); }}
+                disabled={isPending}
+                aria-label="Cancelar pedido"
+                className="rounded p-0.5 text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500 disabled:opacity-60"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           )}
         </div>
       </div>

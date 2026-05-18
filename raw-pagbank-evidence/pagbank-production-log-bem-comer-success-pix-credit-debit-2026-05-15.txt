@@ -1,0 +1,396 @@
+LOG DE VALIDACAO PAGBANK - PRODUCAO - BEM COMER
+Gerado em: 2026-05-15 00:03:00 -03
+Ambiente PagBank: Producao
+Escopo deste arquivo: somente meios de pagamento aprovados em producao (Pix, Cartao de Credito e Cartao de Debito com 3DS).
+Webhook configurado nos requests: https://cardapiobemcomer.com.br/api/webhooks/pagbank
+
+Observacoes:
+- Headers de Authorization/Bearer token nao sao incluidos.
+- CPF, telefone e dados parciais de cartao estao mascarados para compartilhamento seguro.
+- O valor criptografado do cartao foi redigido. O backend nunca recebe numero do cartao, CVV ou validade em texto puro.
+- Requests abaixo foram reconstruidos a partir da base do app e do payload esperado enviado pelo adapter PagBank.
+- Responses abaixo foram consultados diretamente na API PagBank de producao via GET /orders/{id}.
+
+============================================================
+MEIO DE PAGAMENTO: PIX - QR Code
+Endpoint de criacao usado: POST https://api.pagseguro.com/orders
+Endpoint de verificacao do log: GET https://api.pagseguro.com/orders/ORDE_00E7ADDD-B0DA-4FFA-80F9-9204048037B2
+Status HTTP da verificacao: 200
+Order ID PagBank: ORDE_00E7ADDD-B0DA-4FFA-80F9-9204048037B2
+Charge ID PagBank: CHAR_E85C96E2-5093-4E18-A19B-A79BCEAF55FE
+Status da cobranca: PAID
+payment_response.code: 20000
+payment_response.message: SUCESSO
+
+Request
+{
+  "reference_id": "5efa011e-4d2a-4a1b-80ef-b1eaf08e1767",
+  "customer": {
+    "name": "dsadsadsadsa",
+    "email": "dsjadsakdsah@gmail.com",
+    "tax_id": "092******47",
+    "phones": [
+      {
+        "country": "55",
+        "area": "43",
+        "number": "24*****43",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "5efa011e-4d2a-4a1b-80ef-b1eaf08e1767",
+      "name": "Pedido #1",
+      "quantity": 1,
+      "unit_amount": 100
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 100
+      },
+      "expiration_date": "2026-05-14T18:05:49.000-03:00"
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ]
+}
+
+============================================================
+MEIO DE PAGAMENTO: CARTAO DE DEBITO COM 3DS
+Endpoint de criacao usado: POST https://api.pagseguro.com/orders
+Endpoint de verificacao do log: GET https://api.pagseguro.com/orders/ORDE_3913773D-E44E-4DB8-B1D3-BC91C567517A
+Status HTTP da verificacao: 200
+Order ID PagBank: ORDE_3913773D-E44E-4DB8-B1D3-BC91C567517A
+Charge ID PagBank: CHAR_E49CA954-F5D4-482D-B21A-4C524C36A4B3
+Status da cobranca: PAID
+payment_response.code: 20000
+payment_response.message: SUCESSO
+3DS status: AUTHENTICATED
+
+Request
+{
+  "reference_id": "c2905823-a168-4481-a72a-b67ff55fdee5",
+  "customer": {
+    "name": "uaausj",
+    "email": "1raphaelsoriano@gmail.com",
+    "tax_id": "074******59",
+    "phones": [
+      {
+        "country": "55",
+        "area": "72",
+        "number": "72*****27",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "c2905823-a168-4481-a72a-b67ff55fdee5",
+      "name": "Pedido #12",
+      "quantity": 1,
+      "unit_amount": 100
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ],
+  "charges": [
+    {
+      "reference_id": "c2905823-a168-4481-a72a-b67ff55fdee5",
+      "description": "Pedido #12",
+      "amount": {
+        "value": 100,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "DEBIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "<encrypted-card-redacted>",
+          "store": false
+        },
+        "holder": {
+          "name": "RAPHAEL BS SOUZ",
+          "tax_id": "074******59"
+        },
+        "authentication_method": {
+          "type": "THREEDS",
+          "id": "<pagbank-3ds-auth-redacted>"
+        }
+      }
+    }
+  ]
+}
+
+Response
+{
+  "id": "ORDE_3913773D-E44E-4DB8-B1D3-BC91C567517A",
+  "reference_id": "c2905823-a168-4481-a72a-b67ff55fdee5",
+  "created_at": "2026-05-15T00:22:29.734-03:00",
+  "customer": {
+    "name": "uaausj",
+    "email": "1raphaelsoriano@gmail.com",
+    "tax_id": "074******59"
+  },
+  "items": [
+    {
+      "reference_id": "c2905823-a168-4481-a72a-b67ff55fdee5",
+      "name": "Pedido #12",
+      "quantity": 1,
+      "unit_amount": 100
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_E49CA954-F5D4-482D-B21A-4C524C36A4B3",
+      "reference_id": "c2905823-a168-4481-a72a-b67ff55fdee5",
+      "status": "PAID",
+      "created_at": "2026-05-15T00:22:29.795-03:00",
+      "paid_at": "2026-05-15T00:22:30.000-03:00",
+      "description": "Pedido #12",
+      "amount": {
+        "value": 100,
+        "currency": "BRL"
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO",
+        "reference": "051544317579",
+        "raw_data": {
+          "authorization_code": "710254",
+          "nsu": "051544317579",
+          "reason_code": "00",
+          "security_level_indicator": "212"
+        }
+      },
+      "payment_method": {
+        "type": "DEBIT_CARD",
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "550209",
+          "last_digits": "1847",
+          "exp_month": "4",
+          "exp_year": "2031",
+          "holder": {
+            "name": "RAPHAEL BS SOUZ"
+          },
+          "issuer": {
+            "name": "NU PAGAMENTOS SA",
+            "product": "Prepaid MSI Consumer Reload"
+          },
+          "country": "BRA",
+          "product": "PRE_PAID"
+        },
+        "authentication_method": {
+          "id": "<pagbank-3ds-auth-redacted>",
+          "status": "AUTHENTICATED",
+          "type": "THREEDS"
+        },
+        "soft_descriptor": "BemComer"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ]
+}
+
+Response
+{
+  "id": "ORDE_00E7ADDD-B0DA-4FFA-80F9-9204048037B2",
+  "reference_id": "5efa011e-4d2a-4a1b-80ef-b1eaf08e1767",
+  "created_at": "2026-05-14T17:35:49.932-03:00",
+  "customer": {
+    "name": "dsadsadsadsa",
+    "email": "dsjadsakdsah@gmail.com",
+    "tax_id": "092******47"
+  },
+  "items": [
+    {
+      "reference_id": "5efa011e-4d2a-4a1b-80ef-b1eaf08e1767",
+      "name": "Pedido #1",
+      "quantity": 1,
+      "unit_amount": 100
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_E85C96E2-5093-4E18-A19B-A79BCEAF55FE",
+      "expiration_date": "2026-05-14T18:05:49.000-03:00",
+      "amount": {
+        "value": 100
+      },
+      "arrangements": [
+        "PIX"
+      ]
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_E85C96E2-5093-4E18-A19B-A79BCEAF55FE",
+      "reference_id": "5efa011e-4d2a-4a1b-80ef-b1eaf08e1767",
+      "status": "PAID",
+      "created_at": "2026-05-14T17:36:21.869-03:00",
+      "paid_at": "2026-05-14T17:36:22.174-03:00",
+      "amount": {
+        "value": 100,
+        "currency": "BRL"
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO"
+      },
+      "payment_method": {
+        "type": "PIX",
+        "pix": {
+          "notification_id": "NTF_4EA809A3-1F54-4EBC-BDFD-C52B9F704FA6",
+          "end_to_end_id": "E10573521202605142036mn9it493dDD",
+          "holder": {
+            "name": "Yan Lima Barbosa",
+            "tax_id": "996******14"
+          }
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ]
+}
+
+============================================================
+MEIO DE PAGAMENTO: CARTAO DE CREDITO
+Endpoint de criacao usado: POST https://api.pagseguro.com/orders
+Endpoint de verificacao do log: GET https://api.pagseguro.com/orders/ORDE_208453BF-AB95-4E7F-96CE-9A29D75C0A54
+Status HTTP da verificacao: 200
+Order ID PagBank: ORDE_208453BF-AB95-4E7F-96CE-9A29D75C0A54
+Charge ID PagBank: CHAR_B3FAC9D9-EC31-4E61-89DB-3DB0BD7850DE
+Status da cobranca: PAID
+payment_response.code: 20000
+payment_response.message: SUCESSO
+
+Request
+{
+  "reference_id": "47c91db4-08fc-4bdf-b4e5-de27d1abf3b1",
+  "customer": {
+    "name": "Yan",
+    "email": "yanlimabarbosa16@gmail.com",
+    "tax_id": "092******47",
+    "phones": [
+      {
+        "country": "55",
+        "area": "83",
+        "number": "98*****39",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "47c91db4-08fc-4bdf-b4e5-de27d1abf3b1",
+      "name": "Pedido #5",
+      "quantity": 1,
+      "unit_amount": 100
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ],
+  "charges": [
+    {
+      "reference_id": "47c91db4-08fc-4bdf-b4e5-de27d1abf3b1",
+      "description": "Pedido #5",
+      "amount": {
+        "value": 100,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "<encrypted-card-redacted>",
+          "store": false
+        },
+        "holder": {
+          "name": "YAN LIMA BARBOSA",
+          "tax_id": "092******47"
+        }
+      }
+    }
+  ]
+}
+
+Response
+{
+  "id": "ORDE_208453BF-AB95-4E7F-96CE-9A29D75C0A54",
+  "reference_id": "47c91db4-08fc-4bdf-b4e5-de27d1abf3b1",
+  "created_at": "2026-05-14T23:51:22.944-03:00",
+  "customer": {
+    "name": "Yan",
+    "email": "yanlimabarbosa16@gmail.com",
+    "tax_id": "092******47"
+  },
+  "items": [
+    {
+      "reference_id": "47c91db4-08fc-4bdf-b4e5-de27d1abf3b1",
+      "name": "Pedido #5",
+      "quantity": 1,
+      "unit_amount": 100
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_B3FAC9D9-EC31-4E61-89DB-3DB0BD7850DE",
+      "reference_id": "47c91db4-08fc-4bdf-b4e5-de27d1abf3b1",
+      "status": "PAID",
+      "created_at": "2026-05-14T23:51:23.024-03:00",
+      "paid_at": "2026-05-14T23:51:23.000-03:00",
+      "description": "Pedido #5",
+      "amount": {
+        "value": 100,
+        "currency": "BRL"
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO",
+        "reference": "051450847464",
+        "raw_data": {
+          "authorization_code": "092041",
+          "nsu": "051450847464",
+          "reason_code": "00",
+          "security_level_indicator": "210"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "522626",
+          "last_digits": "0590",
+          "exp_month": "05",
+          "exp_year": "2034",
+          "holder": {
+            "name": "YAN LIMA BARBOSA"
+          },
+          "issuer": {
+            "name": "NU PAGAMENTOS SA",
+            "product": "Mastercard Micro-Business Card"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "BemComer"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://cardapiobemcomer.com.br/api/webhooks/pagbank"
+  ]
+}

@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
 import { formatCurrency } from '@/lib/utils';
 import { Plus, Pencil, Power, Search, Tag, Loader2 } from 'lucide-react';
+import { Tooltip } from '@/components/ui/tooltip';
 import { CouponDialog } from './coupon-dialog';
 import type { CouponResponse } from '@cardapio/shared';
 
@@ -153,24 +154,28 @@ export function CouponsClient() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1.5">
-                      <button
-                        onClick={() => openEdit(c)}
-                        className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#3D2B1F]"
-                        aria-label="Editar"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => deactivateMutation.mutate(c.id)}
-                        className={`rounded-lg p-1.5 transition-colors ${
-                          c.isActive
-                            ? 'text-green-600 hover:bg-green-50'
-                            : 'text-red-400 hover:bg-red-50'
-                        }`}
-                        aria-label={c.isActive ? 'Desativar' : 'Ativar'}
-                      >
-                        <Power className="h-4 w-4" />
-                      </button>
+                      <Tooltip label="Editar cupom">
+                        <button
+                          onClick={() => openEdit(c)}
+                          className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#3D2B1F]"
+                          aria-label="Editar cupom"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                      <Tooltip label={c.isActive ? 'Desativar cupom' : 'Ativar cupom'}>
+                        <button
+                          onClick={() => deactivateMutation.mutate(c.id)}
+                          className={`rounded-lg p-1.5 transition-colors ${
+                            c.isActive
+                              ? 'text-green-600 hover:bg-green-50'
+                              : 'text-red-400 hover:bg-red-50'
+                          }`}
+                          aria-label={c.isActive ? 'Desativar cupom' : 'Ativar cupom'}
+                        >
+                          <Power className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
                     </div>
                   </td>
                 </tr>
