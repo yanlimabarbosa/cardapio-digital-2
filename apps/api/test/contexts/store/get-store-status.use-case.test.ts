@@ -91,6 +91,8 @@ function createStoreSettings(overrides: Partial<StoreSettingsModel> = {}): Store
     },
     forceClose: false,
     forceOpen: false,
+    metaPixelEnabled: false,
+    metaPixelIds: [],
     pointsPerReal: '0',
     ...overrides,
   };

@@ -42,6 +42,8 @@ test('updates store settings through the repository port', async (): Promise<voi
   const result = await useCase.execute({
     data: {
       forceOpen: true,
+      metaPixelEnabled: true,
+      metaPixelIds: ['123456789012345', 'bad', '123456789012345', '987654321098765'],
       pointsPerReal: 2.5,
       receiptFooter: 'Obrigado pela preferencia',
       weeklySchedule: null,
@@ -52,6 +54,8 @@ test('updates store settings through the repository port', async (): Promise<voi
     ...createStoreSettings(),
     forceClose: false,
     forceOpen: true,
+    metaPixelEnabled: true,
+    metaPixelIds: ['123456789012345', '987654321098765'],
     pointsPerReal: '2.5',
     receiptFooter: 'Obrigado pela preferencia',
     weeklySchedule: {},
@@ -178,6 +182,8 @@ function createStoreSettings(overrides: Partial<StoreSettingsModel> = {}): Store
     weeklySchedule: null,
     forceClose: false,
     forceOpen: false,
+    metaPixelEnabled: false,
+    metaPixelIds: [],
     pointsPerReal: '0',
     ...overrides,
   };
