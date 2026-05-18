@@ -41,4 +41,10 @@ export class StoreSettings {
 
   @Property({ columnType: 'text', nullable: true })
   bannerUrl?: string;
+
+  @Property({ default: false })
+  metaPixelEnabled?: boolean = false;
+
+  @Property({ type: 'jsonb', nullable: true })
+  metaPixelIds?: string[] | null;
 }

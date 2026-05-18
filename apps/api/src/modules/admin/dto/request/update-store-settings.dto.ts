@@ -30,6 +30,15 @@ export class UpdateStoreSettingsDto {
   public readonly forceOpen?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  public readonly metaPixelEnabled?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  public readonly metaPixelIds?: string[];
+
+  @IsOptional()
   @IsNumber()
   public readonly pointsPerReal?: number;
 
