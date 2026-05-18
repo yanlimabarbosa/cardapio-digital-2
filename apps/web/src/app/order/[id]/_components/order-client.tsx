@@ -1,11 +1,13 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { CustomerHeader, CustomerPage } from '@/components/customer/customer-page-shell';
 import { formatCurrency } from '@/lib/utils';
+import { toMetaContents, trackMetaPixel } from '@/lib/meta-pixel';
 import { formatScheduledFor } from '@cardapio/shared';
 import { CheckCircle, Clock, ChefHat, PackageCheck, Home, Truck } from 'lucide-react';
 import { useOrderPage } from './use-order-page';
@@ -22,6 +24,31 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
 
 export function OrderClient() {
   const { order, isLoading, statusInfo, currentStep, progressWidth, steps, statusConfig } = useOrderPage();
+
+  useEffect(() => {
+    if (!order || !isPaidForPixel(order.status)) return;
+    const storageKey = `meta-pixel-purchase:${order.id}`;
+    if (window.localStorage.getItem(storageKey)) return;
+
+    trackMetaPixel(
+      'Purchase',
+      {
+        content_ids: order.items.map((item) => item.productId),
+        content_type: 'product',
+        contents: toMetaContents(order.items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          itemPrice: item.unitPrice,
+        }))),
+        currency: 'BRL',
+        num_items: order.items.reduce((sum, item) => sum + item.quantity, 0),
+        order_id: order.id,
+        value: order.totalAmount,
+      },
+      { eventID: order.id },
+    );
+    window.localStorage.setItem(storageKey, '1');
+  }, [order]);
 
   if (isLoading) {
     return (
@@ -156,4 +183,8 @@ export function OrderClient() {
       </div>
     </CustomerPage>
   );
+}
+
+function isPaidForPixel(status: string): boolean {
+  return ['paid', 'preparing', 'ready', 'out_for_delivery', 'delivered'].includes(status);
 }
