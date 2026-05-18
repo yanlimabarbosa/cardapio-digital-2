@@ -1,6 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Dialog,
   DialogContent,
@@ -55,6 +57,7 @@ export function CategoriesClient() {
     categoryProducts,
     reorderProductsMutation,
   } = useCategoriesPage();
+  const [deleteCategory, setDeleteCategory] = useState<{ id: string; name: string } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -101,7 +104,7 @@ export function CategoriesClient() {
                   onToggleActive={() =>
                     toggleActiveMutation.mutate({ id: cat.id, isActive: !cat.isActive })
                   }
-                  onDelete={() => deleteMutation.mutate(cat.id)}
+                  onDelete={() => setDeleteCategory({ id: cat.id, name: cat.name })}
                   onReorderProducts={() =>
                     setReorderDialog({ categoryId: cat.id, categoryName: cat.name })
                   }
@@ -195,6 +198,24 @@ export function CategoriesClient() {
           });
         }}
         onClose={() => setReorderDialog(null)}
+      />
+
+      <ConfirmDialog
+        open={deleteCategory !== null}
+        onOpenChange={(open) => { if (!open && !deleteMutation.isPending) setDeleteCategory(null); }}
+        title="Excluir categoria?"
+        description={
+          deleteCategory
+            ? `Voce esta prestes a excluir "${deleteCategory.name}". Essa acao nao pode ser desfeita.`
+            : ''
+        }
+        isPending={deleteMutation.isPending}
+        onConfirm={() => {
+          if (!deleteCategory) return;
+          deleteMutation.mutate(deleteCategory.id, {
+            onSuccess: () => setDeleteCategory(null),
+          });
+        }}
       />
     </div>
   );

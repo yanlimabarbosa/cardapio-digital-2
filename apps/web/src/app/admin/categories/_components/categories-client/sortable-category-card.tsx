@@ -96,11 +96,11 @@ export function SortableCategoryCard({
             className={cn(
               'rounded-lg border p-2 transition-colors',
               cat.isActive
-                ? 'border-[#E8DDD0] text-[#8B7355] hover:bg-slate-100 hover:text-slate-700'
-                : 'border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100',
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                : 'border-[#E8DDD0] bg-slate-100 text-slate-600 hover:bg-slate-200',
             )}
           >
-            {cat.isActive ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            {cat.isActive ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
           </button>
           <button
             onClick={onDelete}
