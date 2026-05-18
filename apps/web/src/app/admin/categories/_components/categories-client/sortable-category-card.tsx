@@ -79,7 +79,7 @@ export function SortableCategoryCard({
         <div className="flex gap-2">
           <button
             onClick={onReorderProducts}
-            title="Reordenar produtos"
+            aria-label="Reordenar produtos"
             className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A]"
           >
             <ArrowUpDown className="h-3.5 w-3.5" />
@@ -92,7 +92,7 @@ export function SortableCategoryCard({
           </button>
           <button
             onClick={onToggleActive}
-            title={cat.isActive ? 'Ocultar categoria' : 'Mostrar categoria'}
+            aria-label={cat.isActive ? 'Ocultar categoria' : 'Mostrar categoria'}
             className={cn(
               'rounded-lg border p-2 transition-colors',
               cat.isActive
@@ -104,7 +104,7 @@ export function SortableCategoryCard({
           </button>
           <button
             onClick={onDelete}
-            title="Excluir categoria"
+            aria-label="Excluir categoria"
             className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
           >
             <Trash2 className="h-3.5 w-3.5" />

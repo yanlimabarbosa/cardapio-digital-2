@@ -357,21 +357,21 @@ export function FeaturedClient() {
                   <button
                     onClick={() => openEditSection(section)}
                     className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1]"
-                    title="Editar"
+                    aria-label="Editar"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => updateMutation.mutate({ id: section.id, isActive: !section.isActive })}
                     className={`rounded-lg p-1.5 transition-colors ${section.isActive ? 'text-emerald-700 hover:bg-emerald-50' : 'text-slate-500 hover:bg-slate-100'}`}
-                    title={section.isActive ? 'Desativar' : 'Ativar'}
+                    aria-label={section.isActive ? 'Desativar' : 'Ativar'}
                   >
                     <Power className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setDeleteSection({ id: section.id, label: section.label })}
                     className="rounded-lg p-1.5 text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500"
-                    title="Excluir"
+                    aria-label="Excluir"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

@@ -142,7 +142,7 @@ export function WeeklyScheduleEditor({
                             type="button"
                             onClick={() => removeRange(day, index)}
                             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#C4B5A0] transition-colors hover:bg-red-50 hover:text-red-500"
-                            title="Remover intervalo"
+                            aria-label="Remover intervalo"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -161,7 +161,7 @@ export function WeeklyScheduleEditor({
                 type="button"
                 onClick={() => addRange(day)}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E8DDD0] text-[#A0603A] transition-colors hover:bg-[#FAF6F1]"
-                title="Adicionar intervalo"
+                aria-label="Adicionar intervalo"
               >
                 <Plus className="h-4 w-4" />
               </button>

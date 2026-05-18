@@ -211,7 +211,7 @@ export function DeliveryAreasClient() {
                       <button
                         onClick={() => openEdit(area)}
                         className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#3D2B1F]"
-                        title="Editar"
+                        aria-label="Editar"
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
@@ -222,14 +222,14 @@ export function DeliveryAreasClient() {
                             ? 'text-emerald-700 hover:bg-emerald-50'
                             : 'text-slate-500 hover:bg-slate-100'
                         }`}
-                        title={area.isActive ? 'Desativar' : 'Ativar'}
+                        aria-label={area.isActive ? 'Desativar' : 'Ativar'}
                       >
                         <Power className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setDeleteArea(area)}
                         className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
-                        title="Excluir"
+                        aria-label="Excluir"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

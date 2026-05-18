@@ -156,7 +156,7 @@ export function CouponsClient() {
                       <button
                         onClick={() => openEdit(c)}
                         className="rounded-lg p-1.5 text-[#8B7355] transition-colors hover:bg-[#FAF6F1] hover:text-[#3D2B1F]"
-                        title="Editar"
+                        aria-label="Editar"
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
@@ -167,7 +167,7 @@ export function CouponsClient() {
                             ? 'text-green-600 hover:bg-green-50'
                             : 'text-red-400 hover:bg-red-50'
                         }`}
-                        title={c.isActive ? 'Desativar' : 'Ativar'}
+                        aria-label={c.isActive ? 'Desativar' : 'Ativar'}
                       >
                         <Power className="h-4 w-4" />
                       </button>

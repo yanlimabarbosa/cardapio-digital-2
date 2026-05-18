@@ -249,7 +249,7 @@ export function ProductsClient() {
                   <div className="flex shrink-0 gap-2 ml-2">
                     <button
                       onClick={() => toggleExpanded(product.id)}
-                      title={expandedProduct === product.id ? 'Recolher produto' : 'Expandir produto'}
+                      aria-label={expandedProduct === product.id ? 'Recolher produto' : 'Expandir produto'}
                       className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-all hover:bg-[#FAF6F1]"
                     >
                       <motion.div
@@ -267,7 +267,7 @@ export function ProductsClient() {
                     </button>
                     <button
                       onClick={() => updateProductStatusMutation.mutate({ id: product.id, data: { isSoldOut: !product.isSoldOut } })}
-                      title={product.isSoldOut ? 'Marcar como disponível' : 'Marcar como esgotado'}
+                      aria-label={product.isSoldOut ? 'Marcar como disponível' : 'Marcar como esgotado'}
                       className={cn(
                         'rounded-lg border border-[#E8DDD0] p-2 transition-colors',
                         product.isSoldOut
@@ -279,7 +279,7 @@ export function ProductsClient() {
                     </button>
                     <button
                       onClick={() => toggleMutation.mutate(product.id)}
-                      title={product.isActive ? 'Ocultar do cardápio' : 'Mostrar no cardápio'}
+                      aria-label={product.isActive ? 'Ocultar do cardápio' : 'Mostrar no cardápio'}
                       className={cn(
                         'rounded-lg border border-[#E8DDD0] p-2 transition-colors',
                         product.isActive
@@ -291,7 +291,7 @@ export function ProductsClient() {
                     </button>
                     <button
                       onClick={() => setDeleteTarget({ type: 'product', id: product.id, name: product.name })}
-                      title="Excluir"
+                      aria-label="Excluir"
                       className="rounded-lg border border-[#E8DDD0] p-2 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -332,7 +332,7 @@ export function ProductsClient() {
                                   <div className="flex items-center justify-between px-3 py-2.5">
                                     <button
                                       onClick={() => toggleExpandedGroup(group.id)}
-                                      title={expandedGroup === group.id ? 'Recolher grupo' : 'Expandir grupo'}
+                                      aria-label={expandedGroup === group.id ? 'Recolher grupo' : 'Expandir grupo'}
                                       className="flex flex-1 items-center gap-2 text-left"
                                     >
                                       <motion.div animate={{ rotate: expandedGroup === group.id ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -358,7 +358,7 @@ export function ProductsClient() {
                                       </button>
                                       <button
                                         onClick={() => updateOptionGroupStatusMutation.mutate({ id: group.id, data: { isActive: !group.isActive } })}
-                                        title={group.isActive ? 'Ocultar grupo' : 'Mostrar grupo'}
+                                        aria-label={group.isActive ? 'Ocultar grupo' : 'Mostrar grupo'}
                                         className={cn(
                                           'rounded-md p-1.5 transition-colors',
                                           group.isActive
@@ -370,7 +370,7 @@ export function ProductsClient() {
                                       </button>
                                       <button
                                         onClick={() => setDeleteTarget({ type: 'optionGroup', id: group.id, name: group.name })}
-                                        title="Excluir grupo"
+                                        aria-label="Excluir grupo"
                                         className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                       >
                                         <Trash2 className="h-3 w-3" />
@@ -442,7 +442,7 @@ export function ProductsClient() {
                                                       </button>
                                                       <button
                                                         onClick={() => updateGroupOptionStatusMutation.mutate({ id: opt.id, data: { isSoldOut: !opt.isSoldOut } })}
-                                                        title={opt.isSoldOut ? 'Marcar opção disponível' : 'Marcar opção esgotada'}
+                                                        aria-label={opt.isSoldOut ? 'Marcar opção disponível' : 'Marcar opção esgotada'}
                                                         className={cn(
                                                           'rounded p-1 transition-colors',
                                                           opt.isSoldOut
@@ -454,7 +454,7 @@ export function ProductsClient() {
                                                       </button>
                                                       <button
                                                         onClick={() => updateGroupOptionStatusMutation.mutate({ id: opt.id, data: { isActive: !opt.isActive } })}
-                                                        title={opt.isActive ? 'Ocultar opção' : 'Mostrar opção'}
+                                                        aria-label={opt.isActive ? 'Ocultar opção' : 'Mostrar opção'}
                                                         className={cn(
                                                           'rounded p-1 transition-colors',
                                                           opt.isActive
@@ -466,7 +466,7 @@ export function ProductsClient() {
                                                       </button>
                                                       <button
                                                         onClick={() => setDeleteTarget({ type: 'groupOption', id: opt.id, name: opt.name })}
-                                                        title="Excluir opção"
+                                                        aria-label="Excluir opção"
                                                         className="rounded p-1 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                                       >
                                                         <Trash2 className="h-2.5 w-2.5" />
@@ -546,7 +546,7 @@ export function ProductsClient() {
                                       </button>
                                       <button
                                         onClick={() => updateExtraStatusMutation.mutate({ id: extra.id, data: { isSoldOut: !extra.isSoldOut } })}
-                                        title={extra.isSoldOut ? 'Marcar adicional disponível' : 'Marcar adicional esgotado'}
+                                        aria-label={extra.isSoldOut ? 'Marcar adicional disponível' : 'Marcar adicional esgotado'}
                                         className={cn(
                                           'rounded-md p-1.5 transition-colors',
                                           extra.isSoldOut
@@ -558,7 +558,7 @@ export function ProductsClient() {
                                       </button>
                                       <button
                                         onClick={() => updateExtraStatusMutation.mutate({ id: extra.id, data: { isActive: !extra.isActive } })}
-                                        title={extra.isActive ? 'Ocultar adicional' : 'Mostrar adicional'}
+                                        aria-label={extra.isActive ? 'Ocultar adicional' : 'Mostrar adicional'}
                                         className={cn(
                                           'rounded-md p-1.5 transition-colors',
                                           extra.isActive
@@ -570,7 +570,7 @@ export function ProductsClient() {
                                       </button>
                                       <button
                                         onClick={() => setDeleteTarget({ type: 'extra', id: extra.id, name: extra.name })}
-                                        title="Excluir adicional"
+                                        aria-label="Excluir adicional"
                                         className="rounded-md p-1.5 text-[#8B7355] transition-colors hover:bg-red-50 hover:text-red-600"
                                       >
                                         <Trash2 className="h-3 w-3" />
