@@ -68,6 +68,9 @@ export class MikroOrmStoreSettingsRepository implements StoreSettingsRepository 
         : settings.weeklySchedule,
       forceClose: !!settings.forceClose,
       forceOpen: !!settings.forceOpen,
+      freeNightDeliveryEnabled: !!settings.freeNightDeliveryEnabled,
+      freeNightDeliveryStart: settings.freeNightDeliveryStart,
+      freeNightDeliveryEnd: settings.freeNightDeliveryEnd,
       metaPixelEnabled: !!settings.metaPixelEnabled,
       metaPixelIds: [...(settings.metaPixelIds ?? [])],
       pointsPerReal: settings.pointsPerReal ?? '0',
@@ -89,6 +92,9 @@ export class MikroOrmStoreSettingsRepository implements StoreSettingsRepository 
       : settings.weeklySchedule;
     entity.forceClose = settings.forceClose;
     entity.forceOpen = settings.forceOpen;
+    entity.freeNightDeliveryEnabled = settings.freeNightDeliveryEnabled;
+    entity.freeNightDeliveryStart = settings.freeNightDeliveryStart;
+    entity.freeNightDeliveryEnd = settings.freeNightDeliveryEnd;
     entity.metaPixelEnabled = settings.metaPixelEnabled;
     entity.metaPixelIds = [...settings.metaPixelIds];
     entity.pointsPerReal = settings.pointsPerReal;

@@ -62,14 +62,15 @@ import {
   GetStoreSettingsResult,
   GetStoreSettingsUseCase,
 } from '../store/application/use-cases/get-store-settings.use-case';
-import {
-  ToggleStoreForceCloseResult,
-  ToggleStoreForceCloseUseCase,
-} from '../store/application/use-cases/toggle-store-force-close.use-case';
-import {
-  ToggleStoreForceOpenResult,
-  ToggleStoreForceOpenUseCase,
-} from '../store/application/use-cases/toggle-store-force-open.use-case';
+import { SetStoreModeUseCase } from '../store/application/use-cases/set-store-mode.use-case';
+import { ToggleStoreForceCloseUseCase, ToggleStoreForceCloseResult } from '../store/application/use-cases/toggle-store-force-close.use-case';
+import { ToggleStoreForceOpenUseCase } from '../store/application/use-cases/toggle-store-force-open.use-case';
+import { ClearTestDataUseCase } from './application/use-cases/clear-test-data.use-case';
+import { ListDeliveryDriversUseCase, DeliveryDriverModel } from './application/use-cases/list-delivery-drivers.use-case';
+import { CreateDeliveryDriverUseCase } from './application/use-cases/create-delivery-driver.use-case';
+import { UpdateDeliveryDriverUseCase } from './application/use-cases/update-delivery-driver.use-case';
+import { DeleteDeliveryDriverUseCase } from './application/use-cases/delete-delivery-driver.use-case';
+import { CreateDeliveryDriverDto, UpdateDeliveryDriverDto } from './dto/delivery-driver.dto';
 import {
   UpdateStoreSettingsResult,
   UpdateStoreSettingsUseCase,
@@ -209,8 +210,14 @@ export class AdminController {
     private readonly createAdminCategoryUseCase: CreateAdminCategoryUseCase,
     private readonly getStoreSettingsUseCase: GetStoreSettingsUseCase,
     private readonly updateStoreSettingsUseCase: UpdateStoreSettingsUseCase,
-    private readonly toggleStoreForceCloseUseCase: ToggleStoreForceCloseUseCase,
-    private readonly toggleStoreForceOpenUseCase: ToggleStoreForceOpenUseCase,
+    private readonly setStoreMode: SetStoreModeUseCase,
+    private readonly toggleStoreForceClose: ToggleStoreForceCloseUseCase,
+    private readonly toggleStoreForceOpen: ToggleStoreForceOpenUseCase,
+    private readonly clearTestData: ClearTestDataUseCase,
+    private readonly listDeliveryDriversUseCase: ListDeliveryDriversUseCase,
+    private readonly createDeliveryDriverUseCase: CreateDeliveryDriverUseCase,
+    private readonly updateDeliveryDriverUseCase: UpdateDeliveryDriverUseCase,
+    private readonly deleteDeliveryDriverUseCase: DeleteDeliveryDriverUseCase,
     private readonly listAdminCustomersUseCase: ListAdminCustomersUseCase,
     private readonly adjustCustomerLoyaltyUseCase: AdjustCustomerLoyaltyUseCase,
   ) {}
@@ -775,11 +782,41 @@ export class AdminController {
 
   @Patch('store-settings/toggle-close')
   public toggleForceClose(): Promise<ToggleStoreForceCloseResult> {
-    return this.toggleStoreForceCloseUseCase.execute();
+    return this.toggleStoreForceClose.execute();
   }
 
   @Patch('store-settings/toggle-open')
-  public toggleForceOpen(): Promise<ToggleStoreForceOpenResult> {
-    return this.toggleStoreForceOpenUseCase.execute();
+  public async toggleStoreForceOpenSettings(): Promise<void> {
+    await this.toggleStoreForceOpen.execute();
+  }
+
+  @Post('system/clear-data')
+  public async handleClearTestData(): Promise<{ success: boolean; message: string }> {
+    return this.clearTestData.execute();
+  }
+
+  @Get('drivers')
+  public listDrivers(): Promise<DeliveryDriverModel[]> {
+    return this.listDeliveryDriversUseCase.execute();
+  }
+
+  @Post('drivers')
+  public createDriver(@Body() dto: CreateDeliveryDriverDto): Promise<{ id: string }> {
+    return this.createDeliveryDriverUseCase.execute(dto);
+  }
+
+  @Put('drivers/:id')
+  public async updateDriver(
+    @Param('id') id: string,
+    @Body() dto: UpdateDeliveryDriverDto,
+  ): Promise<{ success: boolean }> {
+    await this.updateDeliveryDriverUseCase.execute({ id, ...dto });
+    return { success: true };
+  }
+
+  @Delete('drivers/:id')
+  public async deleteDriver(@Param('id') id: string): Promise<{ success: boolean }> {
+    await this.deleteDeliveryDriverUseCase.execute(id);
+    return { success: true };
   }
 }

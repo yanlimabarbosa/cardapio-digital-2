@@ -1,9 +1,8 @@
 'use client';
 
-import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
 import type { OrderSummary } from '@/types/admin';
-import { DraggableCard } from './draggable-card';
+import { OrderCardContent } from './order-card-content';
 
 interface DroppableColumnProps {
   columnKey: string;
@@ -11,8 +10,7 @@ interface DroppableColumnProps {
   dot: string;
   headerBg: string;
   orders: OrderSummary[];
-  isOver: boolean;
-  canAccept: boolean;
+  onAdvance: (orderId: string, currentStatus: string) => void;
   onCancel: (orderId: string) => void;
   onDeliver: (orderId: string) => void;
   pendingOrderId: string | null;
@@ -24,14 +22,11 @@ export function DroppableColumn({
   dot,
   headerBg,
   orders,
-  isOver,
-  canAccept,
+  onAdvance,
   onCancel,
   onDeliver,
   pendingOrderId,
 }: DroppableColumnProps) {
-  const { setNodeRef } = useDroppable({ id: columnKey });
-
   return (
     <div className="flex min-w-[240px] flex-1 flex-col min-h-[200px] lg:min-w-0">
       <div className={cn(
@@ -46,24 +41,17 @@ export function DroppableColumn({
       </div>
 
       <div
-        ref={setNodeRef}
-        className={cn(
-          'flex-1 space-y-2 rounded-xl border-2 border-dashed p-2 transition-colors',
-          isOver && canAccept
-            ? 'border-[#A0603A] bg-[#A0603A]/5'
-            : isOver && !canAccept
-              ? 'border-red-300 bg-red-50/50'
-              : 'border-transparent bg-[#FAF6F1]/50',
-        )}
+        className="flex-1 space-y-2 rounded-xl border-2 border-transparent bg-[#FAF6F1]/50 p-2 transition-colors"
         style={{ minHeight: 120 }}
       >
         {orders.length === 0 ? (
           <p className="py-6 text-center text-xs text-[#C4B5A0]">Nenhum pedido</p>
         ) : (
           orders.map((order) => (
-            <DraggableCard
+            <OrderCardContent
               key={order.id}
               order={order}
+              onAdvance={() => onAdvance(order.id, order.status)}
               onCancel={() => onCancel(order.id)}
               onDeliver={() => onDeliver(order.id)}
               isPending={pendingOrderId === order.id}

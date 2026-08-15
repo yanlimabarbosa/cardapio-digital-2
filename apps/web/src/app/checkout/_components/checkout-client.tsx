@@ -1,15 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import Script from 'next/script';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Loader2, QrCode, CreditCard, Zap, ShieldCheck, Clock, Award, Check } from 'lucide-react';
-import { formatCurrency, maskCpf } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Loader2, QrCode, CreditCard, Clock, Award, Check, Banknote } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import { getImageUrl } from '@/lib/admin-api';
-import { PAGBANK_SDK_URL } from '@/lib/payment-provider';
-import { PixPayment } from './pix-payment';
-import { CreditCardForm } from './credit-card-form';
-import { DebitCardForm } from './debit-card-form';
 import { useCheckoutPage } from './use-checkout-page';
 
 export function CheckoutClient() {
@@ -17,134 +12,24 @@ export function CheckoutClient() {
     items,
     paymentMethod,
     setPaymentMethod,
-    orderId,
-    pixData,
-    step,
     error,
     totalAmount,
     subtotal,
     deliveryFee,
     deliveryType,
-    deliveryAddress,
     scheduledForLabel,
-    customerPhoneForPayment,
     couponCode,
     couponDiscount,
-    payerEmail,
-    setPayerEmail,
-    payerCpf,
-    setPayerCpf,
     handlePay,
-    handleSwitchToPix,
-    handleCardSuccess,
     createOrderPending,
-    pixPaymentPending,
     storeClosed,
     redeemableProducts,
     redeemedItems,
     toggleRedeemItem,
     loyaltyBalance,
   } = useCheckoutPage();
-  const payerInputClass =
-    'h-12 w-full rounded-xl border border-[#E8DDD0] bg-white px-4 text-base font-medium text-[#3D2B1F] placeholder-[#C4B5A0] outline-none transition-all focus:border-[#D4C8BA] focus:ring-2 focus:ring-[#E8DDD0]/50 sm:text-sm';
 
-  if (step === 'processing') {
-    return (
-      <main className="order-flow-brown flex min-h-dvh flex-col items-center justify-center bg-cream-warm px-4">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', damping: 20 }}
-        >
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-terra-100">
-            <Loader2 className="h-8 w-8 animate-spin text-terra-600" />
-          </div>
-          <h2 className="mt-5 font-display text-xl font-semibold text-terra-900">Criando seu pedido...</h2>
-          <p className="mt-1 text-sm text-terra-500">Aguarde um momento</p>
-        </motion.div>
-      </main>
-    );
-  }
-
-  if (step === 'paying' && pixData && orderId) {
-    return (
-      <main className="order-flow-brown min-h-dvh bg-cream-warm">
-        <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
-          <div className="absolute inset-0 tapioca-grain opacity-40" />
-          <div className="container relative flex items-center gap-3">
-            <Link href="/"><img src="/logo.png" alt="Bem Comer Self-Service" className="h-10 w-10 rounded-full object-cover" /></Link>
-            <div>
-              <h1 className="font-display text-xl font-semibold">Pagamento via Pix</h1>
-              <p className="text-sm text-terra-200">{formatCurrency(totalAmount)}</p>
-            </div>
-          </div>
-        </header>
-        <div className="container px-4 py-6">
-          <PixPayment pixData={pixData} orderId={orderId} />
-        </div>
-      </main>
-    );
-  }
-
-  if (step === 'paying' && (paymentMethod === 'credit_card' || paymentMethod === 'debit_card') && orderId) {
-    const isDebit = paymentMethod === 'debit_card';
-
-    return (
-      <main className="order-flow-brown min-h-dvh bg-cream-warm">
-        <header className="relative overflow-hidden bg-cocoa-noise px-4 py-4 text-white">
-          <div className="absolute inset-0 tapioca-grain opacity-40" />
-          <div className="container relative flex items-center gap-3">
-            <Link href="/"><img src="/logo.png" alt="Bem Comer Self-Service" className="h-10 w-10 rounded-full object-cover" /></Link>
-            <div>
-              <h1 className="font-display text-xl font-semibold">{isDebit ? 'Pagamento no Débito' : 'Pagamento com Cartão'}</h1>
-              <p className="text-sm text-terra-200">{formatCurrency(totalAmount)}</p>
-            </div>
-          </div>
-        </header>
-        <div className="container px-4 py-6">
-          <Script src={PAGBANK_SDK_URL} strategy="afterInteractive" />
-          {isDebit ? (
-            <DebitCardForm
-              orderId={orderId}
-              totalAmount={totalAmount}
-              onSuccess={handleCardSuccess}
-              initialEmail={payerEmail}
-              initialCpf={payerCpf}
-              customerPhone={customerPhoneForPayment}
-              deliveryAddress={deliveryType === 'delivery' ? deliveryAddress : undefined}
-            />
-          ) : (
-            <CreditCardForm
-              orderId={orderId}
-              totalAmount={totalAmount}
-              onSuccess={handleCardSuccess}
-              initialEmail={payerEmail}
-              initialCpf={payerCpf}
-            />
-          )}
-          <div className="mt-6 space-y-3 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4">
-            <p className="text-center text-sm text-terra-500">Problemas com o cartão?</p>
-            <button
-              type="button"
-              onClick={handleSwitchToPix}
-              disabled={pixPaymentPending}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-terra-200 font-semibold text-terra-700 transition-all hover:bg-cream-warm disabled:opacity-50"
-            >
-              {pixPaymentPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              <QrCode className="h-4 w-4" />
-              Pagar com Pix
-            </button>
-            <Link href="/">
-              <button className="flex h-10 w-full items-center justify-center text-sm text-terra-400 transition-colors hover:text-terra-600">
-                Voltar ao cardápio
-              </button>
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  const isDelivery = deliveryType === 'delivery';
 
   return (
     <main className="order-flow-brown min-h-dvh bg-cream-warm pb-36">
@@ -304,12 +189,12 @@ export function CheckoutClient() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
-          <h2 className="mb-3 text-sm font-semibold text-terra-700">Forma de pagamento</h2>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <h2 className="mb-3 text-sm font-semibold text-terra-700">Forma de pagamento ({isDelivery ? 'Na entrega' : 'No balcão'})</h2>
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2">
             <button
               type="button"
               data-testid="tab-pix"
-              onClick={() => setPaymentMethod('pix')}
+              onClick={() => setPaymentMethod('pix' as any)}
               className={`flex min-h-12 items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-3 text-sm font-semibold transition-all sm:gap-2 sm:px-4 sm:text-base ${
                 paymentMethod === 'pix'
                   ? 'border-terra-600 bg-terra-600 text-white shadow-lg shadow-terra-600/20'
@@ -321,8 +206,23 @@ export function CheckoutClient() {
             </button>
             <button
               type="button"
+              data-testid="tab-cash"
+              onClick={() => setPaymentMethod('cash' as any)}
+              className={`flex min-h-12 items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-3 text-sm font-semibold transition-all sm:gap-2 sm:px-4 sm:text-base ${
+                paymentMethod === 'cash'
+                  ? 'border-terra-600 bg-terra-600 text-white shadow-lg shadow-terra-600/20'
+                  : 'border-terra-200 bg-white text-terra-700 hover:border-terra-300'
+              }`}
+            >
+              <Banknote className="h-5 w-5" />
+              Dinheiro
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <button
+              type="button"
               data-testid="tab-card"
-              onClick={() => setPaymentMethod('credit_card')}
+              onClick={() => setPaymentMethod('credit_card' as any)}
               className={`flex min-h-12 items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-3 text-sm font-semibold transition-all sm:gap-2 sm:px-4 sm:text-base ${
                 paymentMethod === 'credit_card'
                   ? 'border-terra-600 bg-terra-600 text-white shadow-lg shadow-terra-600/20'
@@ -330,12 +230,12 @@ export function CheckoutClient() {
               }`}
             >
               <CreditCard className="h-5 w-5" />
-              Crédito
+              Cartão de Crédito
             </button>
             <button
               type="button"
               data-testid="tab-debit-card"
-              onClick={() => setPaymentMethod('debit_card')}
+              onClick={() => setPaymentMethod('debit_card' as any)}
               className={`flex min-h-12 items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-3 text-sm font-semibold transition-all sm:gap-2 sm:px-4 sm:text-base ${
                 paymentMethod === 'debit_card'
                   ? 'border-terra-600 bg-terra-600 text-white shadow-lg shadow-terra-600/20'
@@ -343,131 +243,10 @@ export function CheckoutClient() {
               }`}
             >
               <CreditCard className="h-5 w-5" />
-              Débito
+              Cartão de Débito
             </button>
           </div>
         </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.055 }}
-          className="rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-4"
-        >
-          <h2 className="mb-3 text-sm font-semibold text-terra-700">Dados do pagador</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">
-                E-mail
-              </label>
-              <input
-                type="email"
-                placeholder="seu@email.com"
-                value={payerEmail}
-                onChange={(event) => setPayerEmail(event.target.value)}
-                required
-                className={payerInputClass}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#8B7355]">
-                CPF
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="000.000.000-00"
-                value={payerCpf}
-                onChange={(event) => setPayerCpf(maskCpf(event.target.value))}
-                maxLength={14}
-                required
-                className={payerInputClass}
-              />
-            </div>
-          </div>
-        </motion.div>
-
-        <div className="rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] px-4 py-6">
-          <AnimatePresence mode="wait">
-            {paymentMethod === 'pix' ? (
-              <motion.div
-                key="pix"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col items-center gap-4 text-center"
-              >
-                <div className="relative">
-                  <div className="absolute -inset-1.5 animate-[pulse-ring_2s_ease-out_infinite] rounded-full border-2 border-green-500/15" />
-                  <div className="flex h-14 w-14 animate-[float_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-gradient-to-br from-[#ECFDF5] to-[#D1FAE5]">
-                    <Zap className="h-6 w-6 fill-green-500 text-green-500" strokeWidth={1.5} />
-                  </div>
-                </div>
-                <div>
-                  <p className="font-display text-lg font-semibold text-[#3D2B1F]">Pagamento instantâneo</p>
-                  <p className="mx-auto mt-1 max-w-[240px] text-xs font-normal text-[#8B7355]">
-                    Escaneie o QR Code e seu pedido será confirmado na hora
-                  </p>
-                </div>
-                <div className="flex items-center gap-5 text-xs font-semibold text-green-600">
-                  <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> Seguro</span>
-                  <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> Imediato</span>
-                </div>
-              </motion.div>
-            ) : paymentMethod === 'credit_card' ? (
-              <motion.div
-                key="card"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col items-center gap-4 text-center"
-              >
-                <div className="relative">
-                  <div className="absolute -inset-1.5 animate-[pulse-ring_2s_ease-out_infinite] rounded-full border-2 border-blue-500/15" />
-                  <div className="flex h-14 w-14 animate-[float_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE]">
-                    <CreditCard className="h-6 w-6 text-blue-500" strokeWidth={1.5} />
-                  </div>
-                </div>
-                <div>
-                  <p className="font-display text-lg font-semibold text-[#3D2B1F]">Cartão de crédito</p>
-                  <p className="mx-auto mt-1 max-w-[240px] text-xs font-normal text-[#8B7355]">
-                    Parcele em até 6x sem juros no cartão
-                  </p>
-                </div>
-                <div className="flex items-center gap-5 text-xs font-semibold text-blue-600">
-                  <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> Criptografado</span>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="debit"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col items-center gap-4 text-center"
-              >
-                <div className="relative">
-                  <div className="absolute -inset-1.5 animate-[pulse-ring_2s_ease-out_infinite] rounded-full border-2 border-purple-500/15" />
-                  <div className="flex h-14 w-14 animate-[float_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE]">
-                    <CreditCard className="h-6 w-6 text-purple-500" strokeWidth={1.5} />
-                  </div>
-                </div>
-                <div>
-                  <p className="font-display text-lg font-semibold text-[#3D2B1F]">Cartão de débito</p>
-                  <p className="mx-auto mt-1 max-w-[240px] text-xs font-normal text-[#8B7355]">
-                    Autenticação 3DS com validação do banco emissor
-                  </p>
-                </div>
-                <div className="flex items-center gap-5 text-xs font-semibold text-purple-600">
-                  <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> 3DS PagBank</span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
 
         {error && (
           <motion.div
@@ -498,24 +277,29 @@ export function CheckoutClient() {
               type="button"
               data-testid="pay-button"
               onClick={handlePay}
-              disabled={createOrderPending || pixPaymentPending}
+              disabled={createOrderPending}
               className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-terra-600 text-base font-semibold text-white shadow-lg shadow-terra-600/20 transition-all hover:bg-terra-700 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
             >
-              {(createOrderPending || pixPaymentPending) && <Loader2 className="h-4 w-4 animate-spin" />}
+              {createOrderPending && <Loader2 className="h-4 w-4 animate-spin" />}
               {paymentMethod === 'pix' ? (
                 <>
                   <QrCode className="h-5 w-5" />
-                  Gerar QR Code Pix — {formatCurrency(totalAmount)}
+                  Confirmar e pagar via Pix na entrega
                 </>
               ) : paymentMethod === 'debit_card' ? (
                 <>
                   <CreditCard className="h-5 w-5" />
-                  Pagar no Débito — {formatCurrency(totalAmount)}
+                  Confirmar e pagar no Débito na entrega
+                </>
+              ) : paymentMethod === 'cash' ? (
+                <>
+                  <Banknote className="h-5 w-5" />
+                  Confirmar e pagar em Dinheiro na entrega
                 </>
               ) : (
                 <>
                   <CreditCard className="h-5 w-5" />
-                  Pagar no Crédito — {formatCurrency(totalAmount)}
+                  Confirmar e pagar no Crédito na entrega
                 </>
               )}
             </button>

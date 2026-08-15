@@ -24,6 +24,15 @@ export class StoreSettings {
   @Property({ default: false })
   forceOpen?: boolean = false; // Manual override to open
 
+  @Property({ default: false })
+  freeNightDeliveryEnabled?: boolean = false;
+
+  @Property({ nullable: true })
+  freeNightDeliveryStart?: string; // "18:00"
+
+  @Property({ nullable: true })
+  freeNightDeliveryEnd?: string; // "23:59"
+
   @Property({ columnType: 'decimal(5,2)', default: '0' })
   pointsPerReal?: string = '0';
 

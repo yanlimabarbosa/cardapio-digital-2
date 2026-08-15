@@ -12,6 +12,7 @@ export enum PaymentMethod {
   PIX = 'pix',
   CREDIT_CARD = 'credit_card',
   DEBIT_CARD = 'debit_card',
+  CASH = 'cash',
 }
 
 export enum PaymentStatus {
@@ -90,6 +91,8 @@ export interface OrderResponse {
   deliveryAddress?: DeliveryAddress;
   notes?: string;
   scheduledFor?: string | null;
+  driverId?: string;
+  driverName?: string;
   items: OrderItemResponse[];
   createdAt: string;
   updatedAt: string;

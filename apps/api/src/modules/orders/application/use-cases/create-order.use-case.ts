@@ -51,6 +51,7 @@ import type {
 import type { OrderSequenceRepository } from '../ports/order-sequence.port';
 import type { OrderStoreAvailabilityChecker } from '../ports/order-store-availability.port';
 import type { OrderReadModel } from '../read-models/order.read-model';
+import type { StoreSettingsRepository } from '../../../store/application/ports/store-settings.repository.port';
 
 export type CreateOrderOptionSelectionCommand = {
   readonly groupId: string;
@@ -132,6 +133,7 @@ export class CreateOrderUseCase {
     private readonly orderLoyaltyRedemptionRepository: OrderLoyaltyRedemptionRepository,
     private readonly orderCreationReporter: OrderCreationReporter,
     private readonly orderDeliveryAddressResolver: OrderDeliveryAddressResolver,
+    private readonly storeSettings: StoreSettingsRepository,
   ) {}
 
   public async execute(command: CreateOrderCommand): Promise<CreateOrderResult> {
@@ -399,10 +401,36 @@ export class CreateOrderUseCase {
     deliveryMatchKey: string | null,
     context: TransactionContext,
   ): Promise<OrderDeliveryFeeResolution> {
+    const settings = await this.storeSettings.get();
+    
+    let isNightDeliveryFree = false;
+    if (settings.freeNightDeliveryEnabled && settings.freeNightDeliveryStart && settings.freeNightDeliveryEnd) {
+      const now = this.clock.now();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      
+      const [startHour, startMin] = settings.freeNightDeliveryStart.split(':').map(Number);
+      const startMinutes = startHour * 60 + startMin;
+      
+      const [endHour, endMin] = settings.freeNightDeliveryEnd.split(':').map(Number);
+      let endMinutes = endHour * 60 + endMin;
+      
+      if (endMinutes < startMinutes) {
+        // Crosses midnight, e.g. 18:00 to 02:00
+        if (currentMinutes >= startMinutes || currentMinutes <= endMinutes) {
+          isNightDeliveryFree = true;
+        }
+      } else {
+        if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
+          isNightDeliveryFree = true;
+        }
+      }
+    }
+
     const policy = OrderDeliveryFeePolicy.for({
       deliveryType: this.deliveryType(command),
       deliveryAreaId: command.deliveryAreaId ?? null,
       deliveryMatchKey,
+      isNightDeliveryFree,
     });
 
     try {

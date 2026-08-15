@@ -3,6 +3,7 @@ import { OrderStatus, PaymentMethod, PaymentStatus } from '@cardapio/shared';
 import { Customer } from './customer.entity';
 import { Coupon } from './coupon.entity';
 import { OrderItem } from './order-item.entity';
+import { DeliveryDriver } from './delivery-driver.entity';
 
 @Entity({ tableName: 'orders' })
 export class Order {
@@ -55,6 +56,12 @@ export class Order {
 
   @Property({ nullable: true, columnType: 'decimal(10,2)' })
   deliveryFee?: string;
+
+  @ManyToOne(() => DeliveryDriver, { nullable: true })
+  driver?: DeliveryDriver;
+
+  @Property({ nullable: true })
+  driverName?: string;
 
   @ManyToOne(() => Coupon, { nullable: true })
   coupon?: Coupon;

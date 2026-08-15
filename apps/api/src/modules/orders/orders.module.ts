@@ -39,6 +39,7 @@ import { SocketIoOrderRealtimeNotifier } from './adapters/realtime/socket-io-ord
 import { GetStoreStatusUseCaseOrderStoreAvailabilityChecker } from './adapters/store/get-store-status-use-case-order-store-availability.checker';
 import { MikroOrmUnitOfWork } from '../../shared/infrastructure/mikro-orm/mikro-orm-unit-of-work';
 import { KitchenGateway } from '../websocket/websocket.gateway';
+import { STORE_SETTINGS_REPOSITORY, StoreSettingsRepository } from '../store/application/ports/store-settings.repository.port';
 
 const orderSystemClock: Clock = {
   now: (): Date => new Date(),
@@ -142,32 +143,34 @@ const orderSystemClock: Clock = {
       provide: CreateOrderUseCase,
       useFactory: (
         unitOfWork: MikroOrmUnitOfWork,
-        orderStoreAvailabilityChecker: OrderStoreAvailabilityChecker,
-        productCatalogRepository: OrderProductCatalogRepository,
-        orderSequenceRepository: OrderSequenceRepository,
-        orderDeliveryAreaRepository: OrderDeliveryAreaRepository,
-        orderCustomerRepository: OrderCustomerRepository,
-        orderCreationRepository: OrderCreationRepository,
-        orderCouponValidator: OrderCouponValidator,
-        orderCouponUsageRepository: OrderCouponUsageRepository,
-        orderLoyaltyRedemptionRepository: OrderLoyaltyRedemptionRepository,
-        orderCreationReporter: OrderCreationReporter,
-        orderDeliveryAddressResolver: OrderDeliveryAddressResolver,
+        storeAvailabilityChecker: OrderStoreAvailabilityChecker,
+        catalog: OrderProductCatalogRepository,
+        sequences: OrderSequenceRepository,
+        deliveryAreas: OrderDeliveryAreaRepository,
+        customers: OrderCustomerRepository,
+        creationRepo: OrderCreationRepository,
+        couponValidator: OrderCouponValidator,
+        couponUsages: OrderCouponUsageRepository,
+        loyaltyRedemptions: OrderLoyaltyRedemptionRepository,
+        creationReporter: OrderCreationReporter,
+        addressResolver: OrderDeliveryAddressResolver,
+        storeSettings: StoreSettingsRepository,
       ): CreateOrderUseCase =>
         new CreateOrderUseCase(
           unitOfWork,
           orderSystemClock,
-          orderStoreAvailabilityChecker,
-          productCatalogRepository,
-          orderSequenceRepository,
-          orderDeliveryAreaRepository,
-          orderCustomerRepository,
-          orderCreationRepository,
-          orderCouponValidator,
-          orderCouponUsageRepository,
-          orderLoyaltyRedemptionRepository,
-          orderCreationReporter,
-          orderDeliveryAddressResolver,
+          storeAvailabilityChecker,
+          catalog,
+          sequences,
+          deliveryAreas,
+          customers,
+          creationRepo,
+          couponValidator,
+          couponUsages,
+          loyaltyRedemptions,
+          creationReporter,
+          addressResolver,
+          storeSettings,
         ),
       inject: [
         MikroOrmUnitOfWork,
@@ -182,6 +185,7 @@ const orderSystemClock: Clock = {
         ORDER_LOYALTY_REDEMPTION_REPOSITORY,
         ORDER_CREATION_REPORTER,
         ORDER_DELIVERY_ADDRESS_RESOLVER,
+        STORE_SETTINGS_REPOSITORY,
       ],
     },
     {

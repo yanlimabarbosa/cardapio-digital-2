@@ -7,22 +7,9 @@ import {
   useOrdersPage,
   KANBAN_COLUMNS,
   STATUS_LABELS,
+  VALID_DROPS,
 } from '../use-orders-page';
 import { cn } from '@/lib/utils';
-import {
-  DndContext,
-  DragOverlay,
-  closestCenter,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
-} from '@dnd-kit/core';
-import { restrictToWindowEdges } from '@dnd-kit/modifiers';
-import type { OrderSummary } from '@/types/admin';
-import { OrderCardContent } from './order-card-content';
 import { DroppableColumn } from './droppable-column';
 
 export function OrdersClient() {
@@ -31,45 +18,22 @@ export function OrdersClient() {
     columnOrders,
     completedOrders,
     updateStatusMutation,
-    canDrop,
   } = useOrdersPage();
 
-  const [activeOrder, setActiveOrder] = useState<OrderSummary | null>(null);
-  const [overColumn, setOverColumn] = useState<string | null>(null);
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
-  );
+  function handleAdvance(orderId: string, currentStatus: string) {
+    const nextStatuses = VALID_DROPS[currentStatus];
+    if (!nextStatuses || nextStatuses.length === 0) return;
+    
+    // The first valid drop is the next logical step in the pipeline (ignoring 'cancelled' which is typically at the end)
+    const nextStatus = nextStatuses.find(s => s !== 'cancelled');
+    if (!nextStatus) return;
 
-  function handleDragStart(event: DragStartEvent) {
-    const order = event.active.data.current?.order as OrderSummary;
-    setActiveOrder(order);
-  }
-
-  function handleDragOver(event: any) {
-    const overId = event.over?.id as string | null;
-    setOverColumn(overId);
-  }
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    setActiveOrder(null);
-    setOverColumn(null);
-
-    if (!over) return;
-
-    const order = active.data.current?.order as OrderSummary;
-    const targetColumn = over.id as string;
-
-    if (!order || order.status === targetColumn) return;
-    if (!canDrop(order.status, targetColumn)) return;
-
-    setPendingOrderId(order.id);
+    setPendingOrderId(orderId);
     updateStatusMutation.mutate(
-      { orderId: order.id, status: targetColumn },
+      { orderId, status: nextStatus },
       { onSettled: () => setPendingOrderId(null) },
     );
   }
@@ -90,10 +54,6 @@ export function OrdersClient() {
     );
   }
 
-  const canAcceptDrop = activeOrder && overColumn
-    ? canDrop(activeOrder.status, overColumn)
-    : false;
-
   return (
     <div>
       <h1 className="mb-4 font-display text-2xl font-semibold text-[#3D2B1F]">Pedidos</h1>
@@ -104,41 +64,22 @@ export function OrdersClient() {
         </div>
       ) : (
         <>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            modifiers={[restrictToWindowEdges]}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-            onDragCancel={() => { setActiveOrder(null); setOverColumn(null); }}
-          >
-            <div className="flex gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-5 lg:overflow-visible">
-              {KANBAN_COLUMNS.map((col) => (
-                <DroppableColumn
-                  key={col.key}
-                  columnKey={col.key}
-                  label={col.label}
-                  dot={col.dot}
-                  headerBg={col.headerBg}
-                  orders={columnOrders[col.key] || []}
-                  isOver={overColumn === col.key}
-                  canAccept={canAcceptDrop}
-                  onCancel={handleCancel}
-                  onDeliver={handleDeliver}
-                  pendingOrderId={pendingOrderId}
-                />
-              ))}
-            </div>
-
-            <DragOverlay dropAnimation={null}>
-              {activeOrder && (
-                <div className="w-[260px] rotate-2 opacity-90">
-                  <OrderCardContent order={activeOrder} compact />
-                </div>
-              )}
-            </DragOverlay>
-          </DndContext>
+          <div className="flex gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-5 lg:overflow-visible">
+            {KANBAN_COLUMNS.map((col) => (
+              <DroppableColumn
+                key={col.key}
+                columnKey={col.key}
+                label={col.label}
+                dot={col.dot}
+                headerBg={col.headerBg}
+                orders={columnOrders[col.key] || []}
+                onAdvance={handleAdvance}
+                onCancel={handleCancel}
+                onDeliver={handleDeliver}
+                pendingOrderId={pendingOrderId}
+              />
+            ))}
+          </div>
 
           {completedOrders.length > 0 && (
             <div className="mt-6">

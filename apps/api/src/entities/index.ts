@@ -13,3 +13,4 @@ export { SectionProduct } from './section-product.entity';
 export { Coupon } from './coupon.entity';
 export { CouponUsage } from './coupon-usage.entity';
 export { LoyaltyTransaction } from './loyalty-transaction.entity';
+export { DeliveryDriver } from './delivery-driver.entity';

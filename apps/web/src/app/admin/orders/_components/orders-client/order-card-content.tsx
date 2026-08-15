@@ -20,6 +20,7 @@ function timeAgo(dateStr: string) {
 interface OrderCardContentProps {
   order: OrderSummary;
   compact?: boolean;
+  onAdvance?: () => void;
   onCancel?: () => void;
   onDeliver?: () => void;
   isPending?: boolean;
@@ -28,6 +29,7 @@ interface OrderCardContentProps {
 export function OrderCardContent({
   order,
   compact,
+  onAdvance,
   onCancel,
   onDeliver,
   isPending,
@@ -135,6 +137,23 @@ export function OrderCardContent({
               <Receipt className="h-3 w-3" />
               Comprovante
             </Link>
+          )}
+
+          {onAdvance && order.status !== 'out_for_delivery' && order.status !== 'delivered' && order.status !== 'cancelled' && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onAdvance(); }}
+              disabled={isPending}
+              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#A0603A] px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#8B5130] disabled:opacity-60"
+            >
+              {isPending ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <>
+                  Próximo
+                  <ChevronDown className="h-3 w-3 -rotate-90" />
+                </>
+              )}
+            </button>
           )}
 
           {onDeliver && order.status === 'out_for_delivery' && (

@@ -7,6 +7,9 @@ export type StoreSettingsModel = {
   readonly closingTime: string;
   readonly forceClose: boolean;
   readonly forceOpen: boolean;
+  readonly freeNightDeliveryEnabled?: boolean;
+  readonly freeNightDeliveryStart?: string;
+  readonly freeNightDeliveryEnd?: string;
   readonly id: number;
   readonly metaPixelEnabled: boolean;
   readonly metaPixelIds: readonly string[];

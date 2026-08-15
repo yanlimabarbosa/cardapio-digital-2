@@ -19,6 +19,9 @@ export interface StoreSettingsData {
   weeklySchedule?: WeeklySchedule | null;
   forceClose: boolean;
   forceOpen: boolean;
+  freeNightDeliveryEnabled?: boolean;
+  freeNightDeliveryStart?: string;
+  freeNightDeliveryEnd?: string;
   metaPixelEnabled: boolean;
   metaPixelIds: string[];
   pointsPerReal: number;

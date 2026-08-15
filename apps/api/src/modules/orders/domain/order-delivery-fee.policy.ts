@@ -2,6 +2,7 @@ export type OrderDeliveryFeeRequest = {
   readonly deliveryMatchKey?: string | null;
   readonly deliveryAreaId?: string | null;
   readonly deliveryType?: 'delivery' | 'pickup' | null;
+  readonly isNightDeliveryFree?: boolean;
 };
 
 export type OrderDeliveryFeeAreaInput = {
@@ -56,6 +57,13 @@ export class OrderDeliveryFeePolicy {
 
     this.assertValidFee(area);
     this.assertAreaMatchesDeliveryAddress(area);
+
+    if (this.request.isNightDeliveryFree) {
+      return {
+        feeAmount: '0.00',
+        feeCents: 0,
+      };
+    }
 
     return {
       feeAmount: area.feeAmount,

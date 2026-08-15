@@ -75,6 +75,11 @@ import { CreateAdminProductUseCase } from './application/use-cases/create-admin-
 import { UpdateAdminProductUseCase } from './application/use-cases/update-admin-product.use-case';
 import { UpdateAdminCategoryUseCase } from './application/use-cases/update-admin-category.use-case';
 import { CreateAdminCategoryUseCase } from './application/use-cases/create-admin-category.use-case';
+import { ClearTestDataUseCase } from './application/use-cases/clear-test-data.use-case';
+import { ListDeliveryDriversUseCase } from './application/use-cases/list-delivery-drivers.use-case';
+import { CreateDeliveryDriverUseCase } from './application/use-cases/create-delivery-driver.use-case';
+import { UpdateDeliveryDriverUseCase } from './application/use-cases/update-delivery-driver.use-case';
+import { DeleteDeliveryDriverUseCase } from './application/use-cases/delete-delivery-driver.use-case';
 import { Clock } from '../../shared/application/clock/clock.port';
 import { MikroOrmUnitOfWork } from '../../shared/infrastructure/mikro-orm/mikro-orm-unit-of-work';
 
@@ -248,6 +253,31 @@ const adminSystemClock: Clock = {
       ): UpdateAdminGroupOptionUseCase =>
         new UpdateAdminGroupOptionUseCase(extras, unitOfWork),
       inject: [ADMIN_PRODUCT_EXTRA_WRITE_REPOSITORY, MikroOrmUnitOfWork],
+    },
+    {
+      provide: ClearTestDataUseCase,
+      useFactory: (em: EntityManager): ClearTestDataUseCase => new ClearTestDataUseCase(em),
+      inject: [EntityManager],
+    },
+    {
+      provide: ListDeliveryDriversUseCase,
+      useFactory: (em: EntityManager): ListDeliveryDriversUseCase => new ListDeliveryDriversUseCase(em),
+      inject: [EntityManager],
+    },
+    {
+      provide: CreateDeliveryDriverUseCase,
+      useFactory: (em: EntityManager): CreateDeliveryDriverUseCase => new CreateDeliveryDriverUseCase(em),
+      inject: [EntityManager],
+    },
+    {
+      provide: UpdateDeliveryDriverUseCase,
+      useFactory: (em: EntityManager): UpdateDeliveryDriverUseCase => new UpdateDeliveryDriverUseCase(em),
+      inject: [EntityManager],
+    },
+    {
+      provide: DeleteDeliveryDriverUseCase,
+      useFactory: (em: EntityManager): DeleteDeliveryDriverUseCase => new DeleteDeliveryDriverUseCase(em),
+      inject: [EntityManager],
     },
     {
       provide: DeleteAdminGroupOptionUseCase,

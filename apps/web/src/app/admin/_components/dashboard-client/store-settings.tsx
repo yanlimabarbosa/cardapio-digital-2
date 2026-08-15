@@ -253,6 +253,50 @@ export function StoreSettings({
         </p>
       </div>
 
+      <div className="mt-8 border-t border-[#E8DDD0] pt-6">
+        <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#8B7355]">
+          Entrega Grátis Noturna
+        </h3>
+        <div className="space-y-4">
+          <label className="flex cursor-pointer items-center gap-2.5">
+            <input
+              type="checkbox"
+              checked={storeSettings.freeNightDeliveryEnabled}
+              onChange={(event) => onUpdateSettings({ freeNightDeliveryEnabled: event.target.checked })}
+              className="h-4 w-4 rounded border-[#D8C5B2] text-[#A0603A] focus:ring-[#A0603A]"
+            />
+            <span className="text-sm font-bold text-[#3D2B1F]">Ativar entrega grátis à noite</span>
+          </label>
+          
+          {storeSettings.freeNightDeliveryEnabled && (
+            <div className="flex gap-4">
+              <div>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
+                  Início (HH:MM)
+                </label>
+                <Input
+                  type="time"
+                  value={storeSettings.freeNightDeliveryStart || ''}
+                  onChange={(e) => onUpdateSettings({ freeNightDeliveryStart: e.target.value })}
+                  className={cn(settingsControlClass, 'h-11 w-32')}
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">
+                  Fim (HH:MM)
+                </label>
+                <Input
+                  type="time"
+                  value={storeSettings.freeNightDeliveryEnd || ''}
+                  onChange={(e) => onUpdateSettings({ freeNightDeliveryEnd: e.target.value })}
+                  className={cn(settingsControlClass, 'h-11 w-32')}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Banner */}
       <div className="mt-8 border-t border-[#E8DDD0] pt-6">
         <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#8B7355]">

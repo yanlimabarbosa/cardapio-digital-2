@@ -11,6 +11,9 @@ export type UpdateStoreSettingsData = Partial<{
   readonly closingTime: string;
   readonly forceClose: boolean;
   readonly forceOpen: boolean;
+  readonly freeNightDeliveryEnabled: boolean;
+  readonly freeNightDeliveryStart: string;
+  readonly freeNightDeliveryEnd: string;
   readonly metaPixelEnabled: boolean;
   readonly metaPixelIds: readonly string[];
   readonly openDays: readonly number[];
@@ -75,6 +78,18 @@ export class UpdateStoreSettingsUseCase {
       };
     }
 
+    if (data.freeNightDeliveryEnabled !== undefined) {
+      next = { ...next, freeNightDeliveryEnabled: data.freeNightDeliveryEnabled };
+    }
+
+    if (data.freeNightDeliveryStart !== undefined) {
+      next = { ...next, freeNightDeliveryStart: data.freeNightDeliveryStart };
+    }
+
+    if (data.freeNightDeliveryEnd !== undefined) {
+      next = { ...next, freeNightDeliveryEnd: data.freeNightDeliveryEnd };
+    }
+
     if (data.pointsPerReal !== undefined) {
       next = { ...next, pointsPerReal: String(data.pointsPerReal) };
     }
@@ -129,6 +144,9 @@ export class UpdateStoreSettingsUseCase {
       || data.weeklySchedule !== undefined
       || data.forceClose !== undefined
       || data.forceOpen !== undefined
+      || data.freeNightDeliveryEnabled !== undefined
+      || data.freeNightDeliveryStart !== undefined
+      || data.freeNightDeliveryEnd !== undefined
       || data.metaPixelEnabled !== undefined
       || data.metaPixelIds !== undefined
       || data.pointsPerReal !== undefined

@@ -5,7 +5,6 @@ import { BullModule } from '@nestjs/bullmq';
 import mikroOrmConfig from './config/mikro-orm.config';
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
-import { PaymentsModule } from './modules/payments/payments.module';
 import { WebsocketModule } from './modules/websocket/websocket.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AdminModule } from './modules/admin/admin.module';
@@ -34,7 +33,6 @@ import { CouponsModule } from './modules/coupons/coupons.module';
     }),
     ProductsModule,
     OrdersModule,
-    PaymentsModule,
     WebsocketModule,
     AuthModule,
     AdminModule,
