@@ -19,6 +19,7 @@ export class CreateDeliveryDriverUseCase {
       phone: command.phone,
       isActive: command.isActive,
       calculatesFee: command.calculatesFee ?? false,
+      balanceCents: 0,
     });
     
     await this.em.persistAndFlush(driver);

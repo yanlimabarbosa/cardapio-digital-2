@@ -31,7 +31,7 @@ export class AssignDriverUseCase {
     order.driverName = driver.name;
 
     if (wasUnassigned && driver.calculatesFee && order.deliveryFee) {
-      driver.balanceCents += order.deliveryFee;
+      driver.balanceCents += Number(order.deliveryFee);
     }
 
     await this.em.flush();
