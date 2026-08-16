@@ -5,9 +5,12 @@ import Link from 'next/link';
 import { formatCurrency } from '@/lib/utils';
 import { formatScheduledFor } from '@cardapio/shared';
 import { Tooltip } from '@/components/ui/tooltip';
-import { Loader2, Clock, ChevronDown, ChevronUp, X, Check, Receipt } from 'lucide-react';
+import { Loader2, Clock, ChevronDown, ChevronUp, X, Check, Receipt, Truck, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { OrderSummary } from '@/types/admin';
+import { useQuery } from '@tanstack/react-query';
+import { adminFetch } from '@/lib/admin-api';
+import { useAuthStore } from '@/stores/auth-store';
 
 function timeAgo(dateStr: string) {
   const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
@@ -17,10 +20,17 @@ function timeAgo(dateStr: string) {
   return `${hrs}h${mins % 60 > 0 ? `${mins % 60}m` : ''}`;
 }
 
+interface Driver {
+  id: string;
+  name: string;
+  phone: string;
+  isActive: boolean;
+}
+
 interface OrderCardContentProps {
   order: OrderSummary;
   compact?: boolean;
-  onAdvance?: () => void;
+  onAdvance?: (driverId?: string) => void;
   onCancel?: () => void;
   onDeliver?: () => void;
   isPending?: boolean;
@@ -36,10 +46,28 @@ export function OrderCardContent({
 }: OrderCardContentProps) {
   const [expanded, setExpanded] = useState(false);
   const scheduledLabel = formatScheduledFor(order.scheduledFor);
+  const token = useAuthStore((s) => s.token);
+
+  const { data: drivers } = useQuery<Driver[]>({
+    queryKey: ['admin-drivers-active'],
+    queryFn: async () => {
+      const all: Driver[] = await adminFetch('/api/admin/drivers', token);
+      return all.filter((d) => d.isActive);
+    },
+    enabled: order.status === 'ready' && order.deliveryType === 'delivery',
+  });
+
+  const [selectedDriver, setSelectedDriver] = useState<string>('');
+
+  const nextActionLabel =
+    order.status === 'paid' ? 'Preparar' :
+    order.status === 'preparing' ? 'Pronto' :
+    order.status === 'ready' ? (order.deliveryType === 'delivery' ? 'Despachar' : 'Entregue') :
+    'Próximo';
 
   return (
     <div className={cn(
-      'rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-3 shadow-sm',
+      'rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-3 shadow-sm flex flex-col',
       !compact && 'transition-shadow hover:shadow-md',
     )}>
       <div className="flex items-start justify-between gap-2">
@@ -85,7 +113,7 @@ export function OrderCardContent({
           </span>
         )}
         <span className="rounded-full bg-[#FAF6F1] border border-[#E8DDD0] px-2 py-0.5 text-[10px] font-semibold text-[#8B7355]">
-          {order.paymentMethod === 'pix' ? 'Pix' : order.paymentMethod === 'debit_card' ? 'Débito' : 'Crédito'}
+          {order.paymentMethod === 'pix' ? 'Pix' : order.paymentMethod === 'cash' ? 'Dinheiro' : 'Cartão'}
         </span>
         {scheduledLabel && (
           <span className="rounded-full bg-butter-100 border border-butter-300 px-2 py-0.5 text-[10px] font-semibold text-cocoa-800">
@@ -127,7 +155,7 @@ export function OrderCardContent({
             </div>
           )}
 
-          {order.status !== 'pending_payment' && order.status !== 'cancelled' && (
+          {order.status !== 'cancelled' && (
             <Link
               href={`/receipt/${order.id}`}
               target="_blank"
@@ -139,39 +167,64 @@ export function OrderCardContent({
             </Link>
           )}
 
-          {onAdvance && order.status !== 'out_for_delivery' && order.status !== 'delivered' && order.status !== 'cancelled' && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onAdvance(); }}
-              disabled={isPending}
-              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#A0603A] px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#8B5130] disabled:opacity-60"
-            >
-              {isPending ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <>
-                  Próximo
-                  <ChevronDown className="h-3 w-3 -rotate-90" />
-                </>
-              )}
-            </button>
-          )}
+          <div className="mt-auto pt-3">
+            {order.status === 'ready' && order.deliveryType === 'delivery' && (
+              <div className="mb-2">
+                <select
+                  value={selectedDriver}
+                  onChange={(e) => setSelectedDriver(e.target.value)}
+                  className="w-full rounded-lg border border-[#E8DDD0] bg-white px-2 py-1.5 text-xs text-[#3D2B1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A0603A]/20"
+                >
+                  <option value="">Selecione o motoboy...</option>
+                  {drivers?.map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-          {onDeliver && order.status === 'out_for_delivery' && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onDeliver(); }}
-              disabled={isPending}
-              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-600 disabled:opacity-60"
-            >
-              {isPending ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <>
-                  <Check className="h-3 w-3" />
-                  Marcar Entregue
-                </>
-              )}
-            </button>
-          )}
+            {onAdvance && order.status !== 'out_for_delivery' && order.status !== 'delivered' && order.status !== 'cancelled' && (
+              <button
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  if (order.status === 'ready' && order.deliveryType === 'delivery' && !selectedDriver) {
+                    alert('Selecione um motoboy para despachar o pedido.');
+                    return;
+                  }
+                  onAdvance(selectedDriver || undefined); 
+                }}
+                disabled={isPending || (order.status === 'ready' && order.deliveryType === 'delivery' && !selectedDriver)}
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#A0603A] px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#8B5130] disabled:opacity-60"
+              >
+                {isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <>
+                    {order.status === 'ready' && order.deliveryType === 'delivery' && <Truck className="h-3.5 w-3.5" />}
+                    {nextActionLabel}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </>
+                )}
+              </button>
+            )}
+
+            {onDeliver && order.status === 'out_for_delivery' && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onDeliver(); }}
+                disabled={isPending}
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-600 disabled:opacity-60"
+              >
+                {isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <>
+                    <Check className="h-3 w-3" />
+                    Marcar Entregue
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </>
       )}
     </div>

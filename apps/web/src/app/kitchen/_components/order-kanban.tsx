@@ -8,7 +8,7 @@ interface OrderKanbanProps {
 }
 
 const COLUMNS = [
-  { status: 'paid', title: 'Pagos', color: 'border-terra-500', bg: 'bg-terra-50' },
+  { status: 'paid', title: 'Novos (A Fazer)', color: 'border-terra-500', bg: 'bg-terra-50' },
   { status: 'preparing', title: 'Preparando', color: 'border-amber-500', bg: 'bg-amber-50' },
   { status: 'ready', title: 'Prontos', color: 'border-emerald-500', bg: 'bg-emerald-50' },
   { status: 'out_for_delivery', title: 'Em Rota', color: 'border-purple-500', bg: 'bg-purple-50' },

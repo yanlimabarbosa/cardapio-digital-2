@@ -59,6 +59,9 @@ export function OrderCard({ order }: OrderCardProps) {
               Retirada
             </span>
           )}
+          <span className="ml-2 inline-flex items-center gap-1 rounded bg-gray-100 border border-gray-200 px-2 py-0.5 text-xs font-medium text-gray-800">
+            {order.paymentMethod === 'pix' ? 'Pix' : order.paymentMethod === 'cash' ? 'Dinheiro' : 'Cartão'}
+          </span>
         </div>
 
         {scheduledLabel && (

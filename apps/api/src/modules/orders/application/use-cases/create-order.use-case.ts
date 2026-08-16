@@ -208,7 +208,7 @@ export class CreateOrderUseCase {
       deliveryAddress: command.deliveryAddress,
       notes: command.notes,
       scheduledFor: scheduledFor ?? undefined,
-      status: OrderStatus.PENDING_PAYMENT,
+      status: OrderStatus.PAID,
       totalAmount,
       deliveryFee: deliveryFee.feeAmount ?? undefined,
       couponId: appliedCoupon?.coupon.id,

@@ -18,13 +18,7 @@ export class ClearTestDataUseCase {
           "order_items", 
           "customers", 
           "loyalty_transactions",
-          "coupon_usages",
-          "coupons",
-          "products", 
-          "categories",
-          "product_extras",
-          "option_groups",
-          "option_group_options"
+          "coupon_usages"
         CASCADE;
       `);
       await this.em.commit();

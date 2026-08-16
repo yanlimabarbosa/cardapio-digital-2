@@ -7,6 +7,7 @@ export type UpdateDeliveryDriverCommand = {
   name?: string;
   phone?: string;
   isActive?: boolean;
+  calculatesFee?: boolean;
 };
 
 @Injectable()
@@ -22,6 +23,7 @@ export class UpdateDeliveryDriverUseCase {
     if (command.name !== undefined) driver.name = command.name;
     if (command.phone !== undefined) driver.phone = command.phone;
     if (command.isActive !== undefined) driver.isActive = command.isActive;
+    if (command.calculatesFee !== undefined) driver.calculatesFee = command.calculatesFee;
     
     await this.em.flush();
   }

@@ -80,6 +80,7 @@ import { ListDeliveryDriversUseCase } from './application/use-cases/list-deliver
 import { CreateDeliveryDriverUseCase } from './application/use-cases/create-delivery-driver.use-case';
 import { UpdateDeliveryDriverUseCase } from './application/use-cases/update-delivery-driver.use-case';
 import { DeleteDeliveryDriverUseCase } from './application/use-cases/delete-delivery-driver.use-case';
+import { AssignDriverUseCase } from './application/use-cases/assign-driver.use-case';
 import { Clock } from '../../shared/application/clock/clock.port';
 import { MikroOrmUnitOfWork } from '../../shared/infrastructure/mikro-orm/mikro-orm-unit-of-work';
 
@@ -277,6 +278,11 @@ const adminSystemClock: Clock = {
     {
       provide: DeleteDeliveryDriverUseCase,
       useFactory: (em: EntityManager): DeleteDeliveryDriverUseCase => new DeleteDeliveryDriverUseCase(em),
+      inject: [EntityManager],
+    },
+    {
+      provide: AssignDriverUseCase,
+      useFactory: (em: EntityManager): AssignDriverUseCase => new AssignDriverUseCase(em),
       inject: [EntityManager],
     },
     {

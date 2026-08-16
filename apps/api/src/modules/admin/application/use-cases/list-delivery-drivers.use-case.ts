@@ -7,6 +7,8 @@ export type DeliveryDriverModel = {
   name: string;
   phone: string;
   isActive: boolean;
+  calculatesFee: boolean;
+  balanceCents: number;
   createdAt: string;
 };
 
@@ -21,6 +23,8 @@ export class ListDeliveryDriversUseCase {
       name: d.name,
       phone: d.phone,
       isActive: d.isActive,
+      calculatesFee: d.calculatesFee,
+      balanceCents: d.balanceCents,
       createdAt: d.createdAt!.toISOString(),
     }));
   }

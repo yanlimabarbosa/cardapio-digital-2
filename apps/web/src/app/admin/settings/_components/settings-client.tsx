@@ -1,6 +1,7 @@
 'use client';
 
 import { StoreSettings } from '../../_components/dashboard-client/store-settings';
+import { DriversClient } from './drivers-client';
 import { useSettingsPage } from './use-settings-page';
 
 export function SettingsClient() {
@@ -18,7 +19,7 @@ export function SettingsClient() {
       <div>
         <h1 className="font-display text-2xl font-semibold text-[#3D2B1F]">Configurações</h1>
         <p className="mt-1 text-sm text-[#8B7355]">
-          Ajuste horários, aparência, pixels e dados exibidos nos comprovantes.
+          Ajuste horários, aparência, motoboys, pixels e dados exibidos nos comprovantes.
         </p>
       </div>
 
@@ -33,6 +34,8 @@ export function SettingsClient() {
           onUpdateSettings={(data) => updateSettingsMutation.mutate(data)}
         />
       )}
+
+      <DriversClient />
     </div>
   );
 }

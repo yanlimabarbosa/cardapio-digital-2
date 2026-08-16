@@ -6,6 +6,7 @@ export type CreateDeliveryDriverCommand = {
   name: string;
   phone: string;
   isActive: boolean;
+  calculatesFee?: boolean;
 };
 
 @Injectable()
@@ -17,6 +18,7 @@ export class CreateDeliveryDriverUseCase {
       name: command.name,
       phone: command.phone,
       isActive: command.isActive,
+      calculatesFee: command.calculatesFee ?? false,
     });
     
     await this.em.persistAndFlush(driver);

@@ -42,7 +42,7 @@ export function CheckoutClient() {
             </button>
           </Link>
           <Link href="/"><img src="/logo.png" alt="Bem Comer Self-Service" className="h-10 w-10 rounded-full object-cover" /></Link>
-          <h1 className="font-display text-xl font-semibold">Pagamento</h1>
+          <h1 className="font-display text-xl font-semibold">Confirmar Pedido</h1>
         </div>
       </header>
 
@@ -190,6 +190,7 @@ export function CheckoutClient() {
           transition={{ delay: 0.05 }}
         >
           <h2 className="mb-3 text-sm font-semibold text-terra-700">Forma de pagamento ({isDelivery ? 'Na entrega' : 'No balcão'})</h2>
+          <p className="mb-3 text-xs text-terra-500">Você paga quando {isDelivery ? 'o motoboy chegar' : 'retirar no balcão'}.</p>
           <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2">
             <button
               type="button"
@@ -284,22 +285,22 @@ export function CheckoutClient() {
               {paymentMethod === 'pix' ? (
                 <>
                   <QrCode className="h-5 w-5" />
-                  Confirmar e pagar via Pix na entrega
+                  Confirmar — Pagar via Pix {isDelivery ? 'na entrega' : 'no balcão'}
                 </>
               ) : paymentMethod === 'debit_card' ? (
                 <>
                   <CreditCard className="h-5 w-5" />
-                  Confirmar e pagar no Débito na entrega
+                  Confirmar — Pagar no Débito {isDelivery ? 'na entrega' : 'no balcão'}
                 </>
               ) : paymentMethod === 'cash' ? (
                 <>
                   <Banknote className="h-5 w-5" />
-                  Confirmar e pagar em Dinheiro na entrega
+                  Confirmar — Pagar em Dinheiro {isDelivery ? 'na entrega' : 'no balcão'}
                 </>
               ) : (
                 <>
                   <CreditCard className="h-5 w-5" />
-                  Confirmar e pagar no Crédito na entrega
+                  Confirmar — Pagar no Crédito {isDelivery ? 'na entrega' : 'no balcão'}
                 </>
               )}
             </button>

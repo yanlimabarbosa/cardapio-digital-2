@@ -10,8 +10,7 @@ import { API_URL } from '@/lib/api-url';
 import type { OrderSummary } from '@/types/admin';
 
 export const KANBAN_COLUMNS = [
-  { key: 'pending_payment', label: 'Aguardando', dot: 'bg-yellow-400', headerBg: 'bg-yellow-50 border-yellow-200' },
-  { key: 'paid', label: 'Pago', dot: 'bg-blue-400', headerBg: 'bg-blue-50 border-blue-200' },
+  { key: 'paid', label: 'A Fazer / Novo', dot: 'bg-blue-400', headerBg: 'bg-blue-50 border-blue-200' },
   { key: 'preparing', label: 'Preparando', dot: 'bg-orange-400', headerBg: 'bg-orange-50 border-orange-200' },
   { key: 'ready', label: 'Pronto', dot: 'bg-emerald-400', headerBg: 'bg-emerald-50 border-emerald-200' },
   { key: 'out_for_delivery', label: 'Em Rota', dot: 'bg-purple-400', headerBg: 'bg-purple-50 border-purple-200' },
@@ -19,16 +18,16 @@ export const KANBAN_COLUMNS = [
 
 // Valid forward transitions (backend enforced too)
 export const VALID_DROPS: Record<string, string[]> = {
-  pending_payment: ['paid', 'cancelled'],
+  pending_payment: ['paid', 'cancelled'], // kept for legacy compat
   paid: ['preparing', 'cancelled'],
   preparing: ['ready', 'cancelled'],
-  ready: ['out_for_delivery', 'cancelled'],
+  ready: ['out_for_delivery', 'delivered', 'cancelled'],
   out_for_delivery: ['delivered', 'cancelled'],
 };
 
 export const STATUS_LABELS: Record<string, string> = {
-  pending_payment: 'Aguardando',
-  paid: 'Pago',
+  pending_payment: 'Aguardando Pagamento',
+  paid: 'Novo / Recebido',
   preparing: 'Preparando',
   ready: 'Pronto',
   out_for_delivery: 'Em Rota',
@@ -63,6 +62,17 @@ export function useOrdersPage() {
     onError: (_err, _vars, context) => {
       if (context?.prev) queryClient.setQueryData(['admin-orders'], context.prev);
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+    },
+  });
+
+  const assignDriverMutation = useMutation({
+    mutationFn: ({ orderId, driverId }: { orderId: string; driverId: string }) =>
+      adminFetch(`/api/admin/orders/${orderId}/driver`, token, {
+        method: 'PATCH',
+        body: JSON.stringify({ driverId }),
+      }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
     },
@@ -117,6 +127,7 @@ export function useOrdersPage() {
     columnOrders,
     completedOrders,
     updateStatusMutation,
+    assignDriverMutation,
     canDrop,
   };
 }

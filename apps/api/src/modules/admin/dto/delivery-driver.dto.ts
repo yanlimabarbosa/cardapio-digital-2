@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsBoolean, IsOptional, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsBoolean, IsOptional, MaxLength, MinLength } from 'class-validator';
 
 export class CreateDeliveryDriverDto {
   @IsString()
@@ -8,11 +8,16 @@ export class CreateDeliveryDriverDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(10)
   @MaxLength(20)
   phone!: string;
 
   @IsBoolean()
   isActive!: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  calculatesFee?: boolean;
 }
 
 export class UpdateDeliveryDriverDto {
@@ -23,10 +28,15 @@ export class UpdateDeliveryDriverDto {
 
   @IsOptional()
   @IsString()
+  @MinLength(10)
   @MaxLength(20)
   phone?: string;
 
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  calculatesFee?: boolean;
 }

@@ -70,6 +70,7 @@ import { ListDeliveryDriversUseCase, DeliveryDriverModel } from './application/u
 import { CreateDeliveryDriverUseCase } from './application/use-cases/create-delivery-driver.use-case';
 import { UpdateDeliveryDriverUseCase } from './application/use-cases/update-delivery-driver.use-case';
 import { DeleteDeliveryDriverUseCase } from './application/use-cases/delete-delivery-driver.use-case';
+import { AssignDriverUseCase, AssignDriverNotFoundError } from './application/use-cases/assign-driver.use-case';
 import { CreateDeliveryDriverDto, UpdateDeliveryDriverDto } from './dto/delivery-driver.dto';
 import {
   UpdateStoreSettingsResult,
@@ -218,6 +219,7 @@ export class AdminController {
     private readonly createDeliveryDriverUseCase: CreateDeliveryDriverUseCase,
     private readonly updateDeliveryDriverUseCase: UpdateDeliveryDriverUseCase,
     private readonly deleteDeliveryDriverUseCase: DeleteDeliveryDriverUseCase,
+    private readonly assignDriverUseCase: AssignDriverUseCase,
     private readonly listAdminCustomersUseCase: ListAdminCustomersUseCase,
     private readonly adjustCustomerLoyaltyUseCase: AdjustCustomerLoyaltyUseCase,
   ) {}
@@ -818,5 +820,21 @@ export class AdminController {
   public async deleteDriver(@Param('id') id: string): Promise<{ success: boolean }> {
     await this.deleteDeliveryDriverUseCase.execute(id);
     return { success: true };
+  }
+
+  @Patch('orders/:id/driver')
+  public async assignDriver(
+    @Param('id') id: string,
+    @Body() body: { driverId: string },
+  ): Promise<{ success: boolean }> {
+    try {
+      await this.assignDriverUseCase.execute({ orderId: id, driverId: body.driverId });
+      return { success: true };
+    } catch (error: unknown) {
+      if (error instanceof AssignDriverNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 }

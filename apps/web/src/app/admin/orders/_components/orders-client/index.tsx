@@ -18,12 +18,13 @@ export function OrdersClient() {
     columnOrders,
     completedOrders,
     updateStatusMutation,
+    assignDriverMutation,
   } = useOrdersPage();
 
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
 
-  function handleAdvance(orderId: string, currentStatus: string) {
+  async function handleAdvance(orderId: string, currentStatus: string, driverId?: string) {
     const nextStatuses = VALID_DROPS[currentStatus];
     if (!nextStatuses || nextStatuses.length === 0) return;
     
@@ -32,10 +33,14 @@ export function OrdersClient() {
     if (!nextStatus) return;
 
     setPendingOrderId(orderId);
-    updateStatusMutation.mutate(
-      { orderId, status: nextStatus },
-      { onSettled: () => setPendingOrderId(null) },
-    );
+    try {
+      if (driverId) {
+        await assignDriverMutation.mutateAsync({ orderId, driverId });
+      }
+      await updateStatusMutation.mutateAsync({ orderId, status: nextStatus });
+    } finally {
+      setPendingOrderId(null);
+    }
   }
 
   function handleCancel(orderId: string) {

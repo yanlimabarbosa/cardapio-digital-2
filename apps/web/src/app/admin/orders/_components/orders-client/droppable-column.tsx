@@ -10,7 +10,7 @@ interface DroppableColumnProps {
   dot: string;
   headerBg: string;
   orders: OrderSummary[];
-  onAdvance: (orderId: string, currentStatus: string) => void;
+  onAdvance: (orderId: string, currentStatus: string, driverId?: string) => void;
   onCancel: (orderId: string) => void;
   onDeliver: (orderId: string) => void;
   pendingOrderId: string | null;
@@ -51,7 +51,7 @@ export function DroppableColumn({
             <OrderCardContent
               key={order.id}
               order={order}
-              onAdvance={() => onAdvance(order.id, order.status)}
+              onAdvance={(driverId?: string) => onAdvance(order.id, order.status, driverId)}
               onCancel={() => onCancel(order.id)}
               onDeliver={() => onDeliver(order.id)}
               isPending={pendingOrderId === order.id}

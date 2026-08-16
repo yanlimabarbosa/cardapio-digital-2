@@ -14,6 +14,12 @@ export class DeliveryDriver {
   @Property({ default: true })
   isActive: boolean = true;
 
+  @Property({ default: false })
+  calculatesFee: boolean = false;
+
+  @Property({ type: 'integer', default: 0 })
+  balanceCents: number = 0;
+
   @Property({ onCreate: () => new Date() })
   createdAt?: Date = new Date();
 
