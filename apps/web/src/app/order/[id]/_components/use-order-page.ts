@@ -7,8 +7,9 @@ import { useOrderSocket } from '@/hooks/orders/use-order-socket';
 import type { OrderResponse } from '@cardapio/shared';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pending_payment: { label: 'Novo / Recebido', color: 'bg-amber-500' },
-  paid: { label: 'Pago', color: 'bg-terra-600' },
+  pending_payment: { label: 'Pedido Recebido', color: 'bg-amber-500' },
+  // Payment happens on delivery/pickup, so this stage is "received", not "paid".
+  paid: { label: 'Pedido Recebido', color: 'bg-terra-600' },
   preparing: { label: 'Preparando', color: 'bg-terra-500' },
   ready: { label: 'Pronto', color: 'bg-emerald-600' },
   out_for_delivery: { label: 'Em Rota de Entrega', color: 'bg-purple-600' },

@@ -8,6 +8,7 @@ import {
   KANBAN_COLUMNS,
   STATUS_LABELS,
   VALID_DROPS,
+  VALID_BACK,
 } from '../use-orders-page';
 import { cn } from '@/lib/utils';
 import { DroppableColumn } from './droppable-column';
@@ -41,6 +42,17 @@ export function OrdersClient() {
     } finally {
       setPendingOrderId(null);
     }
+  }
+
+  function handleBack(orderId: string, currentStatus: string) {
+    const prevStatus = VALID_BACK[currentStatus];
+    if (!prevStatus) return;
+
+    setPendingOrderId(orderId);
+    updateStatusMutation.mutate(
+      { orderId, status: prevStatus },
+      { onSettled: () => setPendingOrderId(null) },
+    );
   }
 
   function handleCancel(orderId: string) {
@@ -79,6 +91,7 @@ export function OrdersClient() {
                 headerBg={col.headerBg}
                 orders={columnOrders[col.key] || []}
                 onAdvance={handleAdvance}
+                onBack={handleBack}
                 onCancel={handleCancel}
                 onDeliver={handleDeliver}
                 pendingOrderId={pendingOrderId}

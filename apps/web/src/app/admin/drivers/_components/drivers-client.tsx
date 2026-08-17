@@ -71,7 +71,7 @@ export function DriversClient() {
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newCalculatesFee, setNewCalculatesFee] = useState(false);
-  
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editPhone, setEditPhone] = useState('');
@@ -102,7 +102,7 @@ export function DriversClient() {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.35, type: 'spring', damping: 24, stiffness: 300 }}
+      transition={{ delay: 0.15, type: 'spring', damping: 24, stiffness: 300 }}
       className="rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] p-6 shadow-[0_0_8px_rgba(61,43,31,0.12)]"
     >
       <div className="mb-4 flex items-center justify-between">

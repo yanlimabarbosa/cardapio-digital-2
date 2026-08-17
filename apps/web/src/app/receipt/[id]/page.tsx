@@ -52,7 +52,7 @@ interface OrderData {
 
 const STATUS_LABELS: Record<string, string> = {
   pending_payment: 'Aguardando Pagamento',
-  paid: 'Pago',
+  paid: 'Recebido',
   preparing: 'Preparando',
   ready: 'Pronto',
   out_for_delivery: 'Em Rota',

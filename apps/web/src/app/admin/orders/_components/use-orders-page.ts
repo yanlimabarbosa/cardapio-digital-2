@@ -25,6 +25,14 @@ export const VALID_DROPS: Record<string, string[]> = {
   out_for_delivery: ['delivered', 'cancelled'],
 };
 
+// Step one stage BACK (kanban "Voltar"). Must match the reverse edges allowed
+// by the backend OrderStatusTransitionPolicy.
+export const VALID_BACK: Record<string, string> = {
+  preparing: 'paid',
+  ready: 'preparing',
+  out_for_delivery: 'ready',
+};
+
 export const STATUS_LABELS: Record<string, string> = {
   pending_payment: 'Aguardando Pagamento',
   paid: 'Novo / Recebido',
@@ -42,7 +50,14 @@ export function useOrdersPage() {
   const { data: orders, isLoading } = useQuery<OrderSummary[]>({
     queryKey: ['admin-orders'],
     queryFn: () => adminFetch('/api/admin/orders', token),
-    refetchInterval: 10000,
+    // The kanban must feel live even if the websocket drops or a new order
+    // never emits one: poll every 5s (also while the tab is backgrounded) and
+    // refetch whenever the operator returns to the tab. staleTime 0 so these
+    // refetches actually hit the network instead of serving a cached board.
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   const updateStatusMutation = useMutation({

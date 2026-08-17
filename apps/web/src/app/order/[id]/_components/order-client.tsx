@@ -22,6 +22,13 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
   cancelled: <Clock className="h-6 w-6" />,
 };
 
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  pix: 'Pix',
+  cash: 'Dinheiro',
+  credit_card: 'Cartão de Crédito',
+  debit_card: 'Cartão de Débito',
+};
+
 export function OrderClient() {
   const { order, isLoading, statusInfo, currentStep, progressWidth, steps, statusConfig } = useOrderPage();
 
@@ -127,6 +134,22 @@ export function OrderClient() {
               );
             })}
           </div>
+        )}
+
+        {order.status !== 'cancelled' && order.status !== 'delivered' && (
+          <Card className="border-terra-200 bg-butter-100">
+            <CardContent className="p-4">
+              <h3 className="mb-1 font-display font-semibold text-terra-900">Pagamento</h3>
+              <p className="text-sm text-terra-700">
+                {PAYMENT_METHOD_LABELS[order.paymentMethod] ?? order.paymentMethod}
+              </p>
+              <p className="mt-1 text-sm font-medium text-terra-600">
+                {order.deliveryType === 'delivery'
+                  ? 'Você paga na entrega, quando o motoboy chegar.'
+                  : 'Você paga no balcão, na hora da retirada.'}
+              </p>
+            </CardContent>
+          </Card>
         )}
 
         <Card className="border-terra-200">

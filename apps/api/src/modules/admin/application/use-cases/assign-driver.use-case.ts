@@ -31,7 +31,8 @@ export class AssignDriverUseCase {
     order.driverName = driver.name;
 
     if (wasUnassigned && driver.calculatesFee && order.deliveryFee) {
-      driver.balanceCents += Number(order.deliveryFee);
+      // order.deliveryFee is a decimal string in reais (e.g. "5.00"); balance is in cents.
+      driver.balanceCents += Math.round(Number(order.deliveryFee) * 100);
     }
 
     await this.em.flush();

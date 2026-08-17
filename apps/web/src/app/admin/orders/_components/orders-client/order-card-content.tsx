@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { formatCurrency } from '@/lib/utils';
 import { formatScheduledFor } from '@cardapio/shared';
 import { Tooltip } from '@/components/ui/tooltip';
-import { Loader2, Clock, ChevronDown, ChevronUp, X, Check, Receipt, Truck, ArrowRight } from 'lucide-react';
+import { Loader2, Clock, ChevronDown, ChevronUp, X, Check, Receipt, Truck, ArrowRight, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { OrderSummary } from '@/types/admin';
 import { useQuery } from '@tanstack/react-query';
@@ -31,15 +31,19 @@ interface OrderCardContentProps {
   order: OrderSummary;
   compact?: boolean;
   onAdvance?: (driverId?: string) => void;
+  onBack?: () => void;
   onCancel?: () => void;
   onDeliver?: () => void;
   isPending?: boolean;
 }
 
+const CAN_GO_BACK = ['preparing', 'ready', 'out_for_delivery'];
+
 export function OrderCardContent({
   order,
   compact,
   onAdvance,
+  onBack,
   onCancel,
   onDeliver,
   isPending,
@@ -168,6 +172,18 @@ export function OrderCardContent({
           )}
 
           <div className="mt-auto pt-3">
+            {onBack && CAN_GO_BACK.includes(order.status) && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onBack(); }}
+                disabled={isPending}
+                aria-label="Voltar etapa"
+                className="mb-2 flex w-full items-center justify-center gap-1 rounded-lg border border-[#E8DDD0] px-3 py-1 text-[11px] font-semibold text-[#8B7355] transition-colors hover:bg-[#FAF6F1] disabled:opacity-60"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                Voltar etapa
+              </button>
+            )}
+
             {order.status === 'ready' && order.deliveryType === 'delivery' && (
               <div className="mb-2">
                 <select

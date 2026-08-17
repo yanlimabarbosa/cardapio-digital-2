@@ -31,6 +31,18 @@ export class UpdateStoreSettingsDto {
 
   @IsOptional()
   @IsBoolean()
+  public readonly freeNightDeliveryEnabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  public readonly freeNightDeliveryStart?: string;
+
+  @IsOptional()
+  @IsString()
+  public readonly freeNightDeliveryEnd?: string;
+
+  @IsOptional()
+  @IsBoolean()
   public readonly metaPixelEnabled?: boolean;
 
   @IsOptional()

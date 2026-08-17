@@ -12,8 +12,9 @@ export class CreateDeliveryDriverDto {
   @MaxLength(20)
   phone!: string;
 
+  @IsOptional()
   @IsBoolean()
-  isActive!: boolean;
+  isActive?: boolean;
 
   @IsOptional()
   @IsBoolean()

@@ -5,7 +5,7 @@ import { DeliveryDriver } from '../../../../entities/delivery-driver.entity';
 export type CreateDeliveryDriverCommand = {
   name: string;
   phone: string;
-  isActive: boolean;
+  isActive?: boolean;
   calculatesFee?: boolean;
 };
 
@@ -17,7 +17,7 @@ export class CreateDeliveryDriverUseCase {
     const driver = this.em.create(DeliveryDriver, {
       name: command.name,
       phone: command.phone,
-      isActive: command.isActive,
+      isActive: command.isActive ?? true,
       calculatesFee: command.calculatesFee ?? false,
       balanceCents: 0,
     });

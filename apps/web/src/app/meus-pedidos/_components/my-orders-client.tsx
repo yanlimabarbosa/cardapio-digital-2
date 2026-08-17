@@ -13,7 +13,7 @@ import { formatScheduledFor } from '@cardapio/shared';
 
 const STATUS_LABELS: Record<string, string> = {
   pending_payment: 'Aguardando pagamento',
-  paid: 'Pago',
+  paid: 'Recebido',
   preparing: 'Preparando',
   ready: 'Pronto',
   out_for_delivery: 'Saiu para entrega',

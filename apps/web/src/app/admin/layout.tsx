@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
-import { LayoutDashboard, FolderTree, UtensilsCrossed, ClipboardList, Sparkles, MapPin, History, Menu, X, Users, Tag, Settings } from 'lucide-react';
+import { LayoutDashboard, FolderTree, UtensilsCrossed, ClipboardList, Sparkles, MapPin, History, Menu, X, Users, Tag, Settings, Bike } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SidebarContent } from './_components/sidebar-content';
 
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: '/admin/products', label: 'Produtos', icon: UtensilsCrossed },
   { href: '/admin/delivery-areas', label: 'Entregas', icon: MapPin },
   { href: '/admin/orders', label: 'Pedidos', icon: ClipboardList },
+  { href: '/admin/drivers', label: 'Motoboys', icon: Bike },
   { href: '/admin/orders/history', label: 'Histórico', icon: History },
   { href: '/admin/coupons', label: 'Cupons', icon: Tag },
   { href: '/admin/customers', label: 'Clientes', icon: Users },
