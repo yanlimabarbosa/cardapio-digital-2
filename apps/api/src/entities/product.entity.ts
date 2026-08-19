@@ -2,6 +2,7 @@ import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, Collection } from '
 import { Category } from './category.entity';
 import { ProductExtra } from './product-extra.entity';
 import { OptionGroup } from './option-group.entity';
+import { CombinedLimit } from './combined-limit.entity';
 
 @Entity({ tableName: 'products' })
 export class Product {
@@ -70,6 +71,9 @@ export class Product {
 
   @OneToMany(() => OptionGroup, (og) => og.product)
   optionGroups = new Collection<OptionGroup>(this);
+
+  @OneToMany(() => CombinedLimit, (limit) => limit.product)
+  combinedLimits = new Collection<CombinedLimit>(this);
 
   @Property({ onCreate: () => new Date() })
   createdAt?: Date = new Date();

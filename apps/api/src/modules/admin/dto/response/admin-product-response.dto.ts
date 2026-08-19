@@ -17,6 +17,17 @@ export class AdminProductExtraResponseDto {
   ) {}
 }
 
+export class AdminProductCombinedLimitResponseDto {
+  public constructor(
+    /** Combined limit identifier. */
+    public readonly id: string,
+    /** Combined limit display name. */
+    public readonly name: string,
+    /** Maximum combined selections across the linked option groups. */
+    public readonly maxSelections: number,
+  ) {}
+}
+
 export class AdminProductOptionGroupResponseDto {
   public constructor(
     /** Option group identifier. */
@@ -33,6 +44,8 @@ export class AdminProductOptionGroupResponseDto {
     public readonly isActive: boolean,
     /** Options available in this group. */
     public readonly options: AdminProductExtraResponseDto[],
+    /** Identifier of the combined limit this group belongs to, or null. */
+    public readonly combinedLimitId: string | null,
   ) {}
 }
 
@@ -62,6 +75,8 @@ export class AdminProductResponseDto {
     public readonly extras: AdminProductExtraResponseDto[],
     /** Compound option groups attached to this product. */
     public readonly optionGroups: AdminProductOptionGroupResponseDto[],
+    /** Combined limits defined for this product (excluding archived). */
+    public readonly combinedLimits: AdminProductCombinedLimitResponseDto[],
     /** Sort position in the admin product list. */
     public readonly sortOrder: number,
     /** Whether this product can be redeemed with loyalty points. */

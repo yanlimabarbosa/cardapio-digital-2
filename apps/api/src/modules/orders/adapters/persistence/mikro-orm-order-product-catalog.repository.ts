@@ -23,7 +23,16 @@ export class MikroOrmOrderProductCatalogRepository implements OrderProductCatalo
       const products = await em.find(
         Product,
         { id: { $in: ids } },
-        { populate: ['category', 'extras', 'optionGroups', 'optionGroups.options'] },
+        {
+          populate: [
+            'category',
+            'extras',
+            'optionGroups',
+            'optionGroups.options',
+            'optionGroups.combinedLimit',
+            'combinedLimits',
+          ],
+        },
       );
 
       return products.map((product) => this.toOrderableProduct(product, true));
@@ -54,6 +63,16 @@ export class MikroOrmOrderProductCatalogRepository implements OrderProductCatalo
       category: {
         availabilitySchedule: product.category.availabilitySchedule,
       },
+      combinedLimits: includeComposition
+        ? product.combinedLimits
+          .getItems()
+          .filter((limit) => !(limit.isArchived ?? false))
+          .map((limit) => ({
+            id: limit.id,
+            name: limit.name,
+            maxSelections: limit.maxSelections ?? 1,
+          }))
+        : [],
       extras: includeComposition
         ? product.extras.getItems().map((extra) => ({
           id: extra.id,
@@ -68,6 +87,7 @@ export class MikroOrmOrderProductCatalogRepository implements OrderProductCatalo
           name: group.name,
           minSelections: group.minSelections,
           maxSelections: group.maxSelections,
+          combinedLimitId: group.combinedLimit?.id ?? null,
           isActive: (group.isActive ?? true) && !(group.isArchived ?? false),
           options: group.options.getItems().map((option) => ({
             id: option.id,

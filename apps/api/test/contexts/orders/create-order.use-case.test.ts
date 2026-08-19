@@ -546,6 +546,7 @@ function paidProduct(): OrderableProductModel {
     category: {
       availabilitySchedule: null,
     },
+    combinedLimits: [],
     extras: [],
     isActive: true,
     isCompound: false,
@@ -562,6 +563,7 @@ function redeemableProduct(): OrderableProductModel {
     category: {
       availabilitySchedule: null,
     },
+    combinedLimits: [],
     extras: [],
     isActive: true,
     isCompound: false,

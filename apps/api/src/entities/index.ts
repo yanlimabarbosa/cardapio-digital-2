@@ -3,6 +3,7 @@ export { Category } from './category.entity';
 export { Product } from './product.entity';
 export { ProductExtra } from './product-extra.entity';
 export { OptionGroup } from './option-group.entity';
+export { CombinedLimit } from './combined-limit.entity';
 export { Order } from './order.entity';
 export { OrderItem } from './order-item.entity';
 export { AdminUser } from './admin-user.entity';

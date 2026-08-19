@@ -219,7 +219,7 @@ export function useProductsPage() {
   });
 
   const updateOptionGroupStatusMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Pick<AdminOptionGroup, 'isActive'>> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<Pick<AdminOptionGroup, 'isActive' | 'combinedLimitId'>> }) =>
       adminFetch(`/api/admin/option-groups/${id}`, token, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -229,6 +229,58 @@ export function useProductsPage() {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
     },
   });
+
+  const reorderOptionGroupsMutation = useMutation({
+    mutationFn: (items: { id: string; sortOrder: number }[]) =>
+      adminFetch('/api/admin/option-groups/reorder', token, {
+        method: 'PATCH',
+        body: JSON.stringify({ items }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+    },
+  });
+
+  // ─── Combined Limit mutations ────────────────────────
+
+  const createCombinedLimitMutation = useMutation({
+    mutationFn: ({ productId, data }: { productId: string; data: { name: string; maxSelections: number } }) =>
+      adminFetch(`/api/admin/products/${productId}/combined-limits`, token, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+    },
+  });
+
+  const updateCombinedLimitMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { name?: string; maxSelections?: number } }) =>
+      adminFetch(`/api/admin/combined-limits/${id}`, token, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+    },
+  });
+
+  const deleteCombinedLimitMutation = useMutation({
+    mutationFn: (id: string) =>
+      adminFetch(`/api/admin/combined-limits/${id}`, token, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+    },
+  });
+
+  /** Assign (or clear with `null`) a group's combined limit, reusing the group-update mutation. */
+  function setGroupCombinedLimit(groupId: string, combinedLimitId: string | null) {
+    updateOptionGroupStatusMutation.mutate({ id: groupId, data: { combinedLimitId } });
+  }
 
   const saveGroupOptionMutation = useMutation({
     mutationFn: (data: any) => {
@@ -289,6 +341,26 @@ export function useProductsPage() {
       minSelections: parseInt(optionGroupForm.minSelections, 10) || 0,
       maxSelections: parseInt(optionGroupForm.maxSelections, 10) || 1,
     });
+  }
+
+  function handleOptionGroupReorder(productId: string, orderedGroupIds: string[]) {
+    const items = orderedGroupIds.map((id, index) => ({ id, sortOrder: index }));
+
+    // Optimistic update
+    queryClient.setQueryData<AdminProduct[]>(['admin-products'], (old) =>
+      old?.map((p) =>
+        p.id !== productId
+          ? p
+          : {
+              ...p,
+              optionGroups: [...p.optionGroups].sort(
+                (a, b) => orderedGroupIds.indexOf(a.id) - orderedGroupIds.indexOf(b.id),
+              ),
+            },
+      ),
+    );
+
+    reorderOptionGroupsMutation.mutate(items);
   }
 
   function openCreateGroupOption(groupId: string) {
@@ -520,6 +592,13 @@ export function useProductsPage() {
     deleteOptionGroupMutation,
     updateOptionGroupStatusMutation,
     setOptionGroupDialogOpen: (open: boolean) => { if (!open) setOptionGroupDialog({ mode: 'closed' }); },
+    handleOptionGroupReorder,
+    reorderOptionGroupsMutation,
+    // Combined limits
+    createCombinedLimitMutation,
+    updateCombinedLimitMutation,
+    deleteCombinedLimitMutation,
+    setGroupCombinedLimit,
     // Group options
     groupOptionDialogOpen: groupOptionDialog.mode !== 'closed',
     isEditingGroupOption: groupOptionDialog.mode === 'edit',

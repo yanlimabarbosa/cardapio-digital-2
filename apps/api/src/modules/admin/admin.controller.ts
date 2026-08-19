@@ -57,6 +57,8 @@ import { UpdateExtraDto } from './dto/request/update-extra.dto';
 import { ReorderDto } from './dto/request/reorder.dto';
 import { CreateOptionGroupDto } from './dto/request/create-option-group.dto';
 import { UpdateOptionGroupDto } from './dto/request/update-option-group.dto';
+import { CreateCombinedLimitDto } from './dto/request/create-combined-limit.dto';
+import { UpdateCombinedLimitDto } from './dto/request/update-combined-limit.dto';
 import { UpdateStoreSettingsDto } from './dto/request/update-store-settings.dto';
 import {
   GetStoreSettingsResult,
@@ -97,6 +99,9 @@ import { SetAdminFeaturedProductsUseCase } from './application/use-cases/set-adm
 import { CreateAdminOptionGroupUseCase } from './application/use-cases/create-admin-option-group.use-case';
 import { DeleteAdminOptionGroupUseCase } from './application/use-cases/delete-admin-option-group.use-case';
 import { UpdateAdminOptionGroupUseCase } from './application/use-cases/update-admin-option-group.use-case';
+import { CreateAdminCombinedLimitUseCase } from './application/use-cases/create-admin-combined-limit.use-case';
+import { UpdateAdminCombinedLimitUseCase } from './application/use-cases/update-admin-combined-limit.use-case';
+import { DeleteAdminCombinedLimitUseCase } from './application/use-cases/delete-admin-combined-limit.use-case';
 import { UpdateAdminGroupOptionUseCase } from './application/use-cases/update-admin-group-option.use-case';
 import { CreateAdminCategoryUseCase } from './application/use-cases/create-admin-category.use-case';
 import {
@@ -111,6 +116,7 @@ import {
   AdminOptionGroupNotFoundError,
   AdminOptionGroupValidationError,
 } from './application/errors/admin-option-group.errors';
+import { AdminCombinedLimitNotFoundError } from './application/errors/admin-combined-limit.errors';
 import {
   AdminGroupOptionNotFoundError,
   AdminProductExtraNotFoundError,
@@ -163,6 +169,7 @@ import { DeleteCategoryResponseDto } from './dto/response/delete-category-respon
 import { DeleteExtraResponseDto } from './dto/response/delete-extra-response.dto';
 import { DeleteGroupOptionResponseDto } from './dto/response/delete-group-option-response.dto';
 import { DeleteOptionGroupResponseDto } from './dto/response/delete-option-group-response.dto';
+import { DeleteCombinedLimitResponseDto } from './dto/response/delete-combined-limit-response.dto';
 import { DeleteProductResponseDto } from './dto/response/delete-product-response.dto';
 import { ToggleProductResponseDto } from './dto/response/toggle-product-response.dto';
 import { AdminCategoryMutationResponseDto } from './dto/response/admin-category-mutation-response.dto';
@@ -191,6 +198,9 @@ export class AdminController {
     private readonly createAdminOptionGroupUseCase: CreateAdminOptionGroupUseCase,
     private readonly deleteAdminOptionGroupUseCase: DeleteAdminOptionGroupUseCase,
     private readonly updateAdminOptionGroupUseCase: UpdateAdminOptionGroupUseCase,
+    private readonly createAdminCombinedLimitUseCase: CreateAdminCombinedLimitUseCase,
+    private readonly updateAdminCombinedLimitUseCase: UpdateAdminCombinedLimitUseCase,
+    private readonly deleteAdminCombinedLimitUseCase: DeleteAdminCombinedLimitUseCase,
     private readonly createAdminGroupOptionUseCase: CreateAdminGroupOptionUseCase,
     private readonly updateAdminGroupOptionUseCase: UpdateAdminGroupOptionUseCase,
     private readonly createAdminProductExtraUseCase: CreateAdminProductExtraUseCase,
@@ -635,6 +645,7 @@ export class AdminController {
         maxSelections: dto.maxSelections,
         sortOrder: dto.sortOrder,
         isActive: dto.isActive,
+        combinedLimitId: dto.combinedLimitId,
       });
 
       return toAdminProductOptionGroupResponseDto(optionGroup);
@@ -671,6 +682,69 @@ export class AdminController {
     const result = await this.reorderAdminOptionGroupsUseCase.execute({ items: dto.items });
 
     return new ReorderOptionGroupsResponseDto(result.success);
+  }
+
+  // ─── Combined Limits ──────────────────────────────
+
+  @Post('products/:productId/combined-limits')
+  public async createCombinedLimit(
+    @Param('productId') productId: string,
+    @Body() dto: CreateCombinedLimitDto,
+  ): Promise<{ id: string; name: string; maxSelections: number }> {
+    try {
+      const combinedLimit = await this.createAdminCombinedLimitUseCase.execute({
+        productId,
+        name: dto.name,
+        maxSelections: dto.maxSelections,
+      });
+
+      return combinedLimit;
+    } catch (error) {
+      if (error instanceof AdminProductNotFoundError) {
+        throw new NotFoundException('Product not found');
+      }
+
+      throw error;
+    }
+  }
+
+  @Patch('combined-limits/:id')
+  public async updateCombinedLimit(
+    @Param('id') id: string,
+    @Body() dto: UpdateCombinedLimitDto,
+  ): Promise<{ id: string; name: string; maxSelections: number }> {
+    try {
+      const combinedLimit = await this.updateAdminCombinedLimitUseCase.execute({
+        id,
+        name: dto.name,
+        maxSelections: dto.maxSelections,
+      });
+
+      return combinedLimit;
+    } catch (error) {
+      if (error instanceof AdminCombinedLimitNotFoundError) {
+        throw new NotFoundException('Combined limit not found');
+      }
+
+      throw error;
+    }
+  }
+
+  @Delete('combined-limits/:id')
+  public async deleteCombinedLimit(
+    @Param('id') id: string,
+  ): Promise<DeleteCombinedLimitResponseDto> {
+    try {
+      const result = await this.deleteAdminCombinedLimitUseCase.execute({ id });
+
+      return new DeleteCombinedLimitResponseDto(result.success);
+    } catch (error) {
+      if (error instanceof AdminCombinedLimitNotFoundError) {
+        throw new NotFoundException('Combined limit not found');
+      }
+
+      throw error;
+    }
   }
 
   // ─── Group Options ────────────────────────────────

@@ -15,10 +15,12 @@ export type ProductOptionGroupReadModel = {
   readonly options: readonly ProductOptionReadModel[];
   readonly required: boolean;
   readonly sortOrder: number;
+  readonly combinedLimitId?: string;
 };
 
 export type ProductReadModel = {
   readonly availabilityMessage?: string;
+  readonly combinedLimits?: readonly { id: string; name: string; maxSelections: number }[];
   readonly description?: string;
   readonly effectivePrice: number;
   readonly extras: readonly ProductExtraReadModel[];

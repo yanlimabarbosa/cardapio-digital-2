@@ -30,7 +30,14 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
       Category,
       { isActive: true, isArchived: false },
       {
-        populate: ['products', 'products.extras', 'products.optionGroups', 'products.optionGroups.options'],
+        populate: [
+          'products',
+          'products.extras',
+          'products.optionGroups',
+          'products.optionGroups.options',
+          'products.optionGroups.combinedLimit',
+          'products.combinedLimits',
+        ],
         orderBy: { sortOrder: 'ASC', products: { sortOrder: 'ASC', name: 'ASC' } },
       },
     );
@@ -43,7 +50,17 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
     const products = await this.em.find(
       Product,
       { isFeatured: true, isActive: true, isArchived: false },
-      { populate: ['extras', 'category', 'optionGroups', 'optionGroups.options'], orderBy: { featuredOrder: 'ASC' } },
+      {
+        populate: [
+          'extras',
+          'category',
+          'optionGroups',
+          'optionGroups.options',
+          'optionGroups.combinedLimit',
+          'combinedLimits',
+        ],
+        orderBy: { featuredOrder: 'ASC' },
+      },
     );
 
     return products.map((product) => this.toProductReadModel(product, product.category, context));
@@ -58,7 +75,16 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
     const products = await this.em.find(
       Product,
       { id: { $in: [...query.ids] } },
-      { populate: ['extras', 'category', 'optionGroups', 'optionGroups.options'] },
+      {
+        populate: [
+          'extras',
+          'category',
+          'optionGroups',
+          'optionGroups.options',
+          'optionGroups.combinedLimit',
+          'combinedLimits',
+        ],
+      },
     );
 
     return products.map((product) => this.toProductReadModel(product, product.category, context));
@@ -129,6 +155,7 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
       effectivePrice: parseFloat(pricePolicy.effectivePrice(priceEvaluationDate)),
       extras: this.toExtras(product),
       optionGroups: isCompound ? this.toOptionGroups(product) : undefined,
+      combinedLimits: isCompound ? this.toCombinedLimits(product) : undefined,
     };
   }
 
@@ -156,6 +183,7 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
         maxSelections: group.maxSelections ?? 1,
         required: (group.minSelections ?? 0) >= 1,
         sortOrder: group.sortOrder ?? 0,
+        combinedLimitId: group.combinedLimit?.id,
         options: group.options
           .getItems()
           .filter((option) => this.isPublicExtra(option))
@@ -166,6 +194,19 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
             price: parseFloat(option.price),
             imageUrl: option.imageUrl,
           })),
+      }));
+  }
+
+  private toCombinedLimits(
+    product: Product,
+  ): readonly { id: string; name: string; maxSelections: number }[] {
+    return product.combinedLimits
+      .getItems()
+      .filter((limit) => !(limit.isArchived ?? false))
+      .map((limit) => ({
+        id: limit.id,
+        name: limit.name,
+        maxSelections: limit.maxSelections ?? 1,
       }));
   }
 

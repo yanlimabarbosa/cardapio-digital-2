@@ -393,6 +393,7 @@ export class CreateOrderUseCase {
       isCompound: product.isCompound,
       extras: product.extras,
       optionGroups: product.optionGroups,
+      combinedLimits: product.combinedLimits,
     };
   }
 

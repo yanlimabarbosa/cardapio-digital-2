@@ -71,6 +71,13 @@ export interface AdminOptionGroup {
   sortOrder: number;
   isActive: boolean;
   options: AdminOptionGroupOption[];
+  combinedLimitId: string | null;
+}
+
+export interface AdminCombinedLimit {
+  id: string;
+  name: string;
+  maxSelections: number;
 }
 
 export interface AdminProduct {
@@ -87,6 +94,7 @@ export interface AdminProduct {
   sortOrder: number;
   extras: AdminExtra[];
   optionGroups: AdminOptionGroup[];
+  combinedLimits: AdminCombinedLimit[];
 }
 
 export interface AdminCategoryOption {

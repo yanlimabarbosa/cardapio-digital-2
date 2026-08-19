@@ -46,6 +46,22 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
     onClose();
   }, [onClose]);
 
+  const combinedCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    if (!product?.optionGroups) return counts;
+    for (const g of product.optionGroups) {
+      if (!g.combinedLimitId) continue;
+      counts[g.combinedLimitId] = (counts[g.combinedLimitId] ?? 0) + (groupSelections[g.id]?.length ?? 0);
+    }
+    return counts;
+  }, [product, groupSelections]);
+
+  const combinedMaxById = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const l of product?.combinedLimits ?? []) m[l.id] = l.maxSelections;
+    return m;
+  }, [product]);
+
   if (!product) return null;
 
   const isCompound = product.isCompound && product.optionGroups && product.optionGroups.length > 0;
@@ -93,8 +109,13 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
       nextSelection = current.filter((id) => id !== optionId);
     } else if (group.maxSelections === 1) {
       nextSelection = [optionId];
-    } else if (current.length < group.maxSelections) {
-      nextSelection = [...current, optionId];
+    } else {
+      const limitId = group.combinedLimitId;
+      const combinedRoom =
+        !limitId || (combinedCounts[limitId] ?? 0) < (combinedMaxById[limitId] ?? Infinity);
+      if (current.length < group.maxSelections && combinedRoom) {
+        nextSelection = [...current, optionId];
+      }
     }
 
     setGroupSelections((prev) => ({ ...prev, [group.id]: nextSelection }));
@@ -193,7 +214,10 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
       {product.optionGroups!.map((group, gi) => {
         const selected = groupSelections[group.id] ?? [];
         const isSingle = group.maxSelections === 1;
-        const isMaxed = selected.length >= group.maxSelections;
+        const limitId = group.combinedLimitId;
+        const combinedMaxed =
+          !!limitId && (combinedCounts[limitId] ?? 0) >= (combinedMaxById[limitId] ?? Infinity);
+        const isMaxed = selected.length >= group.maxSelections || combinedMaxed;
 
         return (
           <div
@@ -217,6 +241,12 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  {group.combinedLimitId && combinedMaxById[group.combinedLimitId] != null && (
+                    <span className="text-xs font-semibold text-[#4A2810]">
+                      {product.combinedLimits!.find((l) => l.id === group.combinedLimitId)?.name}{' '}
+                      {combinedCounts[group.combinedLimitId] ?? 0}/{combinedMaxById[group.combinedLimitId]}
+                    </span>
+                  )}
                   {selected.length > 0 && (
                     <span className="text-xs font-semibold text-[#4A2810]">{selected.length}/{group.maxSelections}</span>
                   )}

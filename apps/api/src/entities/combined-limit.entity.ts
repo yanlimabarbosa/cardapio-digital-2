@@ -1,10 +1,9 @@
 import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, Collection } from '@mikro-orm/core';
 import { Product } from './product.entity';
-import { ProductExtra } from './product-extra.entity';
-import { CombinedLimit } from './combined-limit.entity';
+import { OptionGroup } from './option-group.entity';
 
-@Entity({ tableName: 'option_groups' })
-export class OptionGroup {
+@Entity({ tableName: 'combined_limits' })
+export class CombinedLimit {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
@@ -14,26 +13,14 @@ export class OptionGroup {
   @Property()
   name!: string;
 
-  @Property({ default: 0 })
-  minSelections?: number = 0;
-
   @Property({ default: 1 })
   maxSelections?: number = 1;
-
-  @Property({ default: 0 })
-  sortOrder?: number = 0;
-
-  @Property({ default: true })
-  isActive?: boolean = true;
 
   @Property({ default: false })
   isArchived?: boolean = false;
 
-  @ManyToOne(() => CombinedLimit, { nullable: true })
-  combinedLimit?: CombinedLimit | null;
-
-  @OneToMany(() => ProductExtra, (extra) => extra.optionGroup)
-  options = new Collection<ProductExtra>(this);
+  @OneToMany(() => OptionGroup, (group) => group.combinedLimit)
+  groups = new Collection<OptionGroup>(this);
 
   @Property({ onCreate: () => new Date() })
   createdAt?: Date = new Date();

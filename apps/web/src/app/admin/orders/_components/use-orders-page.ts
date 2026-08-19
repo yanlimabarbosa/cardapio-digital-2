@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 import { WS_EVENTS } from '@cardapio/shared';
@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { adminFetch } from '@/lib/admin-api';
 import { API_URL } from '@/lib/api-url';
 import type { OrderSummary } from '@/types/admin';
+import { useAutoReceiptPrint } from './use-auto-receipt-print';
 
 export const KANBAN_COLUMNS = [
   { key: 'paid', label: 'A Fazer / Novo', dot: 'bg-blue-400', headerBg: 'bg-blue-50 border-blue-200' },
@@ -46,6 +47,14 @@ export const STATUS_LABELS: Record<string, string> = {
 export function useOrdersPage() {
   const token = useAuthStore((s) => s.token);
   const queryClient = useQueryClient();
+  const autoPrint = useAutoReceiptPrint();
+
+  // Keep the latest auto-print state in a ref so the long-lived socket effect
+  // reads the current `enabled` value without re-subscribing (and reconnecting)
+  // every time the print station is toggled — avoids both reconnect churn and a
+  // stale closure that would ignore toggles until reload.
+  const autoPrintRef = useRef(autoPrint);
+  autoPrintRef.current = autoPrint;
 
   const { data: orders, isLoading } = useQuery<OrderSummary[]>({
     queryKey: ['admin-orders'],
@@ -125,8 +134,11 @@ export function useOrdersPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
     });
 
-    socket.on(WS_EVENTS.ORDER_STATUS_CHANGED, () => {
+    socket.on(WS_EVENTS.ORDER_STATUS_CHANGED, (payload: { id: string; status: string }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      if (payload?.status === 'ready' && autoPrintRef.current.enabled) {
+        autoPrintRef.current.printReceipt(payload.id);
+      }
     });
 
     return () => { socket.disconnect(); };
@@ -144,5 +156,6 @@ export function useOrdersPage() {
     updateStatusMutation,
     assignDriverMutation,
     canDrop,
+    printStation: autoPrint,
   };
 }

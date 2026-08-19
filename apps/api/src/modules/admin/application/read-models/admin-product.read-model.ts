@@ -8,7 +8,14 @@ export type AdminProductExtraReadModel = {
   readonly sortOrder: number;
 };
 
+export type AdminProductCombinedLimitReadModel = {
+  readonly id: string;
+  readonly maxSelections: number;
+  readonly name: string;
+};
+
 export type AdminProductOptionGroupReadModel = {
+  readonly combinedLimitId: string | null;
   readonly id: string;
   readonly isActive: boolean;
   readonly maxSelections: number;
@@ -21,6 +28,7 @@ export type AdminProductOptionGroupReadModel = {
 export type AdminProductReadModel = {
   readonly categoryId: string;
   readonly categoryName: string;
+  readonly combinedLimits: readonly AdminProductCombinedLimitReadModel[];
   readonly createdAt?: Date;
   readonly description?: string;
   readonly extras: readonly AdminProductExtraReadModel[];

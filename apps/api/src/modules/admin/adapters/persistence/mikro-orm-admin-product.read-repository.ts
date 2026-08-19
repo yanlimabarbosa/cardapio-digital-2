@@ -1,10 +1,11 @@
 import { EntityManager } from '@mikro-orm/postgresql';
-import { OptionGroup, Product, ProductExtra } from '../../../../entities';
+import { CombinedLimit, OptionGroup, Product, ProductExtra } from '../../../../entities';
 import type { AdminProductReadRepository } from '../../application/ports/admin-product.read-repository.port';
 import type { AdminFeaturedProductReadModel } from '../../application/read-models/admin-featured-product.read-model';
 import type { AdminOptionGroupReadModel } from '../../application/read-models/admin-option-group.read-model';
 import type { AdminProductExtraListReadModel } from '../../application/read-models/admin-product-extra.read-model';
 import type {
+  AdminProductCombinedLimitReadModel,
   AdminProductExtraReadModel,
   AdminProductOptionGroupReadModel,
   AdminProductReadModel,
@@ -18,7 +19,14 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
       Product,
       { isArchived: false },
       {
-        populate: ['category', 'extras', 'optionGroups', 'optionGroups.options'],
+        populate: [
+          'category',
+          'extras',
+          'optionGroups',
+          'optionGroups.options',
+          'optionGroups.combinedLimit',
+          'combinedLimits',
+        ],
         orderBy: { category: { sortOrder: 'ASC' }, sortOrder: 'ASC', name: 'ASC' },
       },
     );
@@ -30,7 +38,7 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
     const product = await this.em.findOne(
       Product,
       { id: productId },
-      { populate: ['optionGroups', 'optionGroups.options'] },
+      { populate: ['optionGroups', 'optionGroups.options', 'optionGroups.combinedLimit'] },
     );
 
     if (!product) {
@@ -96,6 +104,14 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
       isCompound: product.isCompound ?? false,
       categoryId: product.category.id,
       categoryName: product.category.name,
+      combinedLimits: product.combinedLimits
+        .getItems()
+        .filter((limit: CombinedLimit): boolean => !(limit.isArchived ?? false))
+        .map((limit: CombinedLimit): AdminProductCombinedLimitReadModel => ({
+          id: limit.id,
+          name: limit.name,
+          maxSelections: limit.maxSelections ?? 1,
+        })),
       extras: product.extras
         .getItems()
         .filter((extra: ProductExtra): boolean => !extra.optionGroup && !(extra.isArchived ?? false))
@@ -129,6 +145,7 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
     return {
       id: group.id,
       name: group.name,
+      combinedLimitId: group.combinedLimit?.id ?? null,
       minSelections: group.minSelections ?? 0,
       maxSelections: group.maxSelections ?? 1,
       sortOrder: group.sortOrder ?? 0,

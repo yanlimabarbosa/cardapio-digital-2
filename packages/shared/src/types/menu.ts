@@ -22,6 +22,13 @@ export interface OptionGroup {
   required: boolean;
   sortOrder: number;
   options: OptionGroupOption[];
+  combinedLimitId?: string;
+}
+
+export interface CombinedLimit {
+  id: string;
+  name: string;
+  maxSelections: number;
 }
 
 export interface Product {
@@ -34,6 +41,7 @@ export interface Product {
   isCompound: boolean;
   extras: ProductExtra[];
   optionGroups?: OptionGroup[];
+  combinedLimits?: CombinedLimit[];
   isAvailable?: boolean;
   availabilityMessage?: string;
   nextAvailableAt?: string;

@@ -112,6 +112,32 @@ test('preserves legacy behavior for compound products without option selections'
   });
 });
 
+test('combined limit: 2 proteinas + 1 churrasco excede o teto de 2 carnes', (): void => {
+  assert.throws(
+    () =>
+      OrderItemSnapshotPolicy.for(combinedLimitProduct(), {
+        quantity: 1,
+        optionSelections: [
+          { groupId: 'g-prot', optionIds: ['o1', 'o2'] },
+          { groupId: 'g-chur', optionIds: ['o3'] },
+        ],
+      }).createSnapshot(),
+    (error: unknown): boolean => error instanceof InvalidOrderItemSnapshotError,
+  );
+});
+
+test('combined limit: 1 proteina + 1 churrasco e permitido', (): void => {
+  assert.doesNotThrow(() =>
+    OrderItemSnapshotPolicy.for(combinedLimitProduct(), {
+      quantity: 1,
+      optionSelections: [
+        { groupId: 'g-prot', optionIds: ['o1'] },
+        { groupId: 'g-chur', optionIds: ['o3'] },
+      ],
+    }).createSnapshot(),
+  );
+});
+
 function assertInvalidSnapshot(createSnapshot: () => void, message: string): void {
   assert.throws(
     createSnapshot,
@@ -136,6 +162,44 @@ function sampleProduct(): OrderItemSnapshotProductInput {
       },
     ],
     optionGroups: [],
+  };
+}
+
+function combinedLimitProduct(): OrderItemSnapshotProductInput {
+  return {
+    id: 'p1',
+    name: 'Quentinha M',
+    baseUnitPriceCents: 2500,
+    isActive: true,
+    isCompound: true,
+    extras: [],
+    combinedLimits: [{ id: 'cl1', name: 'Carnes', maxSelections: 2 }],
+    optionGroups: [
+      {
+        id: 'g-prot',
+        name: 'Proteína',
+        isActive: true,
+        minSelections: 0,
+        maxSelections: 2,
+        combinedLimitId: 'cl1',
+        options: [
+          { id: 'o1', name: 'Frango', price: '0', isActive: true },
+          { id: 'o2', name: 'Carne', price: '0', isActive: true },
+        ],
+      },
+      {
+        id: 'g-chur',
+        name: 'Churrasco',
+        isActive: true,
+        minSelections: 0,
+        maxSelections: 2,
+        combinedLimitId: 'cl1',
+        options: [
+          { id: 'o3', name: 'Picanha', price: '0', isActive: true },
+          { id: 'o4', name: 'Linguiça', price: '0', isActive: true },
+        ],
+      },
+    ],
   };
 }
 

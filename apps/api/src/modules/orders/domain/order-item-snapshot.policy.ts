@@ -17,6 +17,7 @@ export type OrderItemSnapshotExtraInput = {
 };
 
 export type OrderItemSnapshotOptionGroupInput = {
+  readonly combinedLimitId?: string | null;
   readonly id: string;
   readonly isActive?: boolean | null;
   readonly maxSelections?: number | null;
@@ -25,8 +26,15 @@ export type OrderItemSnapshotOptionGroupInput = {
   readonly options: readonly OrderItemSnapshotExtraInput[];
 };
 
+export type OrderItemSnapshotCombinedLimitInput = {
+  readonly id: string;
+  readonly maxSelections: number;
+  readonly name: string;
+};
+
 export type OrderItemSnapshotProductInput = {
   readonly baseUnitPriceCents: number;
+  readonly combinedLimits?: readonly OrderItemSnapshotCombinedLimitInput[];
   readonly extras: readonly OrderItemSnapshotExtraInput[];
   readonly id: string;
   readonly isActive?: boolean | null;
@@ -173,6 +181,7 @@ export class OrderItemSnapshotPolicy {
       });
     }
 
+    this.assertCombinedLimits(optionSelections);
     this.assertRequiredCompoundGroupsSelected(optionSelections);
 
     return {
@@ -180,6 +189,35 @@ export class OrderItemSnapshotPolicy {
       extrasCents,
       groupedExtras,
     };
+  }
+
+  private assertCombinedLimits(
+    optionSelections: readonly OrderItemOptionSelectionInput[],
+  ): void {
+    const limits = this.product.combinedLimits ?? [];
+    if (limits.length === 0) {
+      return;
+    }
+
+    const countByLimit = new Map<string, number>();
+    for (const selection of optionSelections) {
+      const group = this.product.optionGroups.find((candidate) => candidate.id === selection.groupId);
+      const limitId = group?.combinedLimitId;
+      if (!limitId) {
+        continue;
+      }
+      countByLimit.set(limitId, (countByLimit.get(limitId) ?? 0) + selection.optionIds.length);
+    }
+
+    for (const limit of limits) {
+      const total = countByLimit.get(limit.id) ?? 0;
+      const max = limit.maxSelections ?? 1;
+      if (total > max) {
+        throw new InvalidOrderItemSnapshotError(
+          `"${limit.name}" permite no maximo ${max} no total`,
+        );
+      }
+    }
   }
 
   private assertRequiredCompoundGroupsSelected(

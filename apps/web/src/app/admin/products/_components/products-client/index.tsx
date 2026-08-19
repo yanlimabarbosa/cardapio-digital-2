@@ -8,11 +8,22 @@ import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useProductsPage } from '../use-products-page';
+import type { AdminCombinedLimit } from '@/types/admin';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ProductDialog } from './product-dialog';
 import { ExtraDialog } from './extra-dialog';
 import { OptionGroupDialog } from './option-group-dialog';
+import { SortableOptionGroupRow } from './sortable-option-group-row';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 
 const containerVariants = {
   hidden: {},
@@ -28,6 +39,7 @@ type DeleteTarget =
   | { type: 'product'; id: string; name: string }
   | { type: 'optionGroup'; id: string; name: string }
   | { type: 'groupOption'; id: string; name: string }
+  | { type: 'combinedLimit'; id: string; name: string }
   | { type: 'extra'; id: string; name: string }
   | null;
 
@@ -83,6 +95,163 @@ function ActionIconButton({
   );
 }
 
+type ProductsPage = ReturnType<typeof useProductsPage>;
+
+function CombinedLimitsSection({
+  productId,
+  limits,
+  createMutation,
+  updateMutation,
+  onRequestDelete,
+}: {
+  productId: string;
+  limits: AdminCombinedLimit[];
+  createMutation: ProductsPage['createCombinedLimitMutation'];
+  updateMutation: ProductsPage['updateCombinedLimitMutation'];
+  onRequestDelete: (limit: { id: string; name: string }) => void;
+}) {
+  const [newName, setNewName] = useState('');
+  const [newMax, setNewMax] = useState('1');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editMax, setEditMax] = useState('1');
+
+  function startEdit(limit: AdminCombinedLimit) {
+    setEditingId(limit.id);
+    setEditName(limit.name);
+    setEditMax(String(limit.maxSelections));
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+  }
+
+  function handleCreate() {
+    const name = newName.trim();
+    if (!name) return;
+    createMutation.mutate(
+      { productId, data: { name, maxSelections: parseInt(newMax, 10) || 1 } },
+      {
+        onSuccess: () => {
+          setNewName('');
+          setNewMax('1');
+        },
+      },
+    );
+  }
+
+  function handleUpdate() {
+    if (!editingId) return;
+    const name = editName.trim();
+    if (!name) return;
+    updateMutation.mutate(
+      { id: editingId, data: { name, maxSelections: parseInt(editMax, 10) || 1 } },
+      { onSuccess: () => setEditingId(null) },
+    );
+  }
+
+  return (
+    <div className="mb-3 rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] p-3">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="text-xs font-bold uppercase tracking-widest text-[#8B7355]">
+          Limites combinados
+        </span>
+      </div>
+
+      {limits.length === 0 ? (
+        <p className="text-xs text-[#8B7355]">Nenhum limite combinado</p>
+      ) : (
+        <div className="space-y-2">
+          {limits.map((limit) => (
+            <div
+              key={limit.id}
+              data-testid={`combined-limit-${limit.id}`}
+              className="flex items-center justify-between gap-3 rounded-lg border border-[#E8DDD0] bg-white px-3 py-2"
+            >
+              {editingId === limit.id ? (
+                <div className="flex flex-1 flex-wrap items-center gap-2">
+                  <Input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Nome do limite"
+                    className="h-9 min-w-[10rem] flex-1 rounded-lg border-[#E8DDD0] bg-[#FFFCF8]"
+                  />
+                  <Input
+                    type="number"
+                    min={1}
+                    value={editMax}
+                    onChange={(e) => setEditMax(e.target.value)}
+                    className="h-9 w-20 rounded-lg border-[#E8DDD0] bg-[#FFFCF8]"
+                  />
+                  <button
+                    onClick={handleUpdate}
+                    disabled={updateMutation.isPending}
+                    className="flex h-9 items-center rounded-lg bg-[#A0603A] px-3 text-xs font-bold text-white transition-colors hover:bg-[#8b4c2a] disabled:opacity-60"
+                  >
+                    Salvar
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    className="flex h-9 items-center rounded-lg border border-[#E8DDD0] bg-white px-3 text-xs font-bold text-[#6F5A43] transition-colors hover:bg-[#FAF6F1]"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="truncate text-sm font-bold text-[#3D2B1F]">{limit.name}</span>
+                    <DetailChip tone="count">máx {limit.maxSelections}</DetailChip>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <ActionIconButton label="Editar limite" onClick={() => startEdit(limit)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </ActionIconButton>
+                    <ActionIconButton
+                      label="Excluir limite"
+                      onClick={() => onRequestDelete({ id: limit.id, name: limit.name })}
+                      className="hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </ActionIconButton>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#E8DDD0] pt-3">
+        <Input
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder="Nome do limite"
+          data-testid={`combined-limit-new-name-${productId}`}
+          className="h-9 min-w-[10rem] flex-1 rounded-lg border-[#E8DDD0] bg-[#FFFCF8]"
+        />
+        <Input
+          type="number"
+          min={1}
+          value={newMax}
+          onChange={(e) => setNewMax(e.target.value)}
+          data-testid={`combined-limit-new-max-${productId}`}
+          className="h-9 w-20 rounded-lg border-[#E8DDD0] bg-[#FFFCF8]"
+        />
+        <button
+          onClick={handleCreate}
+          disabled={createMutation.isPending || !newName.trim()}
+          data-testid={`combined-limit-add-${productId}`}
+          className="flex h-9 items-center gap-1.5 rounded-lg border border-[#E8DDD0] bg-white px-3 text-xs font-bold text-[#6F5A43] transition-colors hover:bg-[#FAF6F1] hover:text-[#A0603A] disabled:opacity-60"
+        >
+          <Plus className="h-3 w-3" />
+          Adicionar limite
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ProductsClient() {
   const {
     products,
@@ -135,10 +304,16 @@ export function ProductsClient() {
     openCreateOptionGroup,
     openEditOptionGroup,
     handleSaveOptionGroup,
+    handleOptionGroupReorder,
     saveOptionGroupMutation,
     deleteOptionGroupMutation,
     updateOptionGroupStatusMutation,
     setOptionGroupDialogOpen,
+    // Combined limits
+    createCombinedLimitMutation,
+    updateCombinedLimitMutation,
+    deleteCombinedLimitMutation,
+    setGroupCombinedLimit,
     // Group options
     groupOptionDialogOpen,
     isEditingGroupOption,
@@ -157,11 +332,13 @@ export function ProductsClient() {
     setGroupOptionDialogOpen,
   } = useProductsPage();
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
+  const groupSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const deletePending =
     deleteProductMutation.isPending ||
     deleteOptionGroupMutation.isPending ||
     deleteGroupOptionMutation.isPending ||
+    deleteCombinedLimitMutation.isPending ||
     deleteExtraMutation.isPending;
 
   function handleConfirmDelete() {
@@ -174,6 +351,8 @@ export function ProductsClient() {
       deleteOptionGroupMutation.mutate(deleteTarget.id, options);
     } else if (deleteTarget.type === 'groupOption') {
       deleteGroupOptionMutation.mutate(deleteTarget.id, options);
+    } else if (deleteTarget.type === 'combinedLimit') {
+      deleteCombinedLimitMutation.mutate(deleteTarget.id, options);
     } else {
       deleteExtraMutation.mutate(deleteTarget.id, options);
     }
@@ -247,6 +426,7 @@ export function ProductsClient() {
           {products?.map((product) => (
             <motion.div
               key={product.id}
+              data-testid={`product-${product.id}`}
               variants={itemVariants}
               className={cn(
                 'overflow-hidden rounded-2xl border border-[#E8DDD0] bg-[#FFFCF8] shadow-[0_0_8px_rgba(61,43,31,0.12)]',
@@ -387,13 +567,36 @@ export function ProductsClient() {
                               Novo grupo
                             </button>
                           </div>
+                          <CombinedLimitsSection
+                            productId={product.id}
+                            limits={product.combinedLimits}
+                            createMutation={createCombinedLimitMutation}
+                            updateMutation={updateCombinedLimitMutation}
+                            onRequestDelete={(limit) => setDeleteTarget({ type: 'combinedLimit', id: limit.id, name: limit.name })}
+                          />
                           {product.optionGroups.length === 0 ? (
                             <p className="text-sm text-[#8B7355]">Nenhum grupo de opções criado</p>
                           ) : (
-                            <div className="space-y-2.5">
+                            <DndContext
+                              sensors={groupSensors}
+                              collisionDetection={closestCenter}
+                              onDragEnd={(e: DragEndEvent) => {
+                                const { active, over } = e;
+                                if (!over || active.id === over.id) return;
+                                const ids = product.optionGroups.map((g) => g.id);
+                                const next = arrayMove(ids, ids.indexOf(String(active.id)), ids.indexOf(String(over.id)));
+                                handleOptionGroupReorder(product.id, next);
+                              }}
+                            >
+                              <SortableContext
+                                items={product.optionGroups.map((g) => g.id)}
+                                strategy={verticalListSortingStrategy}
+                              >
+                                <div className="space-y-2.5">
                               {product.optionGroups.map((group) => (
+                                <SortableOptionGroupRow key={group.id} id={group.id}>
                                 <div
-                                  key={group.id}
+                                  data-testid={`group-row-${group.id}`}
                                   className={cn(
                                     'group overflow-hidden rounded-xl border border-[#E8DDD0] bg-[#FFFCF8] shadow-[0_3px_10px_rgba(61,43,31,0.04)] transition-colors',
                                     expandedGroup === group.id && 'border-[#D9C8B7] bg-[#FFF9F2]',
@@ -469,6 +672,24 @@ export function ProductsClient() {
                                         className="overflow-hidden"
                                       >
                                         <div className="border-t border-[#E8DDD0] bg-[#F6EEE5] p-3">
+                                          <div className="mb-3 flex flex-wrap items-center gap-2">
+                                            <label className="text-xs font-bold uppercase tracking-widest text-[#8B7355]">
+                                              Limite combinado
+                                            </label>
+                                            <select
+                                              data-testid={`group-combined-select-${group.id}`}
+                                              value={group.combinedLimitId ?? ''}
+                                              onChange={(e) => setGroupCombinedLimit(group.id, e.target.value || null)}
+                                              className="h-9 rounded-lg border border-[#E8DDD0] bg-[#FFFCF8] px-2 text-sm text-[#3D2B1F]"
+                                            >
+                                              <option value="">Nenhum</option>
+                                              {product.combinedLimits.map((limit) => (
+                                                <option key={limit.id} value={limit.id}>
+                                                  {limit.name} (máx {limit.maxSelections})
+                                                </option>
+                                              ))}
+                                            </select>
+                                          </div>
                                           {group.options.length === 0 ? (
                                             <p className="text-xs text-[#8B7355]">Nenhuma opção</p>
                                           ) : (
@@ -538,8 +759,11 @@ export function ProductsClient() {
                                     )}
                                   </AnimatePresence>
                                 </div>
+                                </SortableOptionGroupRow>
                               ))}
-                            </div>
+                                </div>
+                              </SortableContext>
+                            </DndContext>
                           )}
                         </div>
                       ) : (

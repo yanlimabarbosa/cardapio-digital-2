@@ -1,6 +1,7 @@
 import type { WeeklySchedule } from '@cardapio/shared';
 import type { TransactionContext } from '../../../../shared/application/unit-of-work/unit-of-work.port';
 import type {
+  OrderItemSnapshotCombinedLimitInput,
   OrderItemSnapshotExtraInput,
   OrderItemSnapshotOptionGroupInput,
 } from '../../domain/order-item-snapshot.policy';
@@ -13,6 +14,7 @@ export type OrderableProductCategoryModel = {
 
 export type OrderableProductModel = {
   readonly category: OrderableProductCategoryModel;
+  readonly combinedLimits: readonly OrderItemSnapshotCombinedLimitInput[];
   readonly extras: readonly OrderItemSnapshotExtraInput[];
   readonly id: string;
   readonly isActive?: boolean | null;

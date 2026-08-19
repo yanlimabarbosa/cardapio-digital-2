@@ -44,6 +44,7 @@ test('maps admin product read models to response DTOs', (): void => {
     isCompound: true,
     categoryId: 'category-1',
     categoryName: 'Lunch',
+    combinedLimits: [],
     extras: [
       {
         id: 'extra-1',
@@ -58,6 +59,7 @@ test('maps admin product read models to response DTOs', (): void => {
     optionGroups: [
       {
         id: 'group-1',
+        combinedLimitId: null,
         name: 'Carne',
         minSelections: 1,
         maxSelections: 2,
@@ -206,6 +208,7 @@ test('maps admin product extra list read models to response DTOs', (): void => {
 test('maps admin option group read models to response DTOs', (): void => {
   const readModel: AdminOptionGroupReadModel = {
     id: 'group-1',
+    combinedLimitId: null,
     name: 'Carne',
     minSelections: 1,
     maxSelections: 2,

@@ -106,6 +106,7 @@ test('rejects invalid selection bounds before opening a unit of work', async ():
 function createOptionGroupMutationModel(id: string): AdminOptionGroupMutationModel {
   return {
     id,
+    combinedLimitId: null,
     name: 'Carne',
     minSelections: 1,
     maxSelections: 2,

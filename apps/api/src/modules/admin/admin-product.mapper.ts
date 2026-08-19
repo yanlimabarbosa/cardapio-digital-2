@@ -17,10 +17,12 @@ import {
   AdminProductMutationResponseDto,
 } from './dto/response/admin-product-mutation-response.dto';
 import {
+  AdminProductCombinedLimitResponseDto,
   AdminProductExtraResponseDto,
   AdminProductOptionGroupResponseDto,
   AdminProductResponseDto,
 } from './dto/response/admin-product-response.dto';
+import type { AdminProductCombinedLimitReadModel } from './application/read-models/admin-product.read-model';
 
 export function toAdminProductResponseDto(product: AdminProductReadModel): AdminProductResponseDto {
   return new AdminProductResponseDto(
@@ -36,6 +38,7 @@ export function toAdminProductResponseDto(product: AdminProductReadModel): Admin
     product.categoryName,
     product.extras.map(toAdminProductExtraResponseDto),
     product.optionGroups.map(toAdminProductOptionGroupResponseDto),
+    product.combinedLimits.map(toAdminProductCombinedLimitResponseDto),
     product.sortOrder,
     product.isRedeemable,
     product.redemptionCost,
@@ -149,7 +152,14 @@ export function toAdminProductOptionGroupResponseDto(
     group.sortOrder,
     group.isActive,
     group.options.map(toAdminProductExtraResponseDto),
+    group.combinedLimitId,
   );
+}
+
+function toAdminProductCombinedLimitResponseDto(
+  limit: AdminProductCombinedLimitReadModel,
+): AdminProductCombinedLimitResponseDto {
+  return new AdminProductCombinedLimitResponseDto(limit.id, limit.name, limit.maxSelections);
 }
 
 function toAdminProductExtraResponseDto(extra: AdminProductExtraReadModel): AdminProductExtraResponseDto {

@@ -20,6 +20,7 @@ export function OrdersClient() {
     completedOrders,
     updateStatusMutation,
     assignDriverMutation,
+    printStation,
   } = useOrdersPage();
 
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
@@ -73,7 +74,20 @@ export function OrdersClient() {
 
   return (
     <div>
-      <h1 className="mb-4 font-display text-2xl font-semibold text-[#3D2B1F]">Pedidos</h1>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-2xl font-semibold text-[#3D2B1F]">Pedidos</h1>
+        <label
+          className="flex items-center gap-2 text-sm text-[#8B7355]"
+          data-testid="print-station-toggle"
+        >
+          <input
+            type="checkbox"
+            checked={printStation.enabled}
+            onChange={(e) => printStation.setEnabled(e.target.checked)}
+          />
+          Estação de impressão (auto-comprovante)
+        </label>
+      </div>
 
       {isLoading ? (
         <div className="flex justify-center py-12">

@@ -111,6 +111,7 @@ test('throws a validation error when the repository rejects selection bounds', a
 function createOptionGroupMutationModel(id: string): AdminOptionGroupMutationModel {
   return {
     id,
+    combinedLimitId: null,
     name: 'Molhos',
     minSelections: 1,
     maxSelections: 2,

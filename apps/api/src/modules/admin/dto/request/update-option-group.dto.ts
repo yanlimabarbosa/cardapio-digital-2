@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsBoolean, Min, MinLength } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsUUID, Min, MinLength } from 'class-validator';
 
 export class UpdateOptionGroupDto {
   /** Option group display name. */
@@ -28,4 +28,9 @@ export class UpdateOptionGroupDto {
   @IsOptional()
   @IsBoolean()
   public readonly isActive?: boolean;
+
+  /** Combined-limit this group belongs to (null detaches it). */
+  @IsOptional()
+  @IsUUID()
+  public readonly combinedLimitId?: string | null;
 }

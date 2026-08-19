@@ -1,4 +1,4 @@
-import { OptionGroup, Product } from '../../../../entities';
+import { CombinedLimit, OptionGroup, Product } from '../../../../entities';
 import type { TransactionContext } from '../../../../shared/application/unit-of-work/unit-of-work.port';
 import { getMikroOrmEntityManager } from '../../../../shared/infrastructure/mikro-orm/mikro-orm-unit-of-work';
 import {
@@ -116,6 +116,13 @@ export class MikroOrmAdminOptionGroupWriteRepository implements AdminOptionGroup
       optionGroup.isActive = data.isActive;
     }
 
+    if (data.combinedLimitId !== undefined) {
+      optionGroup.combinedLimit =
+        data.combinedLimitId === null
+          ? null
+          : await em.findOne(CombinedLimit, { id: data.combinedLimitId });
+    }
+
     await em.flush();
 
     return { status: 'updated', optionGroup: this.toMutationModel(optionGroup) };
@@ -148,6 +155,7 @@ export class MikroOrmAdminOptionGroupWriteRepository implements AdminOptionGroup
     return {
       id: optionGroup.id,
       name: optionGroup.name,
+      combinedLimitId: optionGroup.combinedLimit?.id ?? null,
       minSelections: optionGroup.minSelections ?? 0,
       maxSelections: optionGroup.maxSelections ?? 1,
       sortOrder: optionGroup.sortOrder ?? 0,

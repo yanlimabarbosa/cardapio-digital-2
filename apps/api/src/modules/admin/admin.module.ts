@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Category, Product, ProductExtra, Order, OptionGroup } from '../../entities';
+import { Category, Product, ProductExtra, Order, OptionGroup, CombinedLimit } from '../../entities';
 import { AdminController } from './admin.controller';
 import { AuthModule } from '../auth/auth.module';
 import { CustomersModule } from '../customers/customers.module';
@@ -9,6 +9,7 @@ import { StoreModule } from '../store/store.module';
 import { MikroOrmAdminDashboardReadRepository } from './adapters/persistence/mikro-orm-admin-dashboard.read-repository';
 import { MikroOrmAdminCategoryReadRepository } from './adapters/persistence/mikro-orm-admin-category.read-repository';
 import { MikroOrmAdminOptionGroupWriteRepository } from './adapters/persistence/mikro-orm-admin-option-group-write.repository';
+import { MikroOrmAdminCombinedLimitWriteRepository } from './adapters/persistence/mikro-orm-admin-combined-limit-write.repository';
 import { MikroOrmAdminOrderReadRepository } from './adapters/persistence/mikro-orm-admin-order.read-repository';
 import { MikroOrmAdminProductReadRepository } from './adapters/persistence/mikro-orm-admin-product.read-repository';
 import { MikroOrmAdminCategoryWriteRepository } from './adapters/persistence/mikro-orm-admin-category-write.repository';
@@ -39,6 +40,10 @@ import {
   type AdminOptionGroupWriteRepository,
 } from './application/ports/admin-option-group-write.repository.port';
 import {
+  ADMIN_COMBINED_LIMIT_WRITE_REPOSITORY,
+  type AdminCombinedLimitWriteRepository,
+} from './application/ports/admin-combined-limit-write.repository.port';
+import {
   ADMIN_CATEGORY_WRITE_REPOSITORY,
   type AdminCategoryWriteRepository,
 } from './application/ports/admin-category-write.repository.port';
@@ -68,6 +73,9 @@ import { CreateAdminOptionGroupUseCase } from './application/use-cases/create-ad
 import { DeleteAdminOptionGroupUseCase } from './application/use-cases/delete-admin-option-group.use-case';
 import { ReorderAdminOptionGroupsUseCase } from './application/use-cases/reorder-admin-option-groups.use-case';
 import { UpdateAdminOptionGroupUseCase } from './application/use-cases/update-admin-option-group.use-case';
+import { CreateAdminCombinedLimitUseCase } from './application/use-cases/create-admin-combined-limit.use-case';
+import { UpdateAdminCombinedLimitUseCase } from './application/use-cases/update-admin-combined-limit.use-case';
+import { DeleteAdminCombinedLimitUseCase } from './application/use-cases/delete-admin-combined-limit.use-case';
 import { DeleteAdminCategoryUseCase } from './application/use-cases/delete-admin-category.use-case';
 import { DeleteAdminProductUseCase } from './application/use-cases/delete-admin-product.use-case';
 import { ToggleAdminProductUseCase } from './application/use-cases/toggle-admin-product.use-case';
@@ -90,7 +98,7 @@ const adminSystemClock: Clock = {
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([Category, Product, ProductExtra, Order, OptionGroup]),
+    MikroOrmModule.forFeature([Category, Product, ProductExtra, Order, OptionGroup, CombinedLimit]),
     AuthModule,
     CustomersModule,
     StoreModule,
@@ -138,6 +146,11 @@ const adminSystemClock: Clock = {
       provide: ADMIN_OPTION_GROUP_WRITE_REPOSITORY,
       useFactory: (): AdminOptionGroupWriteRepository =>
         new MikroOrmAdminOptionGroupWriteRepository(),
+    },
+    {
+      provide: ADMIN_COMBINED_LIMIT_WRITE_REPOSITORY,
+      useFactory: (): AdminCombinedLimitWriteRepository =>
+        new MikroOrmAdminCombinedLimitWriteRepository(),
     },
     {
       provide: MikroOrmUnitOfWork,
@@ -227,6 +240,33 @@ const adminSystemClock: Clock = {
       ): ReorderAdminOptionGroupsUseCase =>
         new ReorderAdminOptionGroupsUseCase(optionGroups, unitOfWork),
       inject: [ADMIN_OPTION_GROUP_WRITE_REPOSITORY, MikroOrmUnitOfWork],
+    },
+    {
+      provide: CreateAdminCombinedLimitUseCase,
+      useFactory: (
+        combinedLimits: AdminCombinedLimitWriteRepository,
+        unitOfWork: MikroOrmUnitOfWork,
+      ): CreateAdminCombinedLimitUseCase =>
+        new CreateAdminCombinedLimitUseCase(combinedLimits, unitOfWork),
+      inject: [ADMIN_COMBINED_LIMIT_WRITE_REPOSITORY, MikroOrmUnitOfWork],
+    },
+    {
+      provide: UpdateAdminCombinedLimitUseCase,
+      useFactory: (
+        combinedLimits: AdminCombinedLimitWriteRepository,
+        unitOfWork: MikroOrmUnitOfWork,
+      ): UpdateAdminCombinedLimitUseCase =>
+        new UpdateAdminCombinedLimitUseCase(combinedLimits, unitOfWork),
+      inject: [ADMIN_COMBINED_LIMIT_WRITE_REPOSITORY, MikroOrmUnitOfWork],
+    },
+    {
+      provide: DeleteAdminCombinedLimitUseCase,
+      useFactory: (
+        combinedLimits: AdminCombinedLimitWriteRepository,
+        unitOfWork: MikroOrmUnitOfWork,
+      ): DeleteAdminCombinedLimitUseCase =>
+        new DeleteAdminCombinedLimitUseCase(combinedLimits, unitOfWork),
+      inject: [ADMIN_COMBINED_LIMIT_WRITE_REPOSITORY, MikroOrmUnitOfWork],
     },
     {
       provide: CreateAdminProductExtraUseCase,
