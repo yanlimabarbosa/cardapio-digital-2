@@ -224,7 +224,24 @@ export function useProductsPage() {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
-    onSuccess: () => {
+    // Optimistic: patch the group in cache immediately so a controlled input
+    // (e.g. the combined-limit select) reflects the choice without snapping
+    // back to the old value while the PUT + refetch resolve.
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['admin-products'] });
+      const prev = queryClient.getQueryData<AdminProduct[]>(['admin-products']);
+      queryClient.setQueryData<AdminProduct[]>(['admin-products'], (old) =>
+        old?.map((p) => ({
+          ...p,
+          optionGroups: p.optionGroups.map((g) => (g.id === id ? { ...g, ...data } : g)),
+        })),
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev) queryClient.setQueryData(['admin-products'], context.prev);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       queryClient.invalidateQueries({ queryKey: ['menu'] });
     },

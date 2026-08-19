@@ -7,6 +7,7 @@ import { Plus, Pencil, Loader2, ChevronDown, ImagePlus, Search, Eye, EyeOff, Tra
 import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Tooltip } from '@/components/ui/tooltip';
+import { CustomSelect } from '@/components/ui/custom-select';
 import { useProductsPage } from '../use-products-page';
 import type { AdminCombinedLimit } from '@/types/admin';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -676,19 +677,23 @@ export function ProductsClient() {
                                             <label className="text-xs font-bold uppercase tracking-widest text-[#8B7355]">
                                               Limite combinado
                                             </label>
-                                            <select
+                                            <div
                                               data-testid={`group-combined-select-${group.id}`}
-                                              value={group.combinedLimitId ?? ''}
-                                              onChange={(e) => setGroupCombinedLimit(group.id, e.target.value || null)}
-                                              className="h-9 rounded-lg border border-[#E8DDD0] bg-[#FFFCF8] px-2 text-sm text-[#3D2B1F]"
+                                              className="min-w-[190px]"
                                             >
-                                              <option value="">Nenhum</option>
-                                              {product.combinedLimits.map((limit) => (
-                                                <option key={limit.id} value={limit.id}>
-                                                  {limit.name} (máx {limit.maxSelections})
-                                                </option>
-                                              ))}
-                                            </select>
+                                              <CustomSelect
+                                                value={group.combinedLimitId ?? ''}
+                                                onChange={(v) => setGroupCombinedLimit(group.id, v || null)}
+                                                placeholder="Nenhum"
+                                                options={[
+                                                  { value: '', label: 'Nenhum' },
+                                                  ...product.combinedLimits.map((limit) => ({
+                                                    value: limit.id,
+                                                    label: `${limit.name} (máx ${limit.maxSelections})`,
+                                                  })),
+                                                ]}
+                                              />
+                                            </div>
                                           </div>
                                           {group.options.length === 0 ? (
                                             <p className="text-xs text-[#8B7355]">Nenhuma opção</p>
