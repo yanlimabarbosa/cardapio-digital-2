@@ -134,15 +134,35 @@ export function useOrdersPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
     });
 
-    socket.on(WS_EVENTS.ORDER_STATUS_CHANGED, (payload: { id: string; status: string }) => {
+    socket.on(WS_EVENTS.ORDER_STATUS_CHANGED, () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
-      if (payload?.status === 'ready' && autoPrintRef.current.enabled) {
-        autoPrintRef.current.printReceipt(payload.id);
-      }
     });
 
     return () => { socket.disconnect(); };
   }, [queryClient, token]);
+
+  // Auto-print (estação de impressão): pedido novo entra em "A Fazer / Novo"
+  // (status `paid`). Como a criação de pedido NÃO emite evento de socket
+  // (só o antigo fluxo PagBank emitia), o board descobre pedidos novos pelo
+  // polling. Detectamos aqui ids ainda não vistos e imprimimos os que estão
+  // em `paid`. A primeira carga apenas semeia o conjunto (não reimprime o que
+  // já existia); printReceipt também deduplica por id.
+  const seenOrderIdsRef = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!orders) return;
+    if (seenOrderIdsRef.current === null) {
+      seenOrderIdsRef.current = new Set(orders.map((o) => o.id));
+      return;
+    }
+    const seen = seenOrderIdsRef.current;
+    for (const order of orders) {
+      if (seen.has(order.id)) continue;
+      seen.add(order.id);
+      if (order.status === 'paid' && autoPrintRef.current.enabled) {
+        autoPrintRef.current.printReceipt(order.id);
+      }
+    }
+  }, [orders]);
 
   function canDrop(fromStatus: string, toStatus: string) {
     return VALID_DROPS[fromStatus]?.includes(toStatus) ?? false;

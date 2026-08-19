@@ -121,17 +121,24 @@ pnpm test:e2e
 
 ## 3. Estação de impressão (auto-comprovante)
 
-Impressão em modo **kiosk** no PC do balcão: quando um pedido passa para o
-status **"pronto"** (`ready`), a aba aberta do quadro de pedidos do admin
-**imprime automaticamente** o comprovante na impressora térmica, **sem caixa de
-diálogo de impressão**.
+Impressão em modo **kiosk** no PC do balcão: quando um **pedido novo** entra na
+coluna **"A Fazer / Novo"** (status `paid`), a aba aberta do quadro de pedidos
+do admin **imprime automaticamente** o comprovante na impressora térmica, **sem
+caixa de diálogo de impressão**.
 
 ### Como funciona
 
-- O quadro de pedidos (`/admin/orders`) mantém uma conexão WebSocket com a
-  cozinha. Ao receber a transição de status para `ready`, a aba dispara a
-  impressão do comprovante (`/receipt/<id>`) num iframe oculto e chama
-  `window.print()`.
+- O quadro de pedidos (`/admin/orders`) atualiza a lista de pedidos por
+  *polling* (a cada 5s) — pedido novo aparece na coluna "A Fazer / Novo".
+- A aba guarda os ids de pedido já vistos. Quando aparece um id **novo** em
+  status `paid`, ela dispara a impressão do comprovante (`/receipt/<id>`) num
+  iframe oculto e chama `window.print()`. Há uma latência de até ~5s (o
+  intervalo do polling).
+- **Nota técnica:** a criação de pedido (pagamento na entrega) **não emite
+  evento de WebSocket** — só o antigo fluxo de pagamento PagBank emitia
+  `NEW_ORDER`. Por isso a detecção é feita pelo polling do próprio quadro, não
+  por socket. (Mudanças de status *depois* — preparando/pronto/rota — continuam
+  em tempo real por WebSocket.)
 - Com o Chrome iniciado em `--kiosk-printing`, esse `print()` sai direto na
   **impressora padrão do sistema**, sem diálogo.
 - O toggle **"Estação de impressão (auto-comprovante)"** fica no topo do quadro
@@ -170,12 +177,11 @@ após reiniciar o Chrome no mesmo perfil.
   imprimem — assim você controla exatamente qual máquina é a estação de
   impressão. Se abrir o quadro em mais de uma aba com o toggle ligado, cada uma
   imprime a sua cópia.
-- **Uma impressão por pedido, na transição para `ready`.** Há deduplicação em
-  memória: cada pedido é impresso **uma única vez** por transição para "pronto".
-- **Recarregar a aba não reimprime pedidos já prontos.** A impressão só é
-  disparada pela transição ao vivo (evento de WebSocket), não pela carga
-  inicial do quadro. Ao dar reload, pedidos que já estavam em "pronto" não são
-  reimpressos.
+- **Uma impressão por pedido novo.** Há deduplicação em memória (por id de
+  pedido): cada pedido é impresso **uma única vez**.
+- **Recarregar a aba não reimprime pedidos já existentes.** Ao carregar, a aba
+  primeiro **semeia** os ids que já estão no quadro (sem imprimir) e só imprime
+  os que aparecerem **depois**. Então dar reload não reimprime a fila atual.
 
 ### Solução de problemas
 

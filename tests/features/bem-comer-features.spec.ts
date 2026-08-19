@@ -485,7 +485,7 @@ test.describe('Bem Comer — auto-comprovante (estação de impressão)', () => 
     };
   }
 
-  test('auto-comprovante: imprime no ready SÓ com a estação ligada', async ({ page, context }) => {
+  test('auto-comprovante: imprime ao entrar em A Fazer/Novo SÓ com a estação ligada', async ({ page, context }) => {
     const api = await pwRequest.newContext();
     const token = await apiLogin(api);
     const auth = { Authorization: `Bearer ${token}` };
@@ -516,12 +516,16 @@ test.describe('Bem Comer — auto-comprovante (estação de impressão)', () => 
     await toggle.check();
     await expect(toggle).toBeChecked();
 
-    // cria pedido pickup e leva até ready → o evento de socket dispara o auto-print
-    const orderId = await createPickupOrder(api);
-    await setOrderStatus(api, token, orderId, 'preparing');
-    await setOrderStatus(api, token, orderId, 'ready');
+    // espera a carga inicial do board (semeia os ids já existentes, para não
+    // reimprimir) antes de criar o pedido novo
+    await expect(page.getByText('A Fazer / Novo')).toBeVisible();
+    await page.waitForTimeout(1000);
 
-    // ASSERTIVA PRIMÁRIA (robusta/determinística): a transição para 'ready'
+    // cria pedido pickup → nasce como 'paid' e cai em "A Fazer / Novo"; o board
+    // detecta o id novo pelo polling e o auto-print dispara (sem passar por ready)
+    const orderId = await createPickupOrder(api);
+
+    // ASSERTIVA PRIMÁRIA (robusta/determinística): a chegada do pedido novo
     // fez o board criar o iframe oculto e navegá-lo para o /receipt deste pedido.
     // Isso prova que o auto-print foi acionado sem depender de propagação de
     // console cross-frame nem de o /receipt terminar o load — é puro estado do DOM.
@@ -547,7 +551,7 @@ test.describe('Bem Comer — auto-comprovante (estação de impressão)', () => 
     await api.dispose();
   });
 
-  test('auto-comprovante: NÃO imprime no ready com a estação desligada', async ({ page, context }) => {
+  test('auto-comprovante: NÃO imprime com a estação desligada', async ({ page, context }) => {
     const api = await pwRequest.newContext();
     const token = await apiLogin(api);
     const auth = { Authorization: `Bearer ${token}` };
@@ -566,13 +570,11 @@ test.describe('Bem Comer — auto-comprovante (estação de impressão)', () => 
     const toggle = page.getByTestId('print-station-toggle').locator('input');
     await expect(toggle).not.toBeChecked();
 
-    const orderId = await createPickupOrder(api);
-    await setOrderStatus(api, token, orderId, 'preparing');
-    await setOrderStatus(api, token, orderId, 'ready');
+    await createPickupOrder(api);
 
-    // Prova que o evento de socket 'ready' CHEGOU e foi processado (o board
-    // refez o fetch e renderizou o card) — sem isso, o teste negativo seria um
-    // falso-positivo caso o evento simplesmente nunca tivesse chegado.
+    // Prova que o pedido novo CHEGOU e foi processado (o board renderizou o card
+    // em "A Fazer / Novo") — sem isso, o teste negativo seria um falso-positivo
+    // caso o evento NEW_ORDER simplesmente nunca tivesse chegado.
     await expect(page.getByText('E2E Cliente')).toBeVisible();
 
     // margem extra para eventual print tardio antes de afirmar a AUSÊNCIA
