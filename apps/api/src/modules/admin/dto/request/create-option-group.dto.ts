@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, Min, MinLength } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, Min, MinLength } from 'class-validator';
 
 export class CreateOptionGroupDto {
   /** Option group display name. */
@@ -22,4 +22,9 @@ export class CreateOptionGroupDto {
   @IsOptional()
   @IsNumber()
   public readonly sortOrder?: number;
+
+  /** Whether the same option can be picked more than once. */
+  @IsOptional()
+  @IsBoolean()
+  public readonly allowRepeat?: boolean;
 }

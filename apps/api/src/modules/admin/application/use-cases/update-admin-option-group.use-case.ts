@@ -10,6 +10,7 @@ import type {
 } from '../ports/admin-option-group-write.repository.port';
 
 export type UpdateAdminOptionGroupCommand = {
+  readonly allowRepeat?: boolean;
   readonly combinedLimitId?: string | null;
   readonly id: string;
   readonly isActive?: boolean;
@@ -32,6 +33,7 @@ export class UpdateAdminOptionGroupUseCase {
       ...(command.maxSelections !== undefined ? { maxSelections: command.maxSelections } : {}),
       ...(command.sortOrder !== undefined ? { sortOrder: command.sortOrder } : {}),
       ...(command.isActive !== undefined ? { isActive: command.isActive } : {}),
+      ...(command.allowRepeat !== undefined ? { allowRepeat: command.allowRepeat } : {}),
       ...(command.combinedLimitId !== undefined ? { combinedLimitId: command.combinedLimitId } : {}),
     };
 

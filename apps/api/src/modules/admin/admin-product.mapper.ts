@@ -153,6 +153,7 @@ export function toAdminProductOptionGroupResponseDto(
     group.isActive,
     group.options.map(toAdminProductExtraResponseDto),
     group.combinedLimitId,
+    group.allowRepeat,
   );
 }
 

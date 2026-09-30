@@ -72,6 +72,7 @@ export interface AdminOptionGroup {
   isActive: boolean;
   options: AdminOptionGroupOption[];
   combinedLimitId: string | null;
+  allowRepeat: boolean;
 }
 
 export interface AdminCombinedLimit {

@@ -9,6 +9,7 @@ export type AdminOptionGroupOptionReadModel = {
 };
 
 export type AdminOptionGroupReadModel = {
+  readonly allowRepeat: boolean;
   readonly combinedLimitId: string | null;
   readonly id: string;
   readonly isActive: boolean;

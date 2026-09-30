@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Loader2, QrCode, CreditCard, Clock, Award, Check, Banknote } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { getImageUrl } from '@/lib/admin-api';
+import { formatOptionNames } from '@/stores/cart-store';
 import { useCheckoutPage } from './use-checkout-page';
 
 export function CheckoutClient() {
@@ -87,7 +88,7 @@ export function CheckoutClient() {
                     </p>
                     {item.optionSelections?.length ? (
                       <p className="text-xs text-terra-400 truncate">
-                        {item.optionSelections.flatMap((g) => g.options.map((o) => o.name)).join(', ')}
+                        {item.optionSelections.map((g) => formatOptionNames(g.options)).join(', ')}
                       </p>
                     ) : item.extras.length > 0 ? (
                       <p className="text-xs text-terra-400 truncate">+ {item.extras.map(e => e.name).join(', ')}</p>

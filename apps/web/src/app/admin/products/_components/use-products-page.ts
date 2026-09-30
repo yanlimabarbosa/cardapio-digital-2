@@ -53,7 +53,7 @@ export function useProductsPage() {
   const [extraUploading, setExtraUploading] = useState(false);
 
   const [optionGroupDialog, setOptionGroupDialog] = useState<OptionGroupDialogState>({ mode: 'closed' });
-  const [optionGroupForm, setOptionGroupForm] = useState({ name: '', minSelections: '0', maxSelections: '1' });
+  const [optionGroupForm, setOptionGroupForm] = useState({ name: '', minSelections: '0', maxSelections: '1', allowRepeat: false });
   const [groupOptionDialog, setGroupOptionDialog] = useState<GroupOptionDialogState>({ mode: 'closed' });
   const [groupOptionForm, setGroupOptionForm] = useState({ name: '', price: '', imageUrl: '' });
   const [groupOptionImageFile, setGroupOptionImageFile] = useState<File | null>(null);
@@ -343,12 +343,17 @@ export function useProductsPage() {
   });
 
   function openCreateOptionGroup(productId: string) {
-    setOptionGroupForm({ name: '', minSelections: '0', maxSelections: '1' });
+    setOptionGroupForm({ name: '', minSelections: '0', maxSelections: '1', allowRepeat: false });
     setOptionGroupDialog({ mode: 'create', productId });
   }
 
   function openEditOptionGroup(group: AdminOptionGroup) {
-    setOptionGroupForm({ name: group.name, minSelections: String(group.minSelections), maxSelections: String(group.maxSelections) });
+    setOptionGroupForm({
+      name: group.name,
+      minSelections: String(group.minSelections),
+      maxSelections: String(group.maxSelections),
+      allowRepeat: group.allowRepeat,
+    });
     setOptionGroupDialog({ mode: 'edit', group });
   }
 
@@ -357,6 +362,7 @@ export function useProductsPage() {
       name: optionGroupForm.name,
       minSelections: parseInt(optionGroupForm.minSelections, 10) || 0,
       maxSelections: parseInt(optionGroupForm.maxSelections, 10) || 1,
+      allowRepeat: optionGroupForm.allowRepeat,
     });
   }
 

@@ -29,6 +29,10 @@ export class OptionGroup {
   @Property({ default: false })
   isArchived?: boolean = false;
 
+  /** Lets the customer pick the same option more than once (e.g. 2x Frango). */
+  @Property({ default: false })
+  allowRepeat?: boolean = false;
+
   @ManyToOne(() => CombinedLimit, { nullable: true })
   combinedLimit?: CombinedLimit | null;
 

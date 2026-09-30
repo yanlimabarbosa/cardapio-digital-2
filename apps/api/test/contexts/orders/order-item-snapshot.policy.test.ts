@@ -203,6 +203,75 @@ function combinedLimitProduct(): OrderItemSnapshotProductInput {
   };
 }
 
+test('groups repeated options as "Nx" and charges each repetition when the group allows repeats', (): void => {
+  const result = OrderItemSnapshotPolicy.for(espetoProduct(), {
+    quantity: 1,
+    optionSelections: [{ groupId: 'espetos', optionIds: ['frango', 'carne', 'frango'] }],
+  }).createSnapshot();
+
+  assert.equal(result.unitPriceCents, 800 + 800 + 900);
+  assert.deepEqual(result.groupedExtras, [
+    {
+      groupId: 'espetos',
+      groupName: 'Espeto',
+      options: [
+        { name: '2x Frango', price: 16 },
+        { name: 'Carne', price: 9 },
+      ],
+    },
+  ]);
+});
+
+test('counts repeated options against the group max', (): void => {
+  assertInvalidSnapshot(
+    () =>
+      OrderItemSnapshotPolicy.for(espetoProduct(3), {
+        quantity: 1,
+        optionSelections: [{ groupId: 'espetos', optionIds: ['frango', 'frango', 'frango', 'carne'] }],
+      }).createSnapshot(),
+    'Grupo "Espeto" permite no maximo 3 opcao(oes)',
+  );
+});
+
+test('rejects repeated options when the group does not allow repeats', (): void => {
+  const product = compoundProduct();
+  const groups = product.optionGroups.map((group) =>
+    group.id === 'group-1' ? { ...group, maxSelections: 2 } : group,
+  );
+
+  assertInvalidSnapshot(
+    () =>
+      OrderItemSnapshotPolicy.for({ ...product, optionGroups: groups }, {
+        quantity: 1,
+        optionSelections: [{ groupId: 'group-1', optionIds: ['option-1', 'option-1'] }],
+      }).createSnapshot(),
+    'Grupo "Arroz" nao permite repetir opcoes',
+  );
+});
+
+function espetoProduct(maxSelections = 30): OrderItemSnapshotProductInput {
+  return {
+    ...sampleProduct(),
+    baseUnitPriceCents: 0,
+    isCompound: true,
+    extras: [],
+    optionGroups: [
+      {
+        id: 'espetos',
+        name: 'Espeto',
+        minSelections: 1,
+        maxSelections,
+        allowRepeat: true,
+        isActive: true,
+        options: [
+          { id: 'frango', name: 'Frango', price: '8.00', isActive: true },
+          { id: 'carne', name: 'Carne', price: '9.00', isActive: true },
+        ],
+      },
+    ],
+  };
+}
+
 function compoundProduct(): OrderItemSnapshotProductInput {
   return {
     ...sampleProduct(),

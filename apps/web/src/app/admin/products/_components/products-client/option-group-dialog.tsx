@@ -14,6 +14,7 @@ interface OptionGroupForm {
   name: string;
   minSelections: string;
   maxSelections: string;
+  allowRepeat: boolean;
 }
 
 interface OptionGroupDialogProps {
@@ -84,6 +85,20 @@ export function OptionGroupDialog({
               <p className="mt-1 text-xs text-[#8B7355]">{max === 1 ? 'Escolha única' : `Até ${max} opções`}</p>
             </div>
           </div>
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#E8DDD0] bg-white px-4 py-3">
+            <input
+              type="checkbox"
+              checked={form.allowRepeat}
+              onChange={(e) => setForm({ ...form, allowRepeat: e.target.checked })}
+              className="mt-0.5 h-4 w-4 accent-[#A0603A]"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-[#3D2B1F]">Permitir repetir opção</span>
+              <span className="block text-xs text-[#8B7355]">
+                Cliente escolhe quantidade de cada opção (ex: 2x Frango + 1x Carne). Conta para o máximo.
+              </span>
+            </span>
+          </label>
           {min > max && (
             <p className="text-xs font-medium text-red-500">Mínimo não pode ser maior que máximo</p>
           )}

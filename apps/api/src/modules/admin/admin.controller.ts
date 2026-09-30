@@ -616,6 +616,7 @@ export class AdminController {
         minSelections: dto.minSelections,
         maxSelections: dto.maxSelections,
         sortOrder: dto.sortOrder,
+        allowRepeat: dto.allowRepeat,
       });
 
       return toAdminProductOptionGroupResponseDto(optionGroup);
@@ -645,6 +646,7 @@ export class AdminController {
         maxSelections: dto.maxSelections,
         sortOrder: dto.sortOrder,
         isActive: dto.isActive,
+        allowRepeat: dto.allowRepeat,
         combinedLimitId: dto.combinedLimitId,
       });
 

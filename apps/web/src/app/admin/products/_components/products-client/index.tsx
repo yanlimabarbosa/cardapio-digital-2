@@ -623,6 +623,7 @@ export function ProductsClient() {
                                               {group.minSelections >= 1 ? 'Obrigatório' : 'Opcional'}
                                             </DetailChip>
                                             <DetailChip tone="choice">{group.maxSelections === 1 ? 'Única escolha' : `Até ${group.maxSelections}`}</DetailChip>
+                                            {group.allowRepeat && <DetailChip tone="choice">Repete opção</DetailChip>}
                                             <DetailChip tone="count">{group.options.length} opções</DetailChip>
                                             {!group.isActive && <DetailChip tone="hidden">Oculto</DetailChip>}
                                           </span>

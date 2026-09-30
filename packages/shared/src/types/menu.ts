@@ -23,6 +23,8 @@ export interface OptionGroup {
   sortOrder: number;
   options: OptionGroupOption[];
   combinedLimitId?: string;
+  /** When true the same option can be picked more than once (quantity stepper). */
+  allowRepeat?: boolean;
 }
 
 export interface CombinedLimit {

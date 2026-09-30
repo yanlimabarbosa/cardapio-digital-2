@@ -146,6 +146,7 @@ export class MikroOrmAdminProductReadRepository implements AdminProductReadRepos
       id: group.id,
       name: group.name,
       combinedLimitId: group.combinedLimit?.id ?? null,
+      allowRepeat: group.allowRepeat ?? false,
       minSelections: group.minSelections ?? 0,
       maxSelections: group.maxSelections ?? 1,
       sortOrder: group.sortOrder ?? 0,

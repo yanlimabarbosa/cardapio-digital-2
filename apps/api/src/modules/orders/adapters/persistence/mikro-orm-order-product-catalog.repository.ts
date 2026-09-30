@@ -88,6 +88,7 @@ export class MikroOrmOrderProductCatalogRepository implements OrderProductCatalo
           minSelections: group.minSelections,
           maxSelections: group.maxSelections,
           combinedLimitId: group.combinedLimit?.id ?? null,
+          allowRepeat: group.allowRepeat ?? false,
           isActive: (group.isActive ?? true) && !(group.isArchived ?? false),
           options: group.options.getItems().map((option) => ({
             id: option.id,

@@ -60,6 +60,7 @@ test('maps admin product read models to response DTOs', (): void => {
       {
         id: 'group-1',
         combinedLimitId: null,
+        allowRepeat: false,
         name: 'Carne',
         minSelections: 1,
         maxSelections: 2,
@@ -209,6 +210,7 @@ test('maps admin option group read models to response DTOs', (): void => {
   const readModel: AdminOptionGroupReadModel = {
     id: 'group-1',
     combinedLimitId: null,
+    allowRepeat: false,
     name: 'Carne',
     minSelections: 1,
     maxSelections: 2,

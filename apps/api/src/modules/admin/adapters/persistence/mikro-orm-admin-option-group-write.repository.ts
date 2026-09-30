@@ -39,6 +39,7 @@ export class MikroOrmAdminOptionGroupWriteRepository implements AdminOptionGroup
       minSelections: data.minSelections,
       maxSelections: data.maxSelections,
       sortOrder: data.sortOrder ?? count,
+      allowRepeat: data.allowRepeat ?? false,
     });
 
     await em.flush();
@@ -116,6 +117,10 @@ export class MikroOrmAdminOptionGroupWriteRepository implements AdminOptionGroup
       optionGroup.isActive = data.isActive;
     }
 
+    if (data.allowRepeat !== undefined) {
+      optionGroup.allowRepeat = data.allowRepeat;
+    }
+
     if (data.combinedLimitId !== undefined) {
       optionGroup.combinedLimit =
         data.combinedLimitId === null
@@ -156,6 +161,7 @@ export class MikroOrmAdminOptionGroupWriteRepository implements AdminOptionGroup
       id: optionGroup.id,
       name: optionGroup.name,
       combinedLimitId: optionGroup.combinedLimit?.id ?? null,
+      allowRepeat: optionGroup.allowRepeat ?? false,
       minSelections: optionGroup.minSelections ?? 0,
       maxSelections: optionGroup.maxSelections ?? 1,
       sortOrder: optionGroup.sortOrder ?? 0,

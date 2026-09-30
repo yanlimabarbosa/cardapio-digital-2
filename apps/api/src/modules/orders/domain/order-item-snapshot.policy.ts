@@ -17,6 +17,7 @@ export type OrderItemSnapshotExtraInput = {
 };
 
 export type OrderItemSnapshotOptionGroupInput = {
+  readonly allowRepeat?: boolean | null;
   readonly combinedLimitId?: string | null;
   readonly id: string;
   readonly isActive?: boolean | null;
@@ -161,17 +162,29 @@ export class OrderItemSnapshotPolicy {
         );
       }
 
-      const groupOptions: OrderItemSelectedExtra[] = [];
+      const countByOptionId = new Map<string, number>();
       for (const optionId of selection.optionIds) {
+        countByOptionId.set(optionId, (countByOptionId.get(optionId) ?? 0) + 1);
+      }
+
+      if (!group.allowRepeat && countByOptionId.size < selection.optionIds.length) {
+        throw new InvalidOrderItemSnapshotError(`Grupo "${group.name}" nao permite repetir opcoes`);
+      }
+
+      const groupOptions: OrderItemSelectedExtra[] = [];
+      for (const [optionId, count] of countByOptionId) {
         const option = group.options.find((candidate) => candidate.id === optionId);
 
         if (!option || !option.isActive) {
           throw new InvalidOrderItemSnapshotError(`Opcao ${optionId} nao encontrada no grupo "${group.name}"`);
         }
 
-        const optionPriceCents = this.decimalToCents(option.price);
+        const optionPriceCents = this.decimalToCents(option.price) * count;
         extrasCents += optionPriceCents;
-        groupOptions.push({ name: option.name, price: this.centsToNumber(optionPriceCents) });
+        groupOptions.push({
+          name: count > 1 ? `${count}x ${option.name}` : option.name,
+          price: this.centsToNumber(optionPriceCents),
+        });
       }
 
       groupedExtras.push({

@@ -112,6 +112,7 @@ function createOptionGroupMutationModel(id: string): AdminOptionGroupMutationMod
   return {
     id,
     combinedLimitId: null,
+    allowRepeat: false,
     name: 'Molhos',
     minSelections: 1,
     maxSelections: 2,

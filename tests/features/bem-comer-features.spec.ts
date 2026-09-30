@@ -588,3 +588,126 @@ test.describe('Bem Comer — auto-comprovante (estação de impressão)', () => 
     await api.dispose();
   });
 });
+
+test.describe('Bem Comer — repetir opção (espetos)', () => {
+  test('cliente escolhe 2x Frango + 1x Carne no mesmo item; servidor aceita e agrupa', async ({ page }) => {
+    const api = await pwRequest.newContext();
+    const token = await apiLogin(api);
+    const auth = { Authorization: `Bearer ${token}` };
+    const productName = `E2E Espetos ${Date.now()}`;
+    let productId: string | undefined;
+
+    try {
+      await setForceOpen(api, token, true);
+
+      const categories = (await (
+        await api.get(`${API}/api/admin/categories`, { headers: auth })
+      ).json()) as any[];
+      const sopas = categories.find((c) => /^Sopas$/i.test(c.name));
+      expect(sopas, 'categoria Sopas deve existir no seed').toBeTruthy();
+
+      const product = await (
+        await api.post(`${API}/api/admin/products`, {
+          headers: auth,
+          data: { name: productName, categoryId: sopas.id, price: 0, isCompound: true },
+        })
+      ).json();
+      productId = product.id;
+
+      async function createGroup(name: string, allowRepeat: boolean): Promise<string> {
+        const res = await api.post(`${API}/api/admin/products/${productId}/option-groups`, {
+          headers: auth,
+          data: { name, minSelections: 0, maxSelections: 3, allowRepeat },
+        });
+        expect(res.ok(), `criar grupo ${name} falhou: ${res.status()} ${await res.text()}`).toBeTruthy();
+        const body = await res.json();
+        expect(body.allowRepeat).toBe(allowRepeat);
+        return body.id;
+      }
+      async function addOption(gId: string, name: string, price: number): Promise<string> {
+        const res = await api.post(`${API}/api/admin/option-groups/${gId}/options`, {
+          headers: auth,
+          data: { name, price },
+        });
+        expect(res.ok(), `criar opção ${name} falhou: ${res.status()}`).toBeTruthy();
+        return (await res.json()).id;
+      }
+
+      const espetoGroup = await createGroup('Espeto', true);
+      const frango = await addOption(espetoGroup, 'Frango', 8);
+      const carne = await addOption(espetoGroup, 'Carne', 9);
+      const molhoGroup = await createGroup('Molho', false);
+      const alho = await addOption(molhoGroup, 'Alho', 0);
+
+      // ── UI: stepper por opção ──
+      // o dialog renderiza layout mobile + desktop; só um fica visível
+      const visible = (testId: string) => page.getByTestId(testId).locator('visible=true');
+      await page.goto('/');
+      await page.getByText(productName).first().click();
+
+      await visible(`option-increase-${frango}`).click();
+      await visible(`option-increase-${frango}`).click();
+      await visible(`option-increase-${carne}`).click();
+      await expect(visible(`option-count-${frango}`)).toHaveText('2');
+      await expect(visible(`option-count-${carne}`)).toHaveText('1');
+      // máx 3 atingido → não dá pra adicionar mais
+      await expect(visible(`option-increase-${carne}`)).toBeDisabled();
+
+      // remover 1 frango libera de novo
+      await visible(`option-decrease-${frango}`).click();
+      await expect(visible(`option-count-${frango}`)).toHaveText('1');
+      await visible(`option-increase-${frango}`).click();
+
+      // grupo sem repetição continua checkbox (sem stepper)
+      await expect(page.getByTestId(`option-increase-${alho}`)).toHaveCount(0);
+
+      const confirm = visible('confirm-add-to-cart');
+      await expect(confirm).toContainText('25,00');
+      await confirm.click();
+
+      await page.getByTestId('view-cart').click();
+      await expect(page.getByText('2x Frango, Carne')).toBeVisible();
+
+      // ── Servidor: aceita repetição e grava "2x Frango" ──
+      const orderRes = await api.post(`${API}/api/orders`, {
+        data: {
+          customerName: 'E2E Espetos',
+          customerPhone: '83988887777',
+          deliveryType: 'pickup',
+          paymentMethod: 'cash',
+          items: [
+            { productId, quantity: 1, optionSelections: [{ groupId: espetoGroup, optionIds: [frango, carne, frango] }] },
+          ],
+        },
+      });
+      expect(orderRes.status(), `pedido com repetição deve passar: ${await orderRes.text()}`).toBeLessThan(400);
+      const order = await orderRes.json();
+      const item = order.items[0];
+      expect(item.unitPrice).toBe(25);
+      expect(item.groupedExtras[0].options).toEqual([
+        { name: '2x Frango', price: 16 },
+        { name: 'Carne', price: 9 },
+      ]);
+
+      // ── Servidor: grupo sem allowRepeat rejeita repetição ──
+      const badRes = await api.post(`${API}/api/orders`, {
+        data: {
+          customerName: 'E2E Espetos',
+          customerPhone: '83988887777',
+          deliveryType: 'pickup',
+          paymentMethod: 'cash',
+          items: [
+            { productId, quantity: 1, optionSelections: [{ groupId: molhoGroup, optionIds: [alho, alho] }] },
+          ],
+        },
+      });
+      expect(badRes.status()).toBe(400);
+      expect(await badRes.text()).toMatch(/nao permite repetir/);
+    } finally {
+      if (productId) {
+        await api.delete(`${API}/api/admin/products/${productId}`, { headers: auth }).catch(() => {});
+      }
+      await api.dispose();
+    }
+  });
+});

@@ -109,13 +109,8 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
       nextSelection = current.filter((id) => id !== optionId);
     } else if (group.maxSelections === 1) {
       nextSelection = [optionId];
-    } else {
-      const limitId = group.combinedLimitId;
-      const combinedRoom =
-        !limitId || (combinedCounts[limitId] ?? 0) < (combinedMaxById[limitId] ?? Infinity);
-      if (current.length < group.maxSelections && combinedRoom) {
-        nextSelection = [...current, optionId];
-      }
+    } else if (hasRoomFor(group, current)) {
+      nextSelection = [...current, optionId];
     }
 
     setGroupSelections((prev) => ({ ...prev, [group.id]: nextSelection }));
@@ -123,6 +118,29 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
     if (!wasSelected && isGroupReadyToAdvance(group, nextSelection)) {
       window.setTimeout(() => scrollToNextGroup(group.id), 0);
     }
+  }
+
+  function hasRoomFor(group: OptionGroup, current: string[]) {
+    const limitId = group.combinedLimitId;
+    const combinedRoom =
+      !limitId || (combinedCounts[limitId] ?? 0) < (combinedMaxById[limitId] ?? Infinity);
+    return current.length < group.maxSelections && combinedRoom;
+  }
+
+  function changeOptionCount(group: OptionGroup, optionId: string, delta: 1 | -1) {
+    const current = groupSelections[group.id] ?? [];
+    let nextSelection = current;
+
+    if (delta > 0) {
+      if (!hasRoomFor(group, current)) return;
+      nextSelection = [...current, optionId];
+    } else {
+      const index = current.lastIndexOf(optionId);
+      if (index === -1) return;
+      nextSelection = [...current.slice(0, index), ...current.slice(index + 1)];
+    }
+
+    setGroupSelections((prev) => ({ ...prev, [group.id]: nextSelection }));
   }
 
   function handleAdd() {
@@ -268,6 +286,70 @@ export function ProductDetailDialog({ product, open, onClose, storeOpen = true }
                 const isDisabled = !isSelected && isMaxed;
                 const isLast = idx === group.options.length - 1;
                 const optionImageSrc = getImageUrl(option.imageUrl);
+
+                if (group.allowRepeat) {
+                  const count = selected.filter((id) => id === option.id).length;
+                  return (
+                    <div
+                      key={option.id}
+                      data-testid={`option-row-${option.id}`}
+                      className={`flex w-full items-center justify-between px-5 py-3.5 ${
+                        isDisabled ? 'opacity-40' : ''
+                      } ${!isLast ? 'border-b border-[#f9e8d8]' : ''}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => changeOptionCount(group, option.id, 1)}
+                        disabled={isMaxed}
+                        className="flex min-w-0 flex-1 items-center gap-3 pr-3 text-left"
+                      >
+                        {optionImageSrc && (
+                          <img
+                            src={optionImageSrc}
+                            alt={option.name}
+                            className="h-14 w-14 shrink-0 rounded-lg border border-[#f9e8d8] object-cover"
+                          />
+                        )}
+                        <div className="min-w-0">
+                          <span className="text-sm font-medium text-[#3D2B1F]">{option.name}</span>
+                          {option.price > 0 ? (
+                            <p className="text-sm text-[#8B7355]">+ {formatCurrency(option.price)}</p>
+                          ) : (
+                            <p className="text-xs text-green-600">Incluso</p>
+                          )}
+                        </div>
+                      </button>
+                      <div className="flex shrink-0 items-center">
+                        {count > 0 && (
+                          <>
+                            <button
+                              type="button"
+                              aria-label={`Remover ${option.name}`}
+                              data-testid={`option-decrease-${option.id}`}
+                              onClick={() => changeOptionCount(group, option.id, -1)}
+                              className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#4A2810] text-[#4A2810] transition-colors active:bg-[#FAF6F1]"
+                            >
+                              <Minus className="h-3.5 w-3.5" strokeWidth={3} />
+                            </button>
+                            <span data-testid={`option-count-${option.id}`} className="w-8 text-center font-display text-base font-semibold text-[#3D2B1F]">
+                              {count}
+                            </span>
+                          </>
+                        )}
+                        <button
+                          type="button"
+                          aria-label={`Adicionar ${option.name}`}
+                          data-testid={`option-increase-${option.id}`}
+                          onClick={() => changeOptionCount(group, option.id, 1)}
+                          disabled={isMaxed}
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#4A2810] text-white transition-colors disabled:bg-[#D4C8BA]"
+                        >
+                          <Plus className="h-3.5 w-3.5" strokeWidth={3} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
 
                 return (
                   <button

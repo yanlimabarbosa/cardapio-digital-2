@@ -29,6 +29,11 @@ export class UpdateOptionGroupDto {
   @IsBoolean()
   public readonly isActive?: boolean;
 
+  /** Whether the same option can be picked more than once. */
+  @IsOptional()
+  @IsBoolean()
+  public readonly allowRepeat?: boolean;
+
   /** Combined-limit this group belongs to (null detaches it). */
   @IsOptional()
   @IsUUID()

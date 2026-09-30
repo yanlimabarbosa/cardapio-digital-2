@@ -16,6 +16,7 @@ export type ProductOptionGroupReadModel = {
   readonly required: boolean;
   readonly sortOrder: number;
   readonly combinedLimitId?: string;
+  readonly allowRepeat: boolean;
 };
 
 export type ProductReadModel = {

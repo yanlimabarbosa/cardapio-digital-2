@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Minus, Plus, Trash2, MapPin, Store, Loader2, ShoppingBag, User, Phone, MessageSquare, Check, AlertTriangle, ChevronDown, Tag, X, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { getImageUrl } from '@/lib/admin-api';
+import { formatOptionNames } from '@/stores/cart-store';
 import { useCartPage } from '../use-cart-page';
 import { Field } from './field';
 import { useState, useMemo } from 'react';
@@ -263,7 +264,7 @@ export function CartClient() {
                           {item.optionSelections.map((g) => (
                             <p key={g.groupId} className="line-clamp-1 text-xs text-terra-500">
                               <span className="font-medium text-terra-600">{g.groupName}:</span>{' '}
-                              {g.options.map((o) => o.name).join(', ')}
+                              {formatOptionNames(g.options)}
                             </p>
                           ))}
                         </div>

@@ -13,6 +13,7 @@ export type AdminOptionGroupMutationOptionModel = {
 };
 
 export type AdminOptionGroupMutationModel = {
+  readonly allowRepeat: boolean;
   readonly combinedLimitId: string | null;
   readonly id: string;
   readonly isActive: boolean;
@@ -24,6 +25,7 @@ export type AdminOptionGroupMutationModel = {
 };
 
 export type CreateAdminOptionGroupData = {
+  readonly allowRepeat?: boolean;
   readonly maxSelections: number;
   readonly minSelections: number;
   readonly name: string;
@@ -40,6 +42,7 @@ export type ReorderAdminOptionGroupItem = {
 };
 
 export type UpdateAdminOptionGroupData = {
+  readonly allowRepeat?: boolean;
   readonly combinedLimitId?: string | null;
   readonly isActive?: boolean;
   readonly maxSelections?: number;

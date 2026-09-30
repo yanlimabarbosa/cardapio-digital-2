@@ -12,6 +12,7 @@ import type {
 } from '../ports/admin-option-group-write.repository.port';
 
 export type CreateAdminOptionGroupCommand = {
+  readonly allowRepeat?: boolean;
   readonly maxSelections?: number;
   readonly minSelections?: number;
   readonly name: string;
@@ -27,10 +28,12 @@ export class CreateAdminOptionGroupUseCase {
 
   public async execute(command: CreateAdminOptionGroupCommand): Promise<AdminOptionGroupMutationModel> {
     const selection = this.resolveSelection(command);
-    const data: CreateAdminOptionGroupData =
-      command.sortOrder !== undefined
-        ? { name: command.name, ...selection, sortOrder: command.sortOrder }
-        : { name: command.name, ...selection };
+    const data: CreateAdminOptionGroupData = {
+      name: command.name,
+      ...selection,
+      ...(command.sortOrder !== undefined ? { sortOrder: command.sortOrder } : {}),
+      ...(command.allowRepeat !== undefined ? { allowRepeat: command.allowRepeat } : {}),
+    };
 
     const outcome = await this.unitOfWork.run((context) =>
       this.optionGroups.create(command.productId, data, context),

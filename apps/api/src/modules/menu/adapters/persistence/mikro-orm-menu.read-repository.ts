@@ -184,6 +184,7 @@ export class MikroOrmMenuReadRepository implements MenuReadRepository {
         required: (group.minSelections ?? 0) >= 1,
         sortOrder: group.sortOrder ?? 0,
         combinedLimitId: group.combinedLimit?.id,
+        allowRepeat: group.allowRepeat ?? false,
         options: group.options
           .getItems()
           .filter((option) => this.isPublicExtra(option))

@@ -15,6 +15,7 @@ export type AdminProductCombinedLimitReadModel = {
 };
 
 export type AdminProductOptionGroupReadModel = {
+  readonly allowRepeat: boolean;
   readonly combinedLimitId: string | null;
   readonly id: string;
   readonly isActive: boolean;

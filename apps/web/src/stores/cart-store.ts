@@ -195,3 +195,16 @@ export function getTotalAmount(items: CartItem[]): number {
     return sum + (item.unitPrice + optionsTotal) * item.quantity;
   }, 0);
 }
+
+/** Joins option names, collapsing repeated picks into "2x Frango". */
+export function formatOptionNames(options: CartExtra[]): string {
+  const counts = new Map<string, { name: string; count: number }>();
+  for (const option of options) {
+    const entry = counts.get(option.id);
+    if (entry) entry.count += 1;
+    else counts.set(option.id, { name: option.name, count: 1 });
+  }
+  return Array.from(counts.values())
+    .map(({ name, count }) => (count > 1 ? `${count}x ${name}` : name))
+    .join(', ');
+}

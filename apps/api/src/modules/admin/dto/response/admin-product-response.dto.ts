@@ -46,6 +46,8 @@ export class AdminProductOptionGroupResponseDto {
     public readonly options: AdminProductExtraResponseDto[],
     /** Identifier of the combined limit this group belongs to, or null. */
     public readonly combinedLimitId: string | null,
+    /** Whether the same option can be picked more than once. */
+    public readonly allowRepeat: boolean,
   ) {}
 }
 
